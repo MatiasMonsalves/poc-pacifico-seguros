@@ -56,5 +56,21 @@ RUN=$(post /api/cargas '{"archivo":"polizas_20261017.csv"}' | campo "['runId']")
 sleep 5
 verificar "Estado consultado por runId" "$(curl -s "$API/api/cargas/$RUN" | campo "['estado']")" "Succeeded"
 
+titulo "Siniestros: pipeline maestro → pipeline hijo (Execute Package → Execute Pipeline) en el emulador"
+ADF=${ADF:-http://localhost:5080}
+FAB="$ADF/subscriptions/sub-poc/resourceGroups/rg-poc/providers/Microsoft.DataFactory/factories/siniestros"
+RUN=$(curl -s -X POST "$FAB/pipelines/PL_Maestro_Siniestros/createRun" -H 'Content-Type: application/json' -d '{"FechaCorte":"2026-10-17"}' | campo "['runId']")
+for i in $(seq 1 30); do
+  ESTADO=$(curl -s "$FAB/pipelineruns/$RUN" | campo "['status']")
+  [[ "$ESTADO" == "Succeeded" || "$ESTADO" == "Failed" ]] && break; sleep 1
+done
+ACT=$(curl -s -X POST "$FAB/pipelineruns/$RUN/queryActivityruns")
+verificar "Estado del pipeline maestro" "$ESTADO" "Succeeded"
+HIJO=$(echo "$ACT" | python3 -c "import json,sys; print(next(a['output']['pipelineRunId'] for a in json.load(sys.stdin)['value'] if a['activityType']=='ExecutePipeline'))")
+verificar "Filas copiadas de CoreLegado a Siniestros (solo vigentes)" \
+  "$(curl -s -X POST "$FAB/pipelineruns/$HIJO/queryActivityruns" | python3 -c "import json,sys; print(next(a['output']['rowsCopied'] for a in json.load(sys.stdin)['value'] if a['activityType']=='Copy'))")" "3"
+verificar "Script Task marcado como pendiente de migrar" \
+  "$(curl -s -X POST "$FAB/pipelineruns/$HIJO/queryActivityruns" | python3 -c "import json,sys; print('advertencia' in next(a['output'] for a in json.load(sys.stdin)['value'] if a['activityName']=='Validar totales'))")" "True"
+
 titulo "Resultado"
 if [[ $FALLOS -eq 0 ]]; then echo "   Todas las verificaciones pasaron"; else echo "   $FALLOS verificación(es) fallaron"; exit 1; fi

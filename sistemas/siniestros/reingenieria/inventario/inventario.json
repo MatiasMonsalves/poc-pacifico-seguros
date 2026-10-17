@@ -1,0 +1,316 @@
+{
+  "resumen": {
+    "paquetes_ssis": 2,
+    "tareas_ssis": 6,
+    "archivos_sql": 3,
+    "objetos_bd": 4,
+    "archivos_codigo": 4,
+    "proyectos": 2,
+    "tareas_sin_conversion_directa": 2,
+    "script_tasks": 1,
+    "paquetes_formato_antiguo": 0
+  },
+  "proyectos": [
+    {
+      "archivo": "dotnet/Siniestros.Reportes/Siniestros.Reportes.csproj",
+      "plataforma": ".NET Framework",
+      "lenguaje": "C#",
+      "tipo_aplicacion": "WinForms",
+      "framework": "v4.0",
+      "compilacion": "",
+      "archivos": {},
+      "referencias": [
+        "CrystalDecisions.CrystalReports.Engine",
+        "CrystalDecisions.Windows.Forms",
+        "System",
+        "System.Data",
+        "System.Windows.Forms",
+        "Pacifico.Siniestros.Reglas"
+      ],
+      "referencias_com": [],
+      "paquetes": [],
+      "riesgos": [
+        "Crystal Reports: no tiene versión para .NET moderno en Linux; evaluar SSRS, Power BI o una librería de PDF"
+      ],
+      "ruta_sugerida": "WinForms en .NET 10 (solo Windows, no contenedor Linux) o reescribir como web",
+      "esfuerzo": "Medio"
+    },
+    {
+      "archivo": "dotnet/Siniestros.Web/Siniestros.Web.csproj",
+      "plataforma": ".NET Framework",
+      "lenguaje": "C#",
+      "tipo_aplicacion": "Servicio ASMX",
+      "framework": "v3.5",
+      "compilacion": "",
+      "archivos": {
+        "asmx": 1
+      },
+      "referencias": [
+        "System",
+        "System.Data",
+        "System.Data.Linq",
+        "System.Web",
+        "System.Web.Services",
+        "System.Xml"
+      ],
+      "referencias_com": [],
+      "paquetes": [],
+      "riesgos": [
+        "LINQ to SQL: no existe en .NET 10; migrar a EF Core o SqlClient",
+        "Servicios ASMX: no existen en .NET 10",
+        ".NET Framework v3.5 (CLR 2): el salto a .NET 10 es mayor; revisar APIs obsoletas"
+      ],
+      "ruta_sugerida": "API REST en ASP.NET Core; CoreWCF si los consumidores exigen SOAP",
+      "esfuerzo": "Alto"
+    }
+  ],
+  "paquetes_ssis": [
+    {
+      "archivo": "ssis/Carga_Siniestros.dtsx",
+      "nombre": "Carga_Siniestros",
+      "conexiones": [
+        {
+          "nombre": "CORE",
+          "tipo": "OLEDB",
+          "ref_id": "Package.ConnectionManagers[CORE]",
+          "connection_string": "Data Source=SRVCORE;Initial Catalog=CoreLegado;Provider=SQLNCLI11.1;Integrated Security=SSPI;"
+        },
+        {
+          "nombre": "DW",
+          "tipo": "OLEDB",
+          "ref_id": "Package.ConnectionManagers[DW]",
+          "connection_string": "Data Source=SRVSQL02;Initial Catalog=Siniestros;Provider=SQLNCLI11.1;User ID=etl;Password=****;"
+        }
+      ],
+      "variables": [],
+      "tareas": [
+        {
+          "ref_id": "Package\\Limpiar staging",
+          "nombre": "Limpiar staging",
+          "tipo": "Execute SQL",
+          "sql": "TRUNCATE TABLE stg.Siniestros",
+          "conexion": "Package.ConnectionManagers[DW]",
+          "componentes": []
+        },
+        {
+          "ref_id": "Package\\Extraer siniestros del core",
+          "nombre": "Extraer siniestros del core",
+          "tipo": "Data Flow",
+          "sql": "",
+          "conexion": "",
+          "componentes": [
+            {
+              "nombre": "Movimientos vigentes",
+              "clase": "Microsoft.OLEDBSource",
+              "SqlCommand": "SELECT NRO_SINIESTRO AS NumSiniestro, NRO_POLIZA AS NumPoliza, TIPO AS Tipo, FEC_DENUNCIA AS FechaDenuncia, MONTO_UF AS MontoUF FROM dbo.SINIESTRO_MOV WHERE VIGENTE = 1",
+              "conexion": "Package.ConnectionManagers[CORE]"
+            },
+            {
+              "nombre": "Convertir montos",
+              "clase": "Microsoft.DataConvert"
+            },
+            {
+              "nombre": "Staging siniestros",
+              "clase": "Microsoft.OLEDBDestination",
+              "OpenRowset": "[stg].[Siniestros]",
+              "conexion": "Package.ConnectionManagers[DW]"
+            }
+          ]
+        },
+        {
+          "ref_id": "Package\\Validar totales",
+          "nombre": "Validar totales",
+          "tipo": "Script Task",
+          "sql": "",
+          "conexion": "",
+          "componentes": []
+        }
+      ],
+      "precedencias": [
+        {
+          "desde": "Package\\Limpiar staging",
+          "hacia": "Package\\Extraer siniestros del core",
+          "condicion": "Success",
+          "expresion": ""
+        },
+        {
+          "desde": "Package\\Extraer siniestros del core",
+          "hacia": "Package\\Validar totales",
+          "condicion": "Success",
+          "expresion": ""
+        }
+      ],
+      "version_formato": 8
+    },
+    {
+      "archivo": "ssis/Maestro_Siniestros.dtsx",
+      "nombre": "Maestro_Siniestros",
+      "conexiones": [
+        {
+          "nombre": "DW",
+          "tipo": "OLEDB",
+          "ref_id": "Package.ConnectionManagers[DW]",
+          "connection_string": "Data Source=SRVSQL02;Initial Catalog=Siniestros;Provider=SQLNCLI11.1;User ID=etl;Password=****;"
+        }
+      ],
+      "variables": [
+        {
+          "nombre": "User::FechaCorte",
+          "expresion": "(DT_DBDATE)GETDATE()",
+          "valor": "2026-10-17"
+        }
+      ],
+      "tareas": [
+        {
+          "ref_id": "Package\\Ejecutar carga",
+          "nombre": "Ejecutar carga",
+          "tipo": "Execute Package",
+          "sql": "",
+          "conexion": "",
+          "componentes": []
+        },
+        {
+          "ref_id": "Package\\Calcular reservas",
+          "nombre": "Calcular reservas",
+          "tipo": "Execute SQL",
+          "sql": "EXEC dbo.usp_CalcularReservas ?",
+          "conexion": "Package.ConnectionManagers[DW]",
+          "componentes": []
+        },
+        {
+          "ref_id": "Package\\Avisar falla",
+          "nombre": "Avisar falla",
+          "tipo": "Send Mail",
+          "sql": "",
+          "conexion": "",
+          "componentes": []
+        }
+      ],
+      "precedencias": [
+        {
+          "desde": "Package\\Ejecutar carga",
+          "hacia": "Package\\Calcular reservas",
+          "condicion": "Success",
+          "expresion": ""
+        },
+        {
+          "desde": "Package\\Calcular reservas",
+          "hacia": "Package\\Avisar falla",
+          "condicion": "Failure",
+          "expresion": ""
+        }
+      ],
+      "version_formato": 8
+    }
+  ],
+  "archivos_sql": [
+    {
+      "archivo": "db/01_esquema.sql",
+      "objetos_definidos": [
+        {
+          "tipo": "TABLE",
+          "nombre": "dbo.SINIESTRO_MOV"
+        },
+        {
+          "tipo": "TABLE",
+          "nombre": "stg.Siniestros"
+        },
+        {
+          "tipo": "TABLE",
+          "nombre": "dbo.Siniestros"
+        }
+      ],
+      "lee": [],
+      "escribe": [],
+      "ejecuta": []
+    },
+    {
+      "archivo": "db/02_usp_CalcularReservas.sql",
+      "objetos_definidos": [
+        {
+          "tipo": "PROC",
+          "nombre": "dbo.usp_CalcularReservas"
+        }
+      ],
+      "lee": [],
+      "escribe": [
+        "dbo.Siniestros"
+      ],
+      "ejecuta": []
+    },
+    {
+      "archivo": "db/03_datos.sql",
+      "objetos_definidos": [],
+      "lee": [],
+      "escribe": [
+        "dbo.SINIESTRO_MOV"
+      ],
+      "ejecuta": []
+    }
+  ],
+  "archivos_codigo": [
+    {
+      "archivo": "dotnet/Siniestros.Reportes/FrmReservas.cs",
+      "lenguaje": "C#",
+      "conexiones": [
+        "Data Source=SRVSQL02;Initial Catalog=Siniestros;Integrated Security=SSPI"
+      ],
+      "sql_embebido": [],
+      "procedimientos_llamados": [],
+      "componentes_com": [],
+      "procesos_externos": []
+    },
+    {
+      "archivo": "dotnet/Siniestros.Web/ServicioSiniestros.asmx",
+      "lenguaje": "ASP.NET",
+      "conexiones": [],
+      "sql_embebido": [],
+      "procedimientos_llamados": [],
+      "componentes_com": [],
+      "procesos_externos": []
+    },
+    {
+      "archivo": "dotnet/Siniestros.Web/ServicioSiniestros.asmx.cs",
+      "lenguaje": "C#",
+      "conexiones": [],
+      "sql_embebido": [
+        "SELECT NumSiniestro, Tipo, FechaDenuncia, MontoUF, ReservaUF FROM dbo.Siniestros WHERE NumPoliza ="
+      ],
+      "procedimientos_llamados": [
+        "dbo.usp_CalcularReservas"
+      ],
+      "componentes_com": [],
+      "procesos_externos": []
+    },
+    {
+      "archivo": "dotnet/Siniestros.Web/Web.config",
+      "lenguaje": ".NET config",
+      "conexiones": [
+        "Data Source=SRVSQL02;Initial Catalog=Siniestros;User ID=websin;Password=****"
+      ],
+      "sql_embebido": [],
+      "procedimientos_llamados": [],
+      "componentes_com": [],
+      "procesos_externos": []
+    }
+  ],
+  "dependencias": {
+    "stg.Siniestros": [
+      "SSIS:Carga_Siniestros/Limpiar staging",
+      "SSIS:Carga_Siniestros/Extraer siniestros del core"
+    ],
+    "dbo.SINIESTRO_MOV": [
+      "SSIS:Carga_Siniestros/Extraer siniestros del core",
+      "SQL:db/03_datos.sql"
+    ],
+    "dbo.usp_CalcularReservas": [
+      "SSIS:Maestro_Siniestros/Calcular reservas",
+      "APP:dotnet/Siniestros.Web/ServicioSiniestros.asmx.cs"
+    ],
+    "dbo.Siniestros": [
+      "SQL:dbo.usp_CalcularReservas",
+      "APP:dotnet/Siniestros.Web/ServicioSiniestros.asmx.cs"
+    ]
+  },
+  "errores": []
+}

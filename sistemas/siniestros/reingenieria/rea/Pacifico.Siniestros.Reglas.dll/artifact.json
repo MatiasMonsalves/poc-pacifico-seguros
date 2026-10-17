@@ -1,0 +1,303 @@
+{
+ "evidence_id": "ev_6cf1af35e452abf31f3375f87be3c6cd9c031dce9d3753bd39f73b44687f52d5",
+ "subject": {
+  "name": "Pacifico.Siniestros.Reglas.dll",
+  "digest": {
+   "sha256": "2980961104713cf2910fbf9eef59b80d75bb674382034901a850942d928ccc22"
+  },
+  "local_path": "/home/user/poc-pacifico-seguros/sistemas/siniestros/fuentes/componentes/bin/Pacifico.Siniestros.Reglas.dll",
+  "format": "pe",
+  "architecture": "x86"
+ },
+ "provider": {
+  "id": "rea-dotnet-static",
+  "name": "REA managed static analysis provider",
+  "version": "1"
+ },
+ "analysis_profile": null,
+ "predicate_type": "rea.analysis",
+ "operation": "inspect_managed_artifact",
+ "parameters": {},
+ "raw_result": null,
+ "normalized_result": {
+  "artifact": {
+   "path": "/home/user/poc-pacifico-seguros/sistemas/siniestros/fuentes/componentes/bin/Pacifico.Siniestros.Reglas.dll",
+   "sha256": "2980961104713cf2910fbf9eef59b80d75bb674382034901a850942d928ccc22",
+   "byte_length": 5120,
+   "format": "pe"
+  },
+  "pe": {
+   "machine": 332,
+   "machine_hex": "0x014c",
+   "architecture": "x86",
+   "optional_header": "pe32",
+   "section_count": 3,
+   "characteristics": 8226,
+   "cli": {
+    "header_offset": 520,
+    "header_size": 72,
+    "runtime_version": "2.5",
+    "flags": 1,
+    "flag_names": [
+     "il-only"
+    ],
+    "entry_point": {
+     "kind": "none",
+     "value": null
+    },
+    "metadata_rva": 8564,
+    "metadata_size": 2544,
+    "resources_rva": 0,
+    "resources_size": 0,
+    "strong_name_rva": 0,
+    "strong_name_size": 0,
+    "managed_native_header_rva": 0,
+    "managed_native_header_size": 0,
+    "ready_to_run_signature": false
+   }
+  },
+  "classification": {
+   "status": "managed",
+   "container": "pe",
+   "runtime_family": "dotnet-framework",
+   "implementation": "cil",
+   "managed_architecture": "anycpu",
+   "evidence": [
+    {
+     "code": "cli-header-observed",
+     "detail": "A file-backed PE CLI header and metadata root were admitted.",
+     "file_offset": 520
+    },
+    {
+     "code": "target-framework-observed",
+     "detail": "An assembly-level TargetFrameworkAttribute names .NET Framework.",
+     "file_offset": 1490
+    },
+    {
+     "code": "managed-architecture-derived",
+     "detail": "Managed architecture anycpu is derived from PE machine and CLI flags.",
+     "file_offset": 536
+    }
+   ]
+  },
+  "metadata": {
+   "status": "complete",
+   "version": "v4.0.30319",
+   "stream_names": [
+    "#Blob",
+    "#GUID",
+    "#Strings",
+    "#US",
+    "#~"
+   ],
+   "table_row_counts": {
+    "Module": 1,
+    "TypeRef": 26,
+    "TypeDef": 2,
+    "Field": 1,
+    "MethodDef": 2,
+    "Param": 4,
+    "MemberRef": 28,
+    "Constant": 1,
+    "CustomAttribute": 10,
+    "StandAloneSig": 2,
+    "Assembly": 1,
+    "AssemblyRef": 2
+   }
+  },
+  "module": {
+   "name": "Pacifico.Siniestros.Reglas.dll",
+   "generation": 0,
+   "mvid": "36aba8a3-8c50-4480-9126-8518ac4427ba",
+   "enc_id": null,
+   "enc_base_id": null,
+   "token": "0x00000001",
+   "row_offset": 1064
+  },
+  "assembly": {
+   "name": "Pacifico.Siniestros.Reglas",
+   "version": "1.4.0.0",
+   "culture": null,
+   "flags": 0,
+   "hash_algorithm": 32772,
+   "public_key": {
+    "kind": "none",
+    "byte_length": 0,
+    "sha256": null,
+    "token": null
+   },
+   "token": "0x20000001",
+   "row_offset": 1554
+  },
+  "target_frameworks": [
+   ".NETFramework,Version=v4.0"
+  ],
+  "references": [
+   {
+    "name": "mscorlib",
+    "version": "4.0.0.0",
+    "culture": null,
+    "flags": 0,
+    "public_key_or_token": {
+     "kind": "public-key-token",
+     "byte_length": 8,
+     "sha256": "1b960802b155541df3837ade50790da7e91762d14b8e011fa8223424ff75acdb",
+     "token": "b77a5c561934e089"
+    },
+    "hash_value_sha256": null,
+    "hash_value_length": 0,
+    "token": "0x23000001",
+    "row_offset": 1576
+   },
+   {
+    "name": "System.Data",
+    "version": "4.0.0.0",
+    "culture": null,
+    "flags": 0,
+    "public_key_or_token": {
+     "kind": "public-key-token",
+     "byte_length": 8,
+     "sha256": "1b960802b155541df3837ade50790da7e91762d14b8e011fa8223424ff75acdb",
+     "token": "b77a5c561934e089"
+    },
+    "hash_value_sha256": null,
+    "hash_value_length": 0,
+    "token": "0x23000002",
+    "row_offset": 1596
+   }
+  ],
+  "resources": [],
+  "attributes": [
+   {
+    "parent_token": "0x20000001",
+    "constructor_token": "0x0a000001",
+    "type_name": "System.Runtime.CompilerServices.CompilationRelaxationsAttribute",
+    "value_length": 8,
+    "value_sha256": "e37a02053d377bad23ea19b7443bffd15fc0b9b45cf9d88a2b2464838374009b",
+    "decoded_fixed_string": null,
+    "token": "0x0c000001",
+    "row_offset": 1490
+   },
+   {
+    "parent_token": "0x20000001",
+    "constructor_token": "0x0a000002",
+    "type_name": "System.Runtime.CompilerServices.RuntimeCompatibilityAttribute",
+    "value_length": 30,
+    "value_sha256": "4611a48823d62972173df33a4677daf48b4c4a5e8bd71f94914052aa56c7c2e0",
+    "decoded_fixed_string": null,
+    "token": "0x0c000002",
+    "row_offset": 1496
+   },
+   {
+    "parent_token": "0x20000001",
+    "constructor_token": "0x0a000003",
+    "type_name": "System.Diagnostics.DebuggableAttribute",
+    "value_length": 8,
+    "value_sha256": "6ab1684123fce9ed54ee2be74c776c58aed6aa8bf8dc2ede79239eaba616d772",
+    "decoded_fixed_string": null,
+    "token": "0x0c000003",
+    "row_offset": 1502
+   },
+   {
+    "parent_token": "0x20000001",
+    "constructor_token": "0x0a000004",
+    "type_name": "System.Runtime.Versioning.TargetFrameworkAttribute",
+    "value_length": 71,
+    "value_sha256": "72b48b89416e202721cf7f5cf9b8bd72e22637314932998ce84a1e6bbde90478",
+    "decoded_fixed_string": ".NETFramework,Version=v4.0",
+    "token": "0x0c000004",
+    "row_offset": 1508
+   },
+   {
+    "parent_token": "0x20000001",
+    "constructor_token": "0x0a000005",
+    "type_name": "System.Reflection.AssemblyCompanyAttribute",
+    "value_length": 31,
+    "value_sha256": "48ba5506b9f1d0ac6d00920e9458a85f841626ff7994ed9305097f152a61a456",
+    "decoded_fixed_string": null,
+    "token": "0x0c000005",
+    "row_offset": 1514
+   },
+   {
+    "parent_token": "0x20000001",
+    "constructor_token": "0x0a000006",
+    "type_name": "System.Reflection.AssemblyConfigurationAttribute",
+    "value_length": 12,
+    "value_sha256": "739194e6c3639113ebfbccf301c083af2627642a7aacaceba90eaacb8fae9f4f",
+    "decoded_fixed_string": null,
+    "token": "0x0c000006",
+    "row_offset": 1520
+   },
+   {
+    "parent_token": "0x20000001",
+    "constructor_token": "0x0a000007",
+    "type_name": "System.Reflection.AssemblyFileVersionAttribute",
+    "value_length": 12,
+    "value_sha256": "98dae3355ce1e8e10c11b1565d875264169c34b77c0895e7db050f92d2933cb6",
+    "decoded_fixed_string": null,
+    "token": "0x0c000007",
+    "row_offset": 1526
+   },
+   {
+    "parent_token": "0x20000001",
+    "constructor_token": "0x0a000008",
+    "type_name": "System.Reflection.AssemblyInformationalVersionAttribute",
+    "value_length": 10,
+    "value_sha256": "67e8717238be5f837ad102561ea86e541c15cf62536ac376058f4b8d6ddaa265",
+    "decoded_fixed_string": null,
+    "token": "0x0c000008",
+    "row_offset": 1532
+   },
+   {
+    "parent_token": "0x20000001",
+    "constructor_token": "0x0a000009",
+    "type_name": "System.Reflection.AssemblyProductAttribute",
+    "value_length": 31,
+    "value_sha256": "48ba5506b9f1d0ac6d00920e9458a85f841626ff7994ed9305097f152a61a456",
+    "decoded_fixed_string": null,
+    "token": "0x0c000009",
+    "row_offset": 1538
+   },
+   {
+    "parent_token": "0x20000001",
+    "constructor_token": "0x0a00000a",
+    "type_name": "System.Reflection.AssemblyTitleAttribute",
+    "value_length": 31,
+    "value_sha256": "48ba5506b9f1d0ac6d00920e9458a85f841626ff7994ed9305097f152a61a456",
+    "decoded_fixed_string": null,
+    "token": "0x0c00000a",
+    "row_offset": 1544
+   }
+  ],
+  "coverage": {
+   "state": "complete",
+   "issues": []
+  },
+  "limitations": [
+   "Static inspection did not load the assembly, resolve dependencies through a CLR, decompile C#, or execute target code."
+  ]
+ },
+ "confidence": "observed",
+ "authority": "shipped-artifact",
+ "environment": null,
+ "limitations": [
+  "Static inspection did not load the assembly, resolve dependencies through a CLR, decompile C#, or execute target code."
+ ],
+ "relationship_coverage": null,
+ "locations": [
+  {
+   "kind": "file-offset-range",
+   "start": 520,
+   "end": 592
+  },
+  {
+   "kind": "file-offset",
+   "offset": 1064
+  },
+  {
+   "kind": "file-offset",
+   "offset": 1554
+  }
+ ],
+ "evidence_links": []
+}

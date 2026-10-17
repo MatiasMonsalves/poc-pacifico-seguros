@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Componente legado emulado del sistema "siniestros": .NET Framework 4.0, se entrega solo el binario -->
+  <PropertyGroup>
+    <TargetFramework>net40</TargetFramework>
+    <AssemblyName>Pacifico.Siniestros.Reglas</AssemblyName>
+    <RootNamespace>Pacifico.Siniestros.Reglas</RootNamespace>
+    <LangVersion>7.3</LangVersion>
+    <Version>1.4.0</Version>
+    <Deterministic>true</Deterministic>
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+    <Reference Include="System.Data" />
+  </ItemGroup>
+</Project>

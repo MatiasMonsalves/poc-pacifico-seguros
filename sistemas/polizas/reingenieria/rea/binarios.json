@@ -1,0 +1,28 @@
+[
+  {
+    "binario": "Pacifico.Tarificador.dll",
+    "bytes": 8192,
+    "tipo": ".NET Framework",
+    "assembly": "Pacifico.Tarificador 2.3.1.0",
+    "framework": ".NETFramework,Version=v4.8",
+    "referencias": [
+      "mscorlib",
+      "System",
+      "Microsoft.VisualBasic"
+    ],
+    "tipos": [
+      "Pacifico.Tarificador.Tarificador"
+    ],
+    "metodos": 14,
+    "pinvoke": 0,
+    "accede_a_datos": [],
+    "sql": [],
+    "procedimientos": [],
+    "conexiones": [],
+    "siguiente_paso": "Leer la decompilación, migrar las reglas y validarlas con pruebas de paridad contra este binario",
+    "decompilacion": "11.1.0.9782",
+    "reconstruccion_verificada": {
+      "Pacifico.Tarificador.Tarificador": 3
+    }
+  }
+]

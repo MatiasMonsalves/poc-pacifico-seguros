@@ -1,0 +1,1529 @@
+{
+ "static_members": {
+  "evidence_id": "ev_72df9b17fa9695a7e6120f76d6aa2442e136eb06394b6a1fa3928e74f863f8ec",
+  "subject": {
+   "name": "Pacifico.Siniestros.Reglas.dll",
+   "digest": {
+    "sha256": "2980961104713cf2910fbf9eef59b80d75bb674382034901a850942d928ccc22"
+   },
+   "local_path": "/home/user/poc-pacifico-seguros/sistemas/siniestros/fuentes/componentes/bin/Pacifico.Siniestros.Reglas.dll",
+   "format": "pe",
+   "architecture": "x86"
+  },
+  "provider": {
+   "id": "rea-dotnet-static",
+   "name": "REA managed static analysis provider",
+   "version": "1"
+  },
+  "analysis_profile": null,
+  "predicate_type": "rea.analysis",
+  "operation": "inspect_managed_members",
+  "parameters": {},
+  "raw_result": null,
+  "normalized_result": {
+   "artifact": {
+    "path": "/home/user/poc-pacifico-seguros/sistemas/siniestros/fuentes/componentes/bin/Pacifico.Siniestros.Reglas.dll",
+    "sha256": "2980961104713cf2910fbf9eef59b80d75bb674382034901a850942d928ccc22",
+    "byte_length": 5120,
+    "format": "pe"
+   },
+   "module": {
+    "name": "Pacifico.Siniestros.Reglas.dll",
+    "generation": 0,
+    "mvid": "36aba8a3-8c50-4480-9126-8518ac4427ba",
+    "enc_id": null,
+    "enc_base_id": null,
+    "token": "0x00000001",
+    "row_offset": 1064
+   },
+   "metadata": {
+    "status": "complete",
+    "version": "v4.0.30319",
+    "table_row_counts": {
+     "Module": 1,
+     "TypeRef": 26,
+     "TypeDef": 2,
+     "Field": 1,
+     "MethodDef": 2,
+     "Param": 4,
+     "MemberRef": 28,
+     "Constant": 1,
+     "CustomAttribute": 10,
+     "StandAloneSig": 2,
+     "Assembly": 1,
+     "AssemblyRef": 2
+    }
+   },
+   "identity_scope": {
+    "token_identity": "build-local",
+    "requires_artifact_sha256": "2980961104713cf2910fbf9eef59b80d75bb674382034901a850942d928ccc22",
+    "requires_mvid": "36aba8a3-8c50-4480-9126-8518ac4427ba"
+   },
+   "types": [
+    {
+     "token": "0x02000001",
+     "row_offset": 1230,
+     "namespace": "",
+     "name": "<Module>",
+     "full_name": "<Module>",
+     "flags": 0,
+     "extends_token": null,
+     "field_list": {
+      "first_row": null,
+      "last_row": null,
+      "count": 0
+     },
+     "method_list": {
+      "first_row": null,
+      "last_row": null,
+      "count": 0
+     }
+    },
+    {
+     "token": "0x02000002",
+     "row_offset": 1244,
+     "namespace": "Pacifico.Siniestros.Reglas",
+     "name": "CalculadoraReserva",
+     "full_name": "Pacifico.Siniestros.Reglas.CalculadoraReserva",
+     "flags": 1048961,
+     "extends_token": "0x0100000c",
+     "field_list": {
+      "first_row": 1,
+      "last_row": 1,
+      "count": 1
+     },
+     "method_list": {
+      "first_row": 1,
+      "last_row": 2,
+      "count": 2
+     }
+    }
+   ],
+   "exported_types": [],
+   "fields": [
+    {
+     "token": "0x04000001",
+     "row_offset": 1258,
+     "declaring_type_token": "0x02000002",
+     "declaring_type": "Pacifico.Siniestros.Reglas.CalculadoraReserva",
+     "name": "CadenaPorDefecto",
+     "flags": 32849,
+     "signature": {
+      "raw_length": 2,
+      "raw_sha256": "89c0c2d74467289c8bf954f4cde47f4f794bcf8e6ee65e19cd0b275e47aca3ec",
+      "kind": "field",
+      "parse_status": "decoded",
+      "calling_convention": "field",
+      "generic_parameter_count": null,
+      "parameter_count": null,
+      "return_type": null,
+      "parameter_types": [],
+      "field_type": "string",
+      "issue": null
+     }
+    }
+   ],
+   "methods": [
+    {
+     "token": "0x06000001",
+     "row_offset": 1264,
+     "declaring_type_token": "0x02000002",
+     "declaring_type": "Pacifico.Siniestros.Reglas.CalculadoraReserva",
+     "name": "Calcular",
+     "rva": 8272,
+     "impl_flags": 0,
+     "flags": 150,
+     "signature": {
+      "raw_length": 8,
+      "raw_sha256": "6bfd66da7d06ed8cc6f03eff3f4b19518dd0b6e61a8a72ebdadcb440ae27cbad",
+      "kind": "method",
+      "parse_status": "decoded",
+      "calling_convention": "default",
+      "generic_parameter_count": null,
+      "parameter_count": 3,
+      "return_type": "valuetype:53",
+      "parameter_types": [
+       "char",
+       "valuetype:53",
+       "i4"
+      ],
+      "field_type": null,
+      "issue": null
+     },
+     "body": {
+      "status": "present",
+      "header_format": "fat",
+      "rva": 8272,
+      "file_offset": 592,
+      "max_stack": 6,
+      "init_locals": true,
+      "local_var_sig_token": "0x11000001",
+      "il_size": 136,
+      "il_sha256": "3ba983957e18b66bc528b958abcf102eedf4ded7d0e56345a75645a2a39d7187",
+      "normalized_il_sha256": "d54040f8c359f67708af34155939c30a78a5b42083fd643ed4274fb5d4936ad8",
+      "instruction_count": 59,
+      "decoded_instruction_count": 59,
+      "truncated_instructions": 0,
+      "opcode_counts": {
+       "ldarg.1": 2,
+       "ldsfld": 1,
+       "call": 9,
+       "brfalse.s": 1,
+       "ldstr": 2,
+       "newobj": 3,
+       "throw": 2,
+       "ldarg.0": 1,
+       "stloc.1": 1,
+       "ldloc.1": 3,
+       "ldc.i4.s": 7,
+       "beq.s": 2,
+       "bne.un.s": 1,
+       "ldloca.s": 2,
+       "ldc.i4.0": 9,
+       "ldc.i4.1": 3,
+       "br.s": 2,
+       "ldarga.s": 1,
+       "ldarg.2": 1,
+       "ble.s": 1,
+       "ldloc.0": 2,
+       "stloc.0": 1,
+       "ldc.i4.2": 1,
+       "ret": 1
+      },
+      "anchors": [
+       {
+        "il_offset": 1,
+        "opcode": "ldsfld",
+        "operand_kind": "field",
+        "operand": "0x0a00000b"
+       },
+       {
+        "il_offset": 6,
+        "opcode": "call",
+        "operand_kind": "method",
+        "operand": "0x0a00000c"
+       },
+       {
+        "il_offset": 11,
+        "opcode": "brfalse.s",
+        "operand_kind": "branch",
+        "operand": "24"
+       },
+       {
+        "il_offset": 13,
+        "opcode": "ldstr",
+        "operand_kind": "string",
+        "operand": "0x70000001"
+       },
+       {
+        "il_offset": 18,
+        "opcode": "newobj",
+        "operand_kind": "method",
+        "operand": "0x0a00000d"
+       },
+       {
+        "il_offset": 25,
+        "opcode": "call",
+        "operand_kind": "method",
+        "operand": "0x0a00000e"
+       },
+       {
+        "il_offset": 32,
+        "opcode": "ldc.i4.s",
+        "operand_kind": "constant",
+        "operand": "65"
+       },
+       {
+        "il_offset": 34,
+        "opcode": "beq.s",
+        "operand_kind": "branch",
+        "operand": "61"
+       },
+       {
+        "il_offset": 37,
+        "opcode": "ldc.i4.s",
+        "operand_kind": "constant",
+        "operand": "72"
+       },
+       {
+        "il_offset": 39,
+        "opcode": "beq.s",
+        "operand_kind": "branch",
+        "operand": "61"
+       },
+       {
+        "il_offset": 42,
+        "opcode": "ldc.i4.s",
+        "operand_kind": "constant",
+        "operand": "86"
+       },
+       {
+        "il_offset": 44,
+        "opcode": "bne.un.s",
+        "operand_kind": "branch",
+        "operand": "76"
+       },
+       {
+        "il_offset": 46,
+        "opcode": "ldloca.s",
+        "operand_kind": "variable",
+        "operand": "0"
+       },
+       {
+        "il_offset": 48,
+        "opcode": "ldc.i4.s",
+        "operand_kind": "constant",
+        "operand": "12"
+       },
+       {
+        "il_offset": 54,
+        "opcode": "call",
+        "operand_kind": "method",
+        "operand": "0x0a00000f"
+       },
+       {
+        "il_offset": 59,
+        "opcode": "br.s",
+        "operand_kind": "branch",
+        "operand": "99"
+       },
+       {
+        "il_offset": 61,
+        "opcode": "ldloca.s",
+        "operand_kind": "variable",
+        "operand": "0"
+       },
+       {
+        "il_offset": 63,
+        "opcode": "ldc.i4.s",
+        "operand_kind": "constant",
+        "operand": "10"
+       },
+       {
+        "il_offset": 69,
+        "opcode": "call",
+        "operand_kind": "method",
+        "operand": "0x0a00000f"
+       },
+       {
+        "il_offset": 74,
+        "opcode": "br.s",
+        "operand_kind": "branch",
+        "operand": "99"
+       },
+       {
+        "il_offset": 76,
+        "opcode": "ldstr",
+        "operand_kind": "string",
+        "operand": "0x70000011"
+       },
+       {
+        "il_offset": 81,
+        "opcode": "ldarga.s",
+        "operand_kind": "variable",
+        "operand": "0"
+       },
+       {
+        "il_offset": 83,
+        "opcode": "call",
+        "operand_kind": "method",
+        "operand": "0x0a000010"
+       },
+       {
+        "il_offset": 88,
+        "opcode": "call",
+        "operand_kind": "method",
+        "operand": "0x0a000011"
+       },
+       {
+        "il_offset": 93,
+        "opcode": "newobj",
+        "operand_kind": "method",
+        "operand": "0x0a000012"
+       },
+       {
+        "il_offset": 100,
+        "opcode": "ldc.i4.s",
+        "operand_kind": "constant",
+        "operand": "60"
+       },
+       {
+        "il_offset": 102,
+        "opcode": "ble.s",
+        "operand_kind": "branch",
+        "operand": "122"
+       },
+       {
+        "il_offset": 105,
+        "opcode": "ldc.i4.s",
+        "operand_kind": "constant",
+        "operand": "11"
+       },
+       {
+        "il_offset": 111,
+        "opcode": "newobj",
+        "operand_kind": "method",
+        "operand": "0x0a00000f"
+       },
+       {
+        "il_offset": 116,
+        "opcode": "call",
+        "operand_kind": "method",
+        "operand": "0x0a000013"
+       },
+       {
+        "il_offset": 124,
+        "opcode": "call",
+        "operand_kind": "method",
+        "operand": "0x0a000013"
+       },
+       {
+        "il_offset": 130,
+        "opcode": "call",
+        "operand_kind": "method",
+        "operand": "0x0a000014"
+       }
+      ],
+      "exception_regions": [],
+      "issue": null
+     }
+    },
+    {
+     "token": "0x06000002",
+     "row_offset": 1278,
+     "declaring_type_token": "0x02000002",
+     "declaring_type": "Pacifico.Siniestros.Reglas.CalculadoraReserva",
+     "name": "ReservaRegistrada",
+     "rva": 8420,
+     "impl_flags": 0,
+     "flags": 150,
+     "signature": {
+      "raw_length": 5,
+      "raw_sha256": "09bd38225fe4a20eec3412e1cc2ad3dd9f87798ceea6b785d86798f564fd534c",
+      "kind": "method",
+      "parse_status": "decoded",
+      "calling_convention": "default",
+      "generic_parameter_count": null,
+      "parameter_count": 1,
+      "return_type": "valuetype:53",
+      "parameter_types": [
+       "string"
+      ],
+      "field_type": null,
+      "issue": null
+     },
+     "body": {
+      "status": "present",
+      "header_format": "fat",
+      "rva": 8420,
+      "file_offset": 740,
+      "max_stack": 3,
+      "init_locals": true,
+      "local_var_sig_token": "0x11000002",
+      "il_size": 103,
+      "il_sha256": "45a8c1ad43729ab80234d2a8de382062a8cd69b9a4927108387eb4cb6a9fc3a2",
+      "normalized_il_sha256": "773a53772bbaadd6d0bd1b02f41c370c261ba8390207072190d86978613b9b3c",
+      "instruction_count": 41,
+      "decoded_instruction_count": 41,
+      "truncated_instructions": 0,
+      "opcode_counts": {
+       "ldstr": 3,
+       "newobj": 2,
+       "stloc.0": 1,
+       "ldloc.0": 4,
+       "stloc.1": 1,
+       "ldloc.1": 4,
+       "callvirt": 6,
+       "ldarg.0": 1,
+       "pop": 1,
+       "stloc.2": 1,
+       "ldloc.2": 3,
+       "ldsfld": 2,
+       "beq.s": 1,
+       "brfalse.s": 3,
+       "unbox.any": 1,
+       "br.s": 1,
+       "stloc.3": 1,
+       "leave.s": 1,
+       "endfinally": 2,
+       "ldloc.3": 1,
+       "ret": 1
+      },
+      "anchors": [
+       {
+        "il_offset": 0,
+        "opcode": "ldstr",
+        "operand_kind": "string",
+        "operand": "0x70000051"
+       },
+       {
+        "il_offset": 5,
+        "opcode": "newobj",
+        "operand_kind": "method",
+        "operand": "0x0a000015"
+       },
+       {
+        "il_offset": 11,
+        "opcode": "ldstr",
+        "operand_kind": "string",
+        "operand": "0x700000f0"
+       },
+       {
+        "il_offset": 17,
+        "opcode": "newobj",
+        "operand_kind": "method",
+        "operand": "0x0a000016"
+       },
+       {
+        "il_offset": 24,
+        "opcode": "callvirt",
+        "operand_kind": "method",
+        "operand": "0x0a000017"
+       },
+       {
+        "il_offset": 29,
+        "opcode": "ldstr",
+        "operand_kind": "string",
+        "operand": "0x7000016a"
+       },
+       {
+        "il_offset": 35,
+        "opcode": "callvirt",
+        "operand_kind": "method",
+        "operand": "0x0a000018"
+       },
+       {
+        "il_offset": 42,
+        "opcode": "callvirt",
+        "operand_kind": "method",
+        "operand": "0x0a000019"
+       },
+       {
+        "il_offset": 48,
+        "opcode": "callvirt",
+        "operand_kind": "method",
+        "operand": "0x0a00001a"
+       },
+       {
+        "il_offset": 55,
+        "opcode": "ldsfld",
+        "operand_kind": "field",
+        "operand": "0x0a00001b"
+       },
+       {
+        "il_offset": 60,
+        "opcode": "beq.s",
+        "operand_kind": "branch",
+        "operand": "73"
+       },
+       {
+        "il_offset": 63,
+        "opcode": "brfalse.s",
+        "operand_kind": "branch",
+        "operand": "73"
+       },
+       {
+        "il_offset": 66,
+        "opcode": "unbox.any",
+        "operand_kind": "type",
+        "operand": "0x0100000d"
+       },
+       {
+        "il_offset": 71,
+        "opcode": "br.s",
+        "operand_kind": "branch",
+        "operand": "78"
+       },
+       {
+        "il_offset": 73,
+        "opcode": "ldsfld",
+        "operand_kind": "field",
+        "operand": "0x0a00000b"
+       },
+       {
+        "il_offset": 79,
+        "opcode": "leave.s",
+        "operand_kind": "branch",
+        "operand": "101"
+       },
+       {
+        "il_offset": 82,
+        "opcode": "brfalse.s",
+        "operand_kind": "branch",
+        "operand": "90"
+       },
+       {
+        "il_offset": 85,
+        "opcode": "callvirt",
+        "operand_kind": "method",
+        "operand": "0x0a00001c"
+       },
+       {
+        "il_offset": 92,
+        "opcode": "brfalse.s",
+        "operand_kind": "branch",
+        "operand": "100"
+       },
+       {
+        "il_offset": 95,
+        "opcode": "callvirt",
+        "operand_kind": "method",
+        "operand": "0x0a00001c"
+       }
+      ],
+      "exception_regions": [
+       {
+        "flags": 2,
+        "try_offset": 23,
+        "try_length": 58,
+        "handler_offset": 81,
+        "handler_length": 10,
+        "class_token": null,
+        "filter_offset": null
+       },
+       {
+        "flags": 2,
+        "try_offset": 11,
+        "try_length": 80,
+        "handler_offset": 91,
+        "handler_length": 10,
+        "class_token": null,
+        "filter_offset": null
+       }
+      ],
+      "issue": null
+     }
+    }
+   ],
+   "member_refs": [
+    {
+     "token": "0x0a000001",
+     "row_offset": 1316,
+     "parent_token": "0x01000001",
+     "parent_name": "System.Runtime.CompilerServices.CompilationRelaxationsAttribute",
+     "name": ".ctor",
+     "signature": {
+      "raw_length": 4,
+      "raw_sha256": "c889396c66b535112cb33472b6ecf61ad5f09860a1ea642fb8c31a4ed004296a",
+      "kind": "method",
+      "parse_status": "decoded",
+      "calling_convention": "default has-this",
+      "generic_parameter_count": null,
+      "parameter_count": 1,
+      "return_type": "void",
+      "parameter_types": [
+       "i4"
+      ],
+      "field_type": null,
+      "issue": null
+     }
+    },
+    {
+     "token": "0x0a000002",
+     "row_offset": 1322,
+     "parent_token": "0x01000002",
+     "parent_name": "System.Runtime.CompilerServices.RuntimeCompatibilityAttribute",
+     "name": ".ctor",
+     "signature": {
+      "raw_length": 3,
+      "raw_sha256": "0c9373898d2dd1c85902837a9e979cb88484e2548a008ad2b2176cc7119d09df",
+      "kind": "method",
+      "parse_status": "decoded",
+      "calling_convention": "default has-this",
+      "generic_parameter_count": null,
+      "parameter_count": 0,
+      "return_type": "void",
+      "parameter_types": [],
+      "field_type": null,
+      "issue": null
+     }
+    },
+    {
+     "token": "0x0a000003",
+     "row_offset": 1328,
+     "parent_token": "0x01000003",
+     "parent_name": "System.Diagnostics.DebuggableAttribute",
+     "name": ".ctor",
+     "signature": {
+      "raw_length": 5,
+      "raw_sha256": "1d2049d945c66d5b9530552d2369938d1dd811d391633d9b8a2c9fad0e908844",
+      "kind": "method",
+      "parse_status": "decoded",
+      "calling_convention": "default has-this",
+      "generic_parameter_count": null,
+      "parameter_count": 1,
+      "return_type": "void",
+      "parameter_types": [
+       "valuetype:17"
+      ],
+      "field_type": null,
+      "issue": null
+     }
+    },
+    {
+     "token": "0x0a000004",
+     "row_offset": 1334,
+     "parent_token": "0x01000005",
+     "parent_name": "System.Runtime.Versioning.TargetFrameworkAttribute",
+     "name": ".ctor",
+     "signature": {
+      "raw_length": 4,
+      "raw_sha256": "c65dc7d303e94729245de0fa4db4b80ac687af6d0bb38c5c884bc9c11f01e005",
+      "kind": "method",
+      "parse_status": "decoded",
+      "calling_convention": "default has-this",
+      "generic_parameter_count": null,
+      "parameter_count": 1,
+      "return_type": "void",
+      "parameter_types": [
+       "string"
+      ],
+      "field_type": null,
+      "issue": null
+     }
+    },
+    {
+     "token": "0x0a000005",
+     "row_offset": 1340,
+     "parent_token": "0x01000006",
+     "parent_name": "System.Reflection.AssemblyCompanyAttribute",
+     "name": ".ctor",
+     "signature": {
+      "raw_length": 4,
+      "raw_sha256": "c65dc7d303e94729245de0fa4db4b80ac687af6d0bb38c5c884bc9c11f01e005",
+      "kind": "method",
+      "parse_status": "decoded",
+      "calling_convention": "default has-this",
+      "generic_parameter_count": null,
+      "parameter_count": 1,
+      "return_type": "void",
+      "parameter_types": [
+       "string"
+      ],
+      "field_type": null,
+      "issue": null
+     }
+    },
+    {
+     "token": "0x0a000006",
+     "row_offset": 1346,
+     "parent_token": "0x01000007",
+     "parent_name": "System.Reflection.AssemblyConfigurationAttribute",
+     "name": ".ctor",
+     "signature": {
+      "raw_length": 4,
+      "raw_sha256": "c65dc7d303e94729245de0fa4db4b80ac687af6d0bb38c5c884bc9c11f01e005",
+      "kind": "method",
+      "parse_status": "decoded",
+      "calling_convention": "default has-this",
+      "generic_parameter_count": null,
+      "parameter_count": 1,
+      "return_type": "void",
+      "parameter_types": [
+       "string"
+      ],
+      "field_type": null,
+      "issue": null
+     }
+    },
+    {
+     "token": "0x0a000007",
+     "row_offset": 1352,
+     "parent_token": "0x01000008",
+     "parent_name": "System.Reflection.AssemblyFileVersionAttribute",
+     "name": ".ctor",
+     "signature": {
+      "raw_length": 4,
+      "raw_sha256": "c65dc7d303e94729245de0fa4db4b80ac687af6d0bb38c5c884bc9c11f01e005",
+      "kind": "method",
+      "parse_status": "decoded",
+      "calling_convention": "default has-this",
+      "generic_parameter_count": null,
+      "parameter_count": 1,
+      "return_type": "void",
+      "parameter_types": [
+       "string"
+      ],
+      "field_type": null,
+      "issue": null
+     }
+    },
+    {
+     "token": "0x0a000008",
+     "row_offset": 1358,
+     "parent_token": "0x01000009",
+     "parent_name": "System.Reflection.AssemblyInformationalVersionAttribute",
+     "name": ".ctor",
+     "signature": {
+      "raw_length": 4,
+      "raw_sha256": "c65dc7d303e94729245de0fa4db4b80ac687af6d0bb38c5c884bc9c11f01e005",
+      "kind": "method",
+      "parse_status": "decoded",
+      "calling_convention": "default has-this",
+      "generic_parameter_count": null,
+      "parameter_count": 1,
+      "return_type": "void",
+      "parameter_types": [
+       "string"
+      ],
+      "field_type": null,
+      "issue": null
+     }
+    },
+    {
+     "token": "0x0a000009",
+     "row_offset": 1364,
+     "parent_token": "0x0100000a",
+     "parent_name": "System.Reflection.AssemblyProductAttribute",
+     "name": ".ctor",
+     "signature": {
+      "raw_length": 4,
+      "raw_sha256": "c65dc7d303e94729245de0fa4db4b80ac687af6d0bb38c5c884bc9c11f01e005",
+      "kind": "method",
+      "parse_status": "decoded",
+      "calling_convention": "default has-this",
+      "generic_parameter_count": null,
+      "parameter_count": 1,
+      "return_type": "void",
+      "parameter_types": [
+       "string"
+      ],
+      "field_type": null,
+      "issue": null
+     }
+    },
+    {
+     "token": "0x0a00000a",
+     "row_offset": 1370,
+     "parent_token": "0x0100000b",
+     "parent_name": "System.Reflection.AssemblyTitleAttribute",
+     "name": ".ctor",
+     "signature": {
+      "raw_length": 4,
+      "raw_sha256": "c65dc7d303e94729245de0fa4db4b80ac687af6d0bb38c5c884bc9c11f01e005",
+      "kind": "method",
+      "parse_status": "decoded",
+      "calling_convention": "default has-this",
+      "generic_parameter_count": null,
+      "parameter_count": 1,
+      "return_type": "void",
+      "parameter_types": [
+       "string"
+      ],
+      "field_type": null,
+      "issue": null
+     }
+    },
+    {
+     "token": "0x0a00000b",
+     "row_offset": 1376,
+     "parent_token": "0x0100000d",
+     "parent_name": "System.Decimal",
+     "name": "Zero",
+     "signature": {
+      "raw_length": 3,
+      "raw_sha256": "b92a4bc7386072f7d835d035618cf171d3833d8ecc79f9b26fdafd08a630cdf3",
+      "kind": "field",
+      "parse_status": "decoded",
+      "calling_convention": "field",
+      "generic_parameter_count": null,
+      "parameter_count": null,
+      "return_type": null,
+      "parameter_types": [],
+      "field_type": "valuetype:53",
+      "issue": null
+     }
+    },
+    {
+     "token": "0x0a00000c",
+     "row_offset": 1382,
+     "parent_token": "0x0100000d",
+     "parent_name": "System.Decimal",
+     "name": "op_LessThan",
+     "signature": {
+      "raw_length": 7,
+      "raw_sha256": "7ce15939ed864ffa65e3c6a7987ab82ea27fa16f0e75d56133680756ea4cc744",
+      "kind": "method",
+      "parse_status": "decoded",
+      "calling_convention": "default",
+      "generic_parameter_count": null,
+      "parameter_count": 2,
+      "return_type": "bool",
+      "parameter_types": [
+       "valuetype:53",
+       "valuetype:53"
+      ],
+      "field_type": null,
+      "issue": null
+     }
+    },
+    {
+     "token": "0x0a00000d",
+     "row_offset": 1388,
+     "parent_token": "0x01000010",
+     "parent_name": "System.ArgumentOutOfRangeException",
+     "name": ".ctor",
+     "signature": {
+      "raw_length": 4,
+      "raw_sha256": "c65dc7d303e94729245de0fa4db4b80ac687af6d0bb38c5c884bc9c11f01e005",
+      "kind": "method",
+      "parse_status": "decoded",
+      "calling_convention": "default has-this",
+      "generic_parameter_count": null,
+      "parameter_count": 1,
+      "return_type": "void",
+      "parameter_types": [
+       "string"
+      ],
+      "field_type": null,
+      "issue": null
+     }
+    },
+    {
+     "token": "0x0a00000e",
+     "row_offset": 1394,
+     "parent_token": "0x01000011",
+     "parent_name": "System.Char",
+     "name": "ToUpperInvariant",
+     "signature": {
+      "raw_length": 4,
+      "raw_sha256": "f3e1f3da542d7e8c7fb709d984439231c1fce5156ce88e48d186dbbb7b64b618",
+      "kind": "method",
+      "parse_status": "decoded",
+      "calling_convention": "default",
+      "generic_parameter_count": null,
+      "parameter_count": 1,
+      "return_type": "char",
+      "parameter_types": [
+       "char"
+      ],
+      "field_type": null,
+      "issue": null
+     }
+    },
+    {
+     "token": "0x0a00000f",
+     "row_offset": 1400,
+     "parent_token": "0x0100000d",
+     "parent_name": "System.Decimal",
+     "name": ".ctor",
+     "signature": {
+      "raw_length": 8,
+      "raw_sha256": "b4451e1c0c09ce11487777257b8c43f7397a01495f0516ffef87b0479dfec7a1",
+      "kind": "method",
+      "parse_status": "decoded",
+      "calling_convention": "default has-this",
+      "generic_parameter_count": null,
+      "parameter_count": 5,
+      "return_type": "void",
+      "parameter_types": [
+       "i4",
+       "i4",
+       "i4",
+       "bool",
+       "u1"
+      ],
+      "field_type": null,
+      "issue": null
+     }
+    },
+    {
+     "token": "0x0a000010",
+     "row_offset": 1406,
+     "parent_token": "0x01000011",
+     "parent_name": "System.Char",
+     "name": "ToString",
+     "signature": {
+      "raw_length": 3,
+      "raw_sha256": "df29f5ab2554df47369dafce3bc8630f16eabc3f72c21bbd24c5e73c286f650f",
+      "kind": "method",
+      "parse_status": "decoded",
+      "calling_convention": "default has-this",
+      "generic_parameter_count": null,
+      "parameter_count": 0,
+      "return_type": "string",
+      "parameter_types": [],
+      "field_type": null,
+      "issue": null
+     }
+    },
+    {
+     "token": "0x0a000011",
+     "row_offset": 1412,
+     "parent_token": "0x01000012",
+     "parent_name": "System.String",
+     "name": "Concat",
+     "signature": {
+      "raw_length": 5,
+      "raw_sha256": "e25b82e7e909d55b3ee4778b8dc964ae5cbe58b51c92839f74e3d560fbe3037d",
+      "kind": "method",
+      "parse_status": "decoded",
+      "calling_convention": "default",
+      "generic_parameter_count": null,
+      "parameter_count": 2,
+      "return_type": "string",
+      "parameter_types": [
+       "string",
+       "string"
+      ],
+      "field_type": null,
+      "issue": null
+     }
+    },
+    {
+     "token": "0x0a000012",
+     "row_offset": 1418,
+     "parent_token": "0x01000013",
+     "parent_name": "System.ArgumentException",
+     "name": ".ctor",
+     "signature": {
+      "raw_length": 4,
+      "raw_sha256": "c65dc7d303e94729245de0fa4db4b80ac687af6d0bb38c5c884bc9c11f01e005",
+      "kind": "method",
+      "parse_status": "decoded",
+      "calling_convention": "default has-this",
+      "generic_parameter_count": null,
+      "parameter_count": 1,
+      "return_type": "void",
+      "parameter_types": [
+       "string"
+      ],
+      "field_type": null,
+      "issue": null
+     }
+    },
+    {
+     "token": "0x0a000013",
+     "row_offset": 1424,
+     "parent_token": "0x0100000d",
+     "parent_name": "System.Decimal",
+     "name": "op_Multiply",
+     "signature": {
+      "raw_length": 8,
+      "raw_sha256": "9b18dffa30c170e5170e8c8c1afbc723a5dfdc60946d7b53b36751de897e072b",
+      "kind": "method",
+      "parse_status": "decoded",
+      "calling_convention": "default",
+      "generic_parameter_count": null,
+      "parameter_count": 2,
+      "return_type": "valuetype:53",
+      "parameter_types": [
+       "valuetype:53",
+       "valuetype:53"
+      ],
+      "field_type": null,
+      "issue": null
+     }
+    },
+    {
+     "token": "0x0a000014",
+     "row_offset": 1430,
+     "parent_token": "0x01000014",
+     "parent_name": "System.Math",
+     "name": "Round",
+     "signature": {
+      "raw_length": 7,
+      "raw_sha256": "e4af49b397854df026d7c08b5544e61638f183ea6bf8a6bbe919799b49d0a7f6",
+      "kind": "method",
+      "parse_status": "decoded",
+      "calling_convention": "default",
+      "generic_parameter_count": null,
+      "parameter_count": 2,
+      "return_type": "valuetype:53",
+      "parameter_types": [
+       "valuetype:53",
+       "i4"
+      ],
+      "field_type": null,
+      "issue": null
+     }
+    },
+    {
+     "token": "0x0a000015",
+     "row_offset": 1436,
+     "parent_token": "0x0100000e",
+     "parent_name": "System.Data.SqlClient.SqlConnection",
+     "name": ".ctor",
+     "signature": {
+      "raw_length": 4,
+      "raw_sha256": "c65dc7d303e94729245de0fa4db4b80ac687af6d0bb38c5c884bc9c11f01e005",
+      "kind": "method",
+      "parse_status": "decoded",
+      "calling_convention": "default has-this",
+      "generic_parameter_count": null,
+      "parameter_count": 1,
+      "return_type": "void",
+      "parameter_types": [
+       "string"
+      ],
+      "field_type": null,
+      "issue": null
+     }
+    },
+    {
+     "token": "0x0a000016",
+     "row_offset": 1442,
+     "parent_token": "0x0100000f",
+     "parent_name": "System.Data.SqlClient.SqlCommand",
+     "name": ".ctor",
+     "signature": {
+      "raw_length": 6,
+      "raw_sha256": "96568430537ca1569cfb79e8edaf4e848eb63ce0f36290f7305cf98d3789530d",
+      "kind": "method",
+      "parse_status": "decoded",
+      "calling_convention": "default has-this",
+      "generic_parameter_count": null,
+      "parameter_count": 2,
+      "return_type": "void",
+      "parameter_types": [
+       "string",
+       "class:57"
+      ],
+      "field_type": null,
+      "issue": null
+     }
+    },
+    {
+     "token": "0x0a000017",
+     "row_offset": 1448,
+     "parent_token": "0x0100000f",
+     "parent_name": "System.Data.SqlClient.SqlCommand",
+     "name": "get_Parameters",
+     "signature": {
+      "raw_length": 4,
+      "raw_sha256": "ba2880e37194c1a74f2726bac436670fa92f996ba872f7a1590e7cd9fbe0d2e5",
+      "kind": "method",
+      "parse_status": "decoded",
+      "calling_convention": "default has-this",
+      "generic_parameter_count": null,
+      "parameter_count": 0,
+      "return_type": "class:85",
+      "parameter_types": [],
+      "field_type": null,
+      "issue": null
+     }
+    },
+    {
+     "token": "0x0a000018",
+     "row_offset": 1454,
+     "parent_token": "0x01000015",
+     "parent_name": "System.Data.SqlClient.SqlParameterCollection",
+     "name": "AddWithValue",
+     "signature": {
+      "raw_length": 6,
+      "raw_sha256": "cb5a67138f1586dbdc4ffb07b5c0b5bb8a0eaa74626aa280debb72f4fbc06073",
+      "kind": "method",
+      "parse_status": "decoded",
+      "calling_convention": "default has-this",
+      "generic_parameter_count": null,
+      "parameter_count": 2,
+      "return_type": "class:89",
+      "parameter_types": [
+       "string",
+       "object"
+      ],
+      "field_type": null,
+      "issue": null
+     }
+    },
+    {
+     "token": "0x0a000019",
+     "row_offset": 1460,
+     "parent_token": "0x01000017",
+     "parent_name": "System.Data.Common.DbConnection",
+     "name": "Open",
+     "signature": {
+      "raw_length": 3,
+      "raw_sha256": "0c9373898d2dd1c85902837a9e979cb88484e2548a008ad2b2176cc7119d09df",
+      "kind": "method",
+      "parse_status": "decoded",
+      "calling_convention": "default has-this",
+      "generic_parameter_count": null,
+      "parameter_count": 0,
+      "return_type": "void",
+      "parameter_types": [],
+      "field_type": null,
+      "issue": null
+     }
+    },
+    {
+     "token": "0x0a00001a",
+     "row_offset": 1466,
+     "parent_token": "0x01000018",
+     "parent_name": "System.Data.Common.DbCommand",
+     "name": "ExecuteScalar",
+     "signature": {
+      "raw_length": 3,
+      "raw_sha256": "f3a24573bd5156b4fcaa6c36468c26c520cf55463586a700fca5c6bb10bbbfe8",
+      "kind": "method",
+      "parse_status": "decoded",
+      "calling_convention": "default has-this",
+      "generic_parameter_count": null,
+      "parameter_count": 0,
+      "return_type": "object",
+      "parameter_types": [],
+      "field_type": null,
+      "issue": null
+     }
+    },
+    {
+     "token": "0x0a00001b",
+     "row_offset": 1472,
+     "parent_token": "0x01000019",
+     "parent_name": "System.DBNull",
+     "name": "Value",
+     "signature": {
+      "raw_length": 3,
+      "raw_sha256": "64c9d567ce5ba43153a63e4584e97ff18975149456d8c38e321733c89f9edda3",
+      "kind": "field",
+      "parse_status": "decoded",
+      "calling_convention": "field",
+      "generic_parameter_count": null,
+      "parameter_count": null,
+      "return_type": null,
+      "parameter_types": [],
+      "field_type": "class:101",
+      "issue": null
+     }
+    },
+    {
+     "token": "0x0a00001c",
+     "row_offset": 1478,
+     "parent_token": "0x0100001a",
+     "parent_name": "System.IDisposable",
+     "name": "Dispose",
+     "signature": {
+      "raw_length": 3,
+      "raw_sha256": "0c9373898d2dd1c85902837a9e979cb88484e2548a008ad2b2176cc7119d09df",
+      "kind": "method",
+      "parse_status": "decoded",
+      "calling_convention": "default has-this",
+      "generic_parameter_count": null,
+      "parameter_count": 0,
+      "return_type": "void",
+      "parameter_types": [],
+      "field_type": null,
+      "issue": null
+     }
+    }
+   ],
+   "call_edges": [
+    {
+     "caller_token": "0x06000001",
+     "caller": "Pacifico.Siniestros.Reglas.CalculadoraReserva.Calcular",
+     "opcode": "call",
+     "target_token": "0x0a00000c",
+     "target_kind": "member-ref",
+     "target_name": "op_LessThan",
+     "target_declaring_type": "System.Decimal"
+    },
+    {
+     "caller_token": "0x06000001",
+     "caller": "Pacifico.Siniestros.Reglas.CalculadoraReserva.Calcular",
+     "opcode": "newobj",
+     "target_token": "0x0a00000d",
+     "target_kind": "member-ref",
+     "target_name": ".ctor",
+     "target_declaring_type": "System.ArgumentOutOfRangeException"
+    },
+    {
+     "caller_token": "0x06000001",
+     "caller": "Pacifico.Siniestros.Reglas.CalculadoraReserva.Calcular",
+     "opcode": "call",
+     "target_token": "0x0a00000e",
+     "target_kind": "member-ref",
+     "target_name": "ToUpperInvariant",
+     "target_declaring_type": "System.Char"
+    },
+    {
+     "caller_token": "0x06000001",
+     "caller": "Pacifico.Siniestros.Reglas.CalculadoraReserva.Calcular",
+     "opcode": "call",
+     "target_token": "0x0a00000f",
+     "target_kind": "member-ref",
+     "target_name": ".ctor",
+     "target_declaring_type": "System.Decimal"
+    },
+    {
+     "caller_token": "0x06000001",
+     "caller": "Pacifico.Siniestros.Reglas.CalculadoraReserva.Calcular",
+     "opcode": "call",
+     "target_token": "0x0a00000f",
+     "target_kind": "member-ref",
+     "target_name": ".ctor",
+     "target_declaring_type": "System.Decimal"
+    },
+    {
+     "caller_token": "0x06000001",
+     "caller": "Pacifico.Siniestros.Reglas.CalculadoraReserva.Calcular",
+     "opcode": "call",
+     "target_token": "0x0a000010",
+     "target_kind": "member-ref",
+     "target_name": "ToString",
+     "target_declaring_type": "System.Char"
+    },
+    {
+     "caller_token": "0x06000001",
+     "caller": "Pacifico.Siniestros.Reglas.CalculadoraReserva.Calcular",
+     "opcode": "call",
+     "target_token": "0x0a000011",
+     "target_kind": "member-ref",
+     "target_name": "Concat",
+     "target_declaring_type": "System.String"
+    },
+    {
+     "caller_token": "0x06000001",
+     "caller": "Pacifico.Siniestros.Reglas.CalculadoraReserva.Calcular",
+     "opcode": "newobj",
+     "target_token": "0x0a000012",
+     "target_kind": "member-ref",
+     "target_name": ".ctor",
+     "target_declaring_type": "System.ArgumentException"
+    },
+    {
+     "caller_token": "0x06000001",
+     "caller": "Pacifico.Siniestros.Reglas.CalculadoraReserva.Calcular",
+     "opcode": "newobj",
+     "target_token": "0x0a00000f",
+     "target_kind": "member-ref",
+     "target_name": ".ctor",
+     "target_declaring_type": "System.Decimal"
+    },
+    {
+     "caller_token": "0x06000001",
+     "caller": "Pacifico.Siniestros.Reglas.CalculadoraReserva.Calcular",
+     "opcode": "call",
+     "target_token": "0x0a000013",
+     "target_kind": "member-ref",
+     "target_name": "op_Multiply",
+     "target_declaring_type": "System.Decimal"
+    },
+    {
+     "caller_token": "0x06000001",
+     "caller": "Pacifico.Siniestros.Reglas.CalculadoraReserva.Calcular",
+     "opcode": "call",
+     "target_token": "0x0a000013",
+     "target_kind": "member-ref",
+     "target_name": "op_Multiply",
+     "target_declaring_type": "System.Decimal"
+    },
+    {
+     "caller_token": "0x06000001",
+     "caller": "Pacifico.Siniestros.Reglas.CalculadoraReserva.Calcular",
+     "opcode": "call",
+     "target_token": "0x0a000014",
+     "target_kind": "member-ref",
+     "target_name": "Round",
+     "target_declaring_type": "System.Math"
+    },
+    {
+     "caller_token": "0x06000002",
+     "caller": "Pacifico.Siniestros.Reglas.CalculadoraReserva.ReservaRegistrada",
+     "opcode": "newobj",
+     "target_token": "0x0a000015",
+     "target_kind": "member-ref",
+     "target_name": ".ctor",
+     "target_declaring_type": "System.Data.SqlClient.SqlConnection"
+    },
+    {
+     "caller_token": "0x06000002",
+     "caller": "Pacifico.Siniestros.Reglas.CalculadoraReserva.ReservaRegistrada",
+     "opcode": "newobj",
+     "target_token": "0x0a000016",
+     "target_kind": "member-ref",
+     "target_name": ".ctor",
+     "target_declaring_type": "System.Data.SqlClient.SqlCommand"
+    },
+    {
+     "caller_token": "0x06000002",
+     "caller": "Pacifico.Siniestros.Reglas.CalculadoraReserva.ReservaRegistrada",
+     "opcode": "callvirt",
+     "target_token": "0x0a000017",
+     "target_kind": "member-ref",
+     "target_name": "get_Parameters",
+     "target_declaring_type": "System.Data.SqlClient.SqlCommand"
+    },
+    {
+     "caller_token": "0x06000002",
+     "caller": "Pacifico.Siniestros.Reglas.CalculadoraReserva.ReservaRegistrada",
+     "opcode": "callvirt",
+     "target_token": "0x0a000018",
+     "target_kind": "member-ref",
+     "target_name": "AddWithValue",
+     "target_declaring_type": "System.Data.SqlClient.SqlParameterCollection"
+    },
+    {
+     "caller_token": "0x06000002",
+     "caller": "Pacifico.Siniestros.Reglas.CalculadoraReserva.ReservaRegistrada",
+     "opcode": "callvirt",
+     "target_token": "0x0a000019",
+     "target_kind": "member-ref",
+     "target_name": "Open",
+     "target_declaring_type": "System.Data.Common.DbConnection"
+    },
+    {
+     "caller_token": "0x06000002",
+     "caller": "Pacifico.Siniestros.Reglas.CalculadoraReserva.ReservaRegistrada",
+     "opcode": "callvirt",
+     "target_token": "0x0a00001a",
+     "target_kind": "member-ref",
+     "target_name": "ExecuteScalar",
+     "target_declaring_type": "System.Data.Common.DbCommand"
+    },
+    {
+     "caller_token": "0x06000002",
+     "caller": "Pacifico.Siniestros.Reglas.CalculadoraReserva.ReservaRegistrada",
+     "opcode": "callvirt",
+     "target_token": "0x0a00001c",
+     "target_kind": "member-ref",
+     "target_name": "Dispose",
+     "target_declaring_type": "System.IDisposable"
+    },
+    {
+     "caller_token": "0x06000002",
+     "caller": "Pacifico.Siniestros.Reglas.CalculadoraReserva.ReservaRegistrada",
+     "opcode": "callvirt",
+     "target_token": "0x0a00001c",
+     "target_kind": "member-ref",
+     "target_name": "Dispose",
+     "target_declaring_type": "System.IDisposable"
+    }
+   ],
+   "field_accesses": [
+    {
+     "method_token": "0x06000001",
+     "method": "Pacifico.Siniestros.Reglas.CalculadoraReserva.Calcular",
+     "opcode": "ldsfld",
+     "field_token": "0x0a00000b",
+     "field_name": "Zero",
+     "field_declaring_type": "System.Decimal"
+    },
+    {
+     "method_token": "0x06000002",
+     "method": "Pacifico.Siniestros.Reglas.CalculadoraReserva.ReservaRegistrada",
+     "opcode": "ldsfld",
+     "field_token": "0x0a00001b",
+     "field_name": "Value",
+     "field_declaring_type": "System.DBNull"
+    },
+    {
+     "method_token": "0x06000002",
+     "method": "Pacifico.Siniestros.Reglas.CalculadoraReserva.ReservaRegistrada",
+     "opcode": "ldsfld",
+     "field_token": "0x0a00000b",
+     "field_name": "Zero",
+     "field_declaring_type": "System.Decimal"
+    }
+   ],
+   "user_strings": {
+    "state": "complete",
+    "literals": [
+     {
+      "token": "0x70000001",
+      "offset": 2553,
+      "value": "montoUF"
+     },
+     {
+      "token": "0x70000011",
+      "offset": 2569,
+      "value": "Tipo de siniestro desconocido: "
+     },
+     {
+      "token": "0x70000051",
+      "offset": 2633,
+      "value": "Data Source=SRVSQL02;Initial Catalog=Siniestros;User ID=reglas;Password=r3gl4s"
+     },
+     {
+      "token": "0x700000f0",
+      "offset": 2792,
+      "value": "SELECT ReservaUF FROM dbo.Siniestros WHERE NumSiniestro = @n"
+     },
+     {
+      "token": "0x7000016a",
+      "offset": 2914,
+      "value": "@n"
+     }
+    ],
+    "issues": []
+   },
+   "selection": null,
+   "coverage": {
+    "state": "complete",
+    "issues": []
+   },
+   "limitations": [
+    "Metadata tokens are build-local coordinates and are only meaningful with the reported artifact SHA-256 and MVID.",
+    "CIL instruction anchors are decoded from file-backed method bodies only; no target assembly is loaded or executed.",
+    "Exported types are reported from ExportedType rows as declared; forwarded types are not resolved in their implementing assemblies.",
+    "User strings are the #US literals loaded by ldstr in the inspected method bodies, with their own coverage; instruction anchors and normalized CIL digests keep their build-local tokens.",
+    "Member signatures decode ECMA-335 primitive, class, valuetype, generic instantiation, generic variable, pointer, byref, single-dimension and general array, function pointer, custom modifier, and typed reference forms; class and valuetype operands keep their encoded TypeDefOrRefOrSpec values, and unsupported forms such as vararg sentinels retain raw signature hashes."
+   ]
+  },
+  "confidence": "observed",
+  "authority": "shipped-artifact",
+  "environment": null,
+  "limitations": [
+   "Metadata tokens are build-local coordinates and are only meaningful with the reported artifact SHA-256 and MVID.",
+   "CIL instruction anchors are decoded from file-backed method bodies only; no target assembly is loaded or executed.",
+   "Exported types are reported from ExportedType rows as declared; forwarded types are not resolved in their implementing assemblies.",
+   "User strings are the #US literals loaded by ldstr in the inspected method bodies, with their own coverage; instruction anchors and normalized CIL digests keep their build-local tokens.",
+   "Member signatures decode ECMA-335 primitive, class, valuetype, generic instantiation, generic variable, pointer, byref, single-dimension and general array, function pointer, custom modifier, and typed reference forms; class and valuetype operands keep their encoded TypeDefOrRefOrSpec values, and unsupported forms such as vararg sentinels retain raw signature hashes."
+  ],
+  "relationship_coverage": null,
+  "locations": [
+   {
+    "kind": "file-offset",
+    "offset": 1064
+   },
+   {
+    "kind": "file-offset",
+    "offset": 592
+   },
+   {
+    "kind": "file-offset",
+    "offset": 740
+   }
+  ],
+  "evidence_links": []
+ },
+ "decompiler": {
+  "name": "ilspycmd",
+  "version": "11.1.0.9782",
+  "family": "ilspy",
+  "executable_sha256": null,
+  "options": [
+   "-p"
+  ]
+ },
+ "methods": [
+  {
+   "token": "0x06000001",
+   "signature_sha256": "6bfd66da7d06ed8cc6f03eff3f4b19518dd0b6e61a8a72ebdadcb440ae27cbad",
+   "normalized_il_sha256": "d54040f8c359f67708af34155939c30a78a5b42083fd643ed4274fb5d4936ad8",
+   "reconstruction": {
+    "kind": "decompiled-csharp",
+    "language": "csharp",
+    "text": "\tpublic static decimal Calcular(char tipo, decimal montoUF, int diasAbierto)\n\t{\n\t\tif (montoUF < 0m)\n\t\t{\n\t\t\tthrow new ArgumentOutOfRangeException(\"montoUF\");\n\t\t}\n\t\tdecimal num;\n\t\tswitch (char.ToUpperInvariant(tipo))\n\t\t{\n\t\tcase 'V':\n\t\t\tnum = 1.2m;\n\t\t\tbreak;\n\t\tcase 'A':\n\t\tcase 'H':\n\t\t\tnum = 1.0m;\n\t\t\tbreak;\n\t\tdefault:\n\t\t\tthrow new ArgumentException(\"Tipo de siniestro desconocido: \" + tipo);\n\t\t}\n\t\tif (diasAbierto > 60)\n\t\t{\n\t\t\tnum *= 1.1m;\n\t\t}\n\t\treturn Math.Round(montoUF * num, 2);\n\t}",
+    "source_path": "/home/user/poc-pacifico-seguros/sistemas/siniestros/reingenieria/rea/Pacifico.Siniestros.Reglas.dll/decompilado/Pacifico.Siniestros.Reglas/CalculadoraReserva.cs",
+    "start_line": 11,
+    "end_line": 35
+   }
+  },
+  {
+   "token": "0x06000002",
+   "signature_sha256": "09bd38225fe4a20eec3412e1cc2ad3dd9f87798ceea6b785d86798f564fd534c",
+   "normalized_il_sha256": "773a53772bbaadd6d0bd1b02f41c370c261ba8390207072190d86978613b9b3c",
+   "reconstruction": {
+    "kind": "decompiled-csharp",
+    "language": "csharp",
+    "text": "\tpublic static decimal ReservaRegistrada(string numSiniestro)\n\t{\n\t\t//IL_0005: Unknown result type (might be due to invalid IL or missing references)\n\t\t//IL_000b: Expected Obj, but got Unknown\n\t\t//IL_0011: Unknown result type (might be due to invalid IL or missing references)\n\t\t//IL_0017: Expected Obj, but got Unknown\n\t\tSqlConnection val = new SqlConnection(\"Data Source=SRVSQL02;Initial Catalog=Siniestros;User ID=reglas;Password=r3gl4s\");\n\t\ttry\n\t\t{\n\t\t\tSqlCommand val2 = new SqlCommand(\"SELECT ReservaUF FROM dbo.Siniestros WHERE NumSiniestro = @n\", val);\n\t\t\ttry\n\t\t\t{\n\t\t\t\tval2.Parameters.AddWithValue(\"@n\", (object)numSiniestro);\n\t\t\t\t((DbConnection)(object)val).Open();\n\t\t\t\tobject obj = ((DbCommand)(object)val2).ExecuteScalar();\n\t\t\t\treturn (obj == DBNull.Value || obj == null) ? 0m : ((decimal)obj);\n\t\t\t}\n\t\t\tfinally\n\t\t\t{\n\t\t\t\t((IDisposable)val2)?.Dispose();\n\t\t\t}\n\t\t}\n\t\tfinally\n\t\t{\n\t\t\t((IDisposable)val)?.Dispose();\n\t\t}\n\t}",
+    "source_path": "/home/user/poc-pacifico-seguros/sistemas/siniestros/reingenieria/rea/Pacifico.Siniestros.Reglas.dll/decompilado/Pacifico.Siniestros.Reglas/CalculadoraReserva.cs",
+    "start_line": 37,
+    "end_line": 63
+   }
+  }
+ ],
+ "notes": [
+  "Tipo Pacifico.Siniestros.Reglas.CalculadoraReserva reconstruido desde el binario con ILSpy."
+ ]
+}

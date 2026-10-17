@@ -10,10 +10,10 @@
 
 ## Estado
 
-La POC está implementada sobre un sistema legado **emulado** (`legacy/`), a la espera de los fuentes reales y de las especificaciones de destino:
+La POC está implementada sobre dos sistemas legados **emulados** (`sistemas/polizas`, `sistemas/siniestros`), a la espera de los fuentes reales y de las especificaciones de destino. Para varios sistemas ver [GUIA_MULTISISTEMA.md](GUIA_MULTISISTEMA.md).
 
 - [x] Ingeniería inversa: inventario automático + REA sobre el componente compilado (`reingenieria/HALLAZGOS.md`)
-- [x] SSIS → ADF con convertidor automático (`adf/`, `tools/ssis2adf`)
+- [x] SSIS → ADF con convertidor automático (`sistemas/<id>/adf/`, `tools/ssis2adf`)
 - [x] VB6 + COM → API .NET 10 LTS con pruebas de paridad contra el binario legado (`app/`)
 - [x] El sistema nuevo invoca ADF por su API REST; en local, contra un emulador (`adf-emulador/`)
 - [x] Entorno local con Docker Compose y demostración de punta a punta (`scripts/demo.sh`)
@@ -43,7 +43,7 @@ Se usan dos herramientas que se complementan:
 | Script Tasks de SSIS compilados | **REA** (.NET) | El código C#/VB embebido en el paquete |
 | Front web (si existe) | **REA** (análisis de sitio) | Estructura, scripts y tráfico de red |
 
-REA ([github.com/morluto/rea](https://github.com/morluto/rea), licencia MIT) es un servidor MCP que conecta al agente con herramientas de ingeniería inversa; el análisis corre en la máquina local. Se instala con `npx rea-agents setup` (Node.js ≥ 22.19). Para binarios nativos (VB6) necesita Ghidra (gratuito), IDA o Hopper. Los VB6 compilados en **P-Code** se descompilan peor que los compilados a código nativo: conviene preguntar al cliente cómo los compila, o pedir los fuentes.
+REA ([github.com/morluto/rea](https://github.com/morluto/rea), licencia MIT) es un servidor MCP que conecta al agente con herramientas de ingeniería inversa; el análisis corre en la máquina local. Se instala con `npx rea-agents setup` (Node.js ≥ 22.19). Para binarios nativos (VB6) necesita Ghidra (gratuito), IDA o Hopper. De un VB6 compilado a **código nativo** solo se obtiene pseudocódigo; uno compilado en **P-Code** se decompila mejor con herramientas específicas. Conviene preguntar al cliente cómo los compila, y sobre todo pedir los fuentes.
 
 Pasos:
 1. Copiar los fuentes en `fuentes/` (está en `.gitignore` para no versionar código ni credenciales del cliente).
@@ -63,7 +63,7 @@ Pasos:
 
 ### Fase 3 — Construcción de la POC (un flujo de punta a punta)
 - Elegir **un** paquete representativo y **una** funcionalidad de la app.
-- Pipeline ADF como código (JSON/ARM/Bicep) en `adf/`.
+- Pipeline ADF como código (JSON en formato Git de ADF) en `sistemas/<id>/adf/`.
 - Servicio en Docker en `app/`.
 - Infraestructura como código en `infra/`.
 

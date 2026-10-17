@@ -26,6 +26,8 @@ import xml.etree.ElementTree as ET
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
+from proyectos import ProyectoLegado, analizar_proyecto
+
 NS_DTS = "www.microsoft.com/SqlServer/Dts"
 NS_SQLTASK = "www.microsoft.com/sqlserver/dts/tasks/sqltask"
 
@@ -57,6 +59,7 @@ class PaqueteSSIS:
     variables: list[dict] = field(default_factory=list)
     tareas: list[TareaSSIS] = field(default_factory=list)
     precedencias: list[dict] = field(default_factory=list)
+    version_formato: int | None = None
 
 
 @dataclass
@@ -83,26 +86,38 @@ class ArchivoCodigo:
 # SSIS
 # ---------------------------------------------------------------------------
 
-# Nombres legibles para los CreationName/ExecutableType más comunes.
-TIPOS_TAREA = {
-    "Microsoft.ExecuteSQLTask": "Execute SQL",
-    "Microsoft.Pipeline": "Data Flow",
-    "Microsoft.ExecutePackageTask": "Execute Package",
-    "Microsoft.FileSystemTask": "File System",
-    "Microsoft.ScriptTask": "Script Task",
-    "Microsoft.SendMailTask": "Send Mail",
-    "Microsoft.FtpTask": "FTP",
-    "STOCK:SEQUENCE": "Sequence Container",
-    "STOCK:FORLOOP": "For Loop",
-    "STOCK:FOREACHLOOP": "Foreach Loop",
-}
+# Fragmentos del ExecutableType → nombre legible. Cubre los nombres cortos (SSIS 2012+,
+# "Microsoft.ExecuteSQLTask") y los tipos .NET completos de versiones anteriores
+# ("Microsoft.SqlServer.Dts.Tasks.ExecuteSQLTask.ExecuteSQLTask, ...", "SSIS.Pipeline.2").
+TIPOS_TAREA = [
+    ("executesqltask", "Execute SQL"),
+    ("executepackagetask", "Execute Package"),
+    ("executeprocess", "Execute Process"),
+    ("scripttask", "Script Task"),
+    ("filesystemtask", "File System"),
+    ("sendmailtask", "Send Mail"),
+    ("ftptask", "FTP"),
+    ("bulkinserttask", "Bulk Insert"),
+    ("webservicetask", "Web Service"),
+    ("xmltask", "XML"),
+    ("stock:sequence", "Sequence Container"),
+    ("stock:forloop", "For Loop"),
+    ("stock:foreachloop", "Foreach Loop"),
+    ("pipeline", "Data Flow"),
+]
 
 
 def _tipo_legible(executable_type: str) -> str:
-    for clave, legible in TIPOS_TAREA.items():
-        if executable_type.startswith(clave) or clave in executable_type:
-            return legible
-    return executable_type
+    bajo = executable_type.lower()
+    return next((legible for clave, legible in TIPOS_TAREA if clave in bajo), executable_type)
+
+
+def version_formato_dtsx(raiz: ET.Element) -> int | None:
+    """PackageFormatVersion: 2 = SSIS 2005, 3 = 2008/R2, 6 = 2012, 8 = 2014 o superior."""
+    for prop in raiz.findall(dts("Property")):
+        if prop.get(dts("Name")) == "PackageFormatVersion" and (prop.text or "").strip().isdigit():
+            return int(prop.text.strip())
+    return None
 
 
 def _propiedad(componente: ET.Element, nombre: str) -> str:
@@ -135,6 +150,7 @@ def analizar_dtsx(ruta: Path, base: Path) -> PaqueteSSIS:
     paquete = PaqueteSSIS(
         archivo=str(ruta.relative_to(base)),
         nombre=raiz.get(dts("ObjectName"), ruta.stem),
+        version_formato=version_formato_dtsx(raiz),
     )
 
     for cm in raiz.iter(dts("ConnectionManager")):
@@ -260,6 +276,7 @@ def analizar_sql(ruta: Path, base: Path) -> ArchivoSQL:
 EXT_CODIGO = {
     ".vbp": "VB6", ".frm": "VB6", ".bas": "VB6", ".cls": "VB6", ".ctl": "VB6",
     ".vb": "VB.NET", ".cs": "C#", ".config": ".NET config",
+    ".aspx": "ASP.NET", ".asmx": "ASP.NET", ".asax": "ASP.NET",
 }
 
 RE_CONN = re.compile(
@@ -355,8 +372,22 @@ def generar_markdown(inv: dict) -> str:
         f"| Archivos T-SQL | {r['archivos_sql']} |",
         f"| Objetos de BD definidos | {r['objetos_bd']} |",
         f"| Archivos VB6/.NET | {r['archivos_codigo']} |",
+        f"| Proyectos VB6/.NET | {r['proyectos']} |",
+        f"| Tareas SSIS sin conversión directa | {r['tareas_sin_conversion_directa']} (Script Tasks: {r['script_tasks']}) |",
+        f"| Paquetes SSIS formato 2005/2008 | {r['paquetes_formato_antiguo']} |",
         "",
     ]
+
+    if inv["proyectos"]:
+        out += ["## Proyectos y ruta de migración", "",
+                "| Proyecto | Tipo | Framework | Esfuerzo | Ruta sugerida |", "|---|---|---|---|---|"]
+        out += [f"| `{p['archivo']}` | {p['tipo_aplicacion']} ({p['lenguaje']}) | {p['framework']}"
+                f"{' · ' + p['compilacion'] if p['compilacion'] else ''} | {p['esfuerzo']} | {p['ruta_sugerida']} |"
+                for p in inv["proyectos"]]
+        for p in inv["proyectos"]:
+            if p["riesgos"]:
+                out += ["", f"**Riesgos de `{p['archivo']}`**", "", *[f"- {x}" for x in p["riesgos"]]]
+        out.append("")
 
     out.append("## Paquetes SSIS\n")
     for p in inv["paquetes_ssis"]:
@@ -435,7 +466,7 @@ def _dependencias(paquetes, sqls, codigos) -> dict[str, list[str]]:
 
 
 def inventariar(fuentes: Path) -> dict:
-    paquetes, sqls, codigos, errores = [], [], [], []
+    paquetes, sqls, codigos, proyectos, errores = [], [], [], [], []
     for ruta in sorted(p for p in fuentes.rglob("*") if p.is_file()):
         ext = ruta.suffix.lower()
         try:
@@ -445,6 +476,8 @@ def inventariar(fuentes: Path) -> dict:
                 sqls.append(analizar_sql(ruta, fuentes))
             elif ext in EXT_CODIGO:
                 codigos.append(analizar_codigo(ruta, fuentes))
+            if ext in (".vbp", ".csproj", ".vbproj"):
+                proyectos.append(analizar_proyecto(ruta, fuentes))
         except (ET.ParseError, OSError) as e:
             errores.append({"archivo": str(ruta.relative_to(fuentes)), "error": str(e)})
 
@@ -455,7 +488,14 @@ def inventariar(fuentes: Path) -> dict:
             "archivos_sql": len(sqls),
             "objetos_bd": sum(len(s.objetos_definidos) for s in sqls),
             "archivos_codigo": len(codigos),
+            "proyectos": len(proyectos),
+            "tareas_sin_conversion_directa": sum(
+                1 for p in paquetes for t in p.tareas
+                if t.tipo not in ("Execute SQL", "Data Flow", "Execute Package")),
+            "script_tasks": sum(1 for p in paquetes for t in p.tareas if t.tipo == "Script Task"),
+            "paquetes_formato_antiguo": sum(1 for p in paquetes if p.version_formato is not None and p.version_formato < 6),
         },
+        "proyectos": [asdict(p) for p in proyectos],
         "paquetes_ssis": [asdict(p) for p in paquetes],
         "archivos_sql": [asdict(s) for s in sqls],
         "archivos_codigo": [asdict(c) for c in codigos],

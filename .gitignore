@@ -1,10 +1,14 @@
-# Fuentes y reportes del cliente: no se versionan
-fuentes/*
-!fuentes/.gitkeep
-salida/*
-!salida/.gitkeep
+# Fuentes reales de los sistemas del cliente y su decompilación: no se versionan.
+# Solo los dos sistemas de ejemplo (emulados) se incluyen en el repositorio.
+sistemas/*/fuentes/
+!sistemas/polizas/fuentes/
+!sistemas/siniestros/fuentes/
+sistemas/*/reingenieria/rea/*/decompilado/
+!sistemas/polizas/reingenieria/rea/*/decompilado/
+!sistemas/siniestros/reingenieria/rea/*/decompilado/
 __pycache__/
 bin/
-!legacy/componente-net/bin/
+!sistemas/*/fuentes/**/bin/
 obj/
 .env
+TestResults/

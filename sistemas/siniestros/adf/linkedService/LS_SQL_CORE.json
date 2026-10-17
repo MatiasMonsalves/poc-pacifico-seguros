@@ -1,0 +1,19 @@
+{
+    "name": "LS_SQL_CORE",
+    "properties": {
+        "type": "AzureSqlDatabase",
+        "annotations": [
+            "SSIS: CORE (OLEDB)"
+        ],
+        "typeProperties": {
+            "connectionString": {
+                "type": "AzureKeyVaultSecret",
+                "store": {
+                    "referenceName": "LS_KeyVault",
+                    "type": "LinkedServiceReference"
+                },
+                "secretName": "siniestros-sql-core-connstring"
+            }
+        }
+    }
+}

@@ -15,7 +15,8 @@ import sys
 
 
 def ubicar_metodo(lineas: list[str], nombre: str) -> tuple[int, int] | None:
-    patron = re.compile(rf"^\s*public\s+[\w.<>\[\]]+\s+{re.escape(nombre)}\s*\(")
+    modificadores = r"(?:(?:public|private|protected|internal|static|virtual|override|sealed|abstract|async|extern|new|unsafe)\s+)+"
+    patron = re.compile(rf"^\s*{modificadores}[\w.<>\[\],?]+\s+{re.escape(nombre)}\s*\(")
     for i, linea in enumerate(lineas):
         if patron.search(linea):
             profundidad, abierto = 0, False
@@ -27,9 +28,7 @@ def ubicar_metodo(lineas: list[str], nombre: str) -> tuple[int, int] | None:
     return None
 
 
-def main(argv: list[str]) -> int:
-    members_path, cs_path, tipo, version, salida = argv[1:6]
-    evidencia = json.load(open(members_path, encoding="utf-8"))
+def armar_entrada(evidencia: dict, cs_path: str, tipo: str, version: str) -> dict:
     lineas = open(cs_path, encoding="utf-8").read().splitlines()
     metodos = []
     for m in evidencia["normalized_result"]["methods"]:
@@ -53,20 +52,25 @@ def main(argv: list[str]) -> int:
                 "end_line": fin,
             },
         })
-    entrada = {
+    return {
         "static_members": evidencia,
         "decompiler": {
             "name": "ilspycmd",
             "version": version,
             "family": "ilspy",
             "executable_sha256": None,
-            "options": ["-t", tipo],
+            "options": ["-p"],
         },
         "methods": metodos,
-        "notes": ["Componente legado Pacifico.Tarificador analizado solo desde el binario."],
+        "notes": [f"Tipo {tipo} reconstruido desde el binario con ILSpy."],
     }
+
+
+def main(argv: list[str]) -> int:
+    members_path, cs_path, tipo, version, salida = argv[1:6]
+    entrada = armar_entrada(json.load(open(members_path, encoding="utf-8")), cs_path, tipo, version)
     json.dump(entrada, open(salida, "w", encoding="utf-8"), indent=2, ensure_ascii=False)
-    print(f"{len(metodos)} métodos: {', '.join(m['reconstruction']['text'].split('(')[0].split()[-1] for m in metodos)}")
+    print(f"{len(entrada['methods'])} métodos")
     return 0
 
 

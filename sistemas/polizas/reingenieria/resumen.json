@@ -1,0 +1,64 @@
+{
+  "id": "polizas",
+  "nombre": "Pólizas",
+  "descripcion": "Mantenedor y cotización de pólizas (VB6 + componente COM .NET 4.8) y carga diaria de pólizas desde archivo (SSIS).",
+  "criticidad": "Alta",
+  "estado": "POC construida (app .NET 10 + ADF)",
+  "tecnologias": [
+    "SSIS",
+    "T-SQL",
+    "VB6"
+  ],
+  "metricas": {
+    "paquetes_ssis": 1,
+    "tareas_ssis": 4,
+    "archivos_sql": 4,
+    "objetos_bd": 6,
+    "archivos_codigo": 3,
+    "proyectos": 1,
+    "tareas_sin_conversion_directa": 0,
+    "script_tasks": 0,
+    "paquetes_formato_antiguo": 0,
+    "binarios": 1,
+    "binarios_nativos": 0,
+    "sql_en_binarios": 0,
+    "pipelines": 1,
+    "actividades_sin_convertir": 0,
+    "advertencias_adf": 3
+  },
+  "bases_de_datos": [
+    "Seguros"
+  ],
+  "proyectos": [
+    {
+      "archivo": "vb6/Polizas.vbp",
+      "tipo_aplicacion": "VB6 aplicación con formularios",
+      "framework": "VB6 runtime (MSVBVM60)",
+      "esfuerzo": "Alto",
+      "ruta_sugerida": "Reescribir: UI web o API .NET 10; reglas de negocio a una biblioteca .NET 10"
+    }
+  ],
+  "binarios": [
+    {
+      "binario": "Pacifico.Tarificador.dll",
+      "tipo": ".NET Framework",
+      "framework": ".NETFramework,Version=v4.8",
+      "siguiente_paso": "Leer la decompilación, migrar las reglas y validarlas con pruebas de paridad contra este binario"
+    }
+  ],
+  "riesgos": [
+    "vb6/Polizas.vbp: Compilado a código nativo: si falta el fuente, del ejecutable solo se obtiene pseudocódigo (REA + Ghidra/IDA)"
+  ],
+  "sin_convertir": [],
+  "advertencias_adf": [
+    "PL_CargaPolizas: Data Flow `Cargar CSV a Staging`: el componente `Buscar Cliente` (Microsoft.Lookup) no tiene equivalente en una Copy activity. Opciones: Mapping Data Flow, o mover la lógica al SQL de origen o al SP que consume el destino (consulta: `SELECT IdCliente, Rut FROM dbo.Clientes`)",
+    "PL_CargaPolizas: `Registrar Error` usa GETDATE(): en Azure SQL Database devuelve hora UTC, no la hora local del servidor on-premise",
+    "PL_CargaPolizas: `User::FechaProceso` = `(DT_DBDATE)GETDATE()`: GETDATE() usa la hora local del servidor y utcNow() la hora UTC. Se convierte a Pacific SA Standard Time para no cambiar de día en cargas nocturnas"
+  ],
+  "secretos": [
+    "polizas-blob-connstring",
+    "polizas-sql-oltp-connstring"
+  ],
+  "puntaje": 22.5,
+  "complejidad": "Media"
+}

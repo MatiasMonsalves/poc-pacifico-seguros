@@ -1,0 +1,86 @@
+{
+    "name": "PL_Carga_Siniestros",
+    "properties": {
+        "description": "Convertido desde el paquete SSIS Carga_Siniestros con tools/ssis2adf",
+        "activities": [
+            {
+                "name": "Limpiar staging",
+                "type": "Script",
+                "linkedServiceName": {
+                    "referenceName": "LS_SQL_DW",
+                    "type": "LinkedServiceReference"
+                },
+                "policy": {
+                    "timeout": "0.02:00:00",
+                    "retry": 0
+                },
+                "typeProperties": {
+                    "scripts": [
+                        {
+                            "type": "NonQuery",
+                            "text": "TRUNCATE TABLE stg.Siniestros"
+                        }
+                    ]
+                }
+            },
+            {
+                "name": "Extraer siniestros del core",
+                "type": "Copy",
+                "policy": {
+                    "timeout": "0.02:00:00",
+                    "retry": 0
+                },
+                "outputs": [
+                    {
+                        "referenceName": "DS_DW_stg_Siniestros",
+                        "type": "DatasetReference"
+                    }
+                ],
+                "inputs": [
+                    {
+                        "referenceName": "DS_CORE_dbo_consulta_Extraer_siniestros_del_core",
+                        "type": "DatasetReference"
+                    }
+                ],
+                "typeProperties": {
+                    "source": {
+                        "type": "AzureSqlSource",
+                        "sqlReaderQuery": "SELECT NRO_SINIESTRO AS NumSiniestro, NRO_POLIZA AS NumPoliza, TIPO AS Tipo, FEC_DENUNCIA AS FechaDenuncia, MONTO_UF AS MontoUF FROM dbo.SINIESTRO_MOV WHERE VIGENTE = 1"
+                    },
+                    "sink": {
+                        "type": "AzureSqlSink",
+                        "writeBehavior": "insert"
+                    }
+                },
+                "dependsOn": [
+                    {
+                        "activity": "Limpiar staging",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Validar totales",
+                "type": "Wait",
+                "description": "MARCADOR Script Task: contiene código C#/VB: reescribir como Azure Function, Batch o lógica en SQL",
+                "typeProperties": {
+                    "waitTimeInSeconds": 1
+                },
+                "dependsOn": [
+                    {
+                        "activity": "Extraer siniestros del core",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ]
+            }
+        ],
+        "parameters": {},
+        "annotations": [
+            "ssis2adf"
+        ]
+    }
+}

@@ -1,0 +1,11 @@
+{
+    "name": "DS_CORE_dbo_consulta_Extraer_siniestros_del_core",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "LS_SQL_CORE",
+            "type": "LinkedServiceReference"
+        },
+        "type": "AzureSqlTable",
+        "typeProperties": {}
+    }
+}

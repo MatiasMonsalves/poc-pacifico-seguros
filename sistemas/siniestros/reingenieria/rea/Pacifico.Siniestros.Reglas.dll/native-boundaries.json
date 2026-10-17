@@ -1,0 +1,106 @@
+{
+ "evidence_id": "ev_fb107884028fd3a3cbf9c492ac804b13630a134f8beee0586d80c024d135289d",
+ "subject": {
+  "name": "Pacifico.Siniestros.Reglas.dll",
+  "digest": {
+   "sha256": "2980961104713cf2910fbf9eef59b80d75bb674382034901a850942d928ccc22"
+  },
+  "local_path": "/home/user/poc-pacifico-seguros/sistemas/siniestros/fuentes/componentes/bin/Pacifico.Siniestros.Reglas.dll",
+  "format": "pe",
+  "architecture": "x86"
+ },
+ "provider": {
+  "id": "rea-dotnet-static",
+  "name": "REA managed static analysis provider",
+  "version": "1"
+ },
+ "analysis_profile": null,
+ "predicate_type": "rea.analysis",
+ "operation": "inspect_managed_native_boundaries",
+ "parameters": {},
+ "raw_result": null,
+ "normalized_result": {
+  "artifact": {
+   "path": "/home/user/poc-pacifico-seguros/sistemas/siniestros/fuentes/componentes/bin/Pacifico.Siniestros.Reglas.dll",
+   "sha256": "2980961104713cf2910fbf9eef59b80d75bb674382034901a850942d928ccc22",
+   "byte_length": 5120,
+   "format": "pe"
+  },
+  "module": {
+   "name": "Pacifico.Siniestros.Reglas.dll",
+   "generation": 0,
+   "mvid": "36aba8a3-8c50-4480-9126-8518ac4427ba",
+   "enc_id": null,
+   "enc_base_id": null,
+   "token": "0x00000001",
+   "row_offset": 1064
+  },
+  "metadata": {
+   "status": "complete",
+   "version": "v4.0.30319",
+   "table_row_counts": {
+    "Module": 1,
+    "TypeRef": 26,
+    "TypeDef": 2,
+    "Field": 1,
+    "MethodDef": 2,
+    "Param": 4,
+    "MemberRef": 28,
+    "Constant": 1,
+    "CustomAttribute": 10,
+    "StandAloneSig": 2,
+    "Assembly": 1,
+    "AssemblyRef": 2
+   }
+  },
+  "identity_scope": {
+   "token_identity": "build-local",
+   "requires_artifact_sha256": "2980961104713cf2910fbf9eef59b80d75bb674382034901a850942d928ccc22",
+   "requires_mvid": "36aba8a3-8c50-4480-9126-8518ac4427ba"
+  },
+  "cli_native": {
+   "il_only": true,
+   "requires_32bit": false,
+   "strong_name_signed": false,
+   "native_entry_point": false,
+   "ready_to_run_signature": false,
+   "managed_native_header_rva": 0,
+   "managed_native_header_size": 0
+  },
+  "module_refs": [],
+  "pinvoke_imports": [],
+  "native_implementations": [],
+  "summary": {
+   "module_ref_count": 0,
+   "pinvoke_import_count": 0,
+   "native_implementation_count": 0,
+   "ready_to_run": false,
+   "mixed_mode_or_native_header": false
+  },
+  "coverage": {
+   "state": "complete",
+   "issues": []
+  },
+  "limitations": [
+   "P/Invoke rows prove managed import declarations only; this inspection does not verify that a native library, export, thunk, or provider-qualified function exists.",
+   "Managed metadata tokens are build-local coordinates and are only meaningful with the reported artifact SHA-256 and MVID.",
+   "ReadyToRun, NativeAOT, C++/CLI, and IL2CPP native semantics require separately selected native-provider evidence; this tool does not translate managed tokens into native addresses."
+  ]
+ },
+ "confidence": "observed",
+ "authority": "shipped-artifact",
+ "environment": null,
+ "limitations": [
+  "P/Invoke rows prove managed import declarations only; this inspection does not verify that a native library, export, thunk, or provider-qualified function exists.",
+  "Managed metadata tokens are build-local coordinates and are only meaningful with the reported artifact SHA-256 and MVID.",
+  "ReadyToRun, NativeAOT, C++/CLI, and IL2CPP native semantics require separately selected native-provider evidence; this tool does not translate managed tokens into native addresses."
+ ],
+ "relationship_coverage": null,
+ "locations": [
+  {
+   "kind": "file-offset",
+   "offset": 1064
+  }
+ ],
+ "evidence_links": []
+}

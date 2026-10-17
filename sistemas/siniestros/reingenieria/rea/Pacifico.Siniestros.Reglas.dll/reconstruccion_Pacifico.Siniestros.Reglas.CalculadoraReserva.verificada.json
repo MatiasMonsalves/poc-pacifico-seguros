@@ -1,0 +1,165 @@
+{
+ "evidence_id": "ev_1fea586e6f7a8c71f46f3462781d407e1c148f4ea0993769100c3bc706fe39fd",
+ "subject": {
+  "name": "Pacifico.Siniestros.Reglas.dll",
+  "digest": {
+   "sha256": "2980961104713cf2910fbf9eef59b80d75bb674382034901a850942d928ccc22"
+  },
+  "local_path": "/home/user/poc-pacifico-seguros/sistemas/siniestros/fuentes/componentes/bin/Pacifico.Siniestros.Reglas.dll",
+  "format": "pe",
+  "architecture": null
+ },
+ "provider": {
+  "id": "rea-dotnet-workflows",
+  "name": "REA managed-code workflows",
+  "version": "1"
+ },
+ "analysis_profile": null,
+ "predicate_type": "rea.managed-reconstruction-import",
+ "operation": "import_managed_reconstruction",
+ "parameters": {
+  "static_members_evidence_id": "ev_72df9b17fa9695a7e6120f76d6aa2442e136eb06394b6a1fa3928e74f863f8ec",
+  "decompiler": {
+   "name": "ilspycmd",
+   "version": "11.1.0.9782",
+   "family": "ilspy",
+   "executable_sha256": null,
+   "options": [
+    "-p"
+   ],
+   "options_sha256": "708f1ffb7a2c2949deab1b501ee46ddbd52e36d40ce51d69d72a0e1af1e86aae"
+  },
+  "method_locks": [
+   {
+    "token": "0x06000001",
+    "signature_sha256": "6bfd66da7d06ed8cc6f03eff3f4b19518dd0b6e61a8a72ebdadcb440ae27cbad",
+    "normalized_il_sha256": "d54040f8c359f67708af34155939c30a78a5b42083fd643ed4274fb5d4936ad8"
+   },
+   {
+    "token": "0x06000002",
+    "signature_sha256": "09bd38225fe4a20eec3412e1cc2ad3dd9f87798ceea6b785d86798f564fd534c",
+    "normalized_il_sha256": "773a53772bbaadd6d0bd1b02f41c370c261ba8390207072190d86978613b9b3c"
+   }
+  ],
+  "notes": [
+   "Tipo Pacifico.Siniestros.Reglas.CalculadoraReserva reconstruido desde el binario con ILSpy."
+  ]
+ },
+ "raw_result": null,
+ "normalized_result": {
+  "reconstruction_id": "mre_6d3b546d29f495db4f1d9f857c3e409661201445330a2a2a595b18818a542b60",
+  "phase": "reconstruction-import",
+  "executed": false,
+  "static_observation": {
+   "evidence_id": "ev_72df9b17fa9695a7e6120f76d6aa2442e136eb06394b6a1fa3928e74f863f8ec",
+   "artifact_sha256": "2980961104713cf2910fbf9eef59b80d75bb674382034901a850942d928ccc22",
+   "artifact_path": "/home/user/poc-pacifico-seguros/sistemas/siniestros/fuentes/componentes/bin/Pacifico.Siniestros.Reglas.dll",
+   "byte_length": 5120,
+   "module_name": "Pacifico.Siniestros.Reglas.dll",
+   "mvid": "36aba8a3-8c50-4480-9126-8518ac4427ba",
+   "metadata_status": "complete"
+  },
+  "decompiler": {
+   "name": "ilspycmd",
+   "version": "11.1.0.9782",
+   "family": "ilspy",
+   "executable_sha256": null,
+   "options": [
+    "-p"
+   ],
+   "options_sha256": "708f1ffb7a2c2949deab1b501ee46ddbd52e36d40ce51d69d72a0e1af1e86aae"
+  },
+  "summary": {
+   "imported_methods": 2,
+   "decompiled_csharp_methods": 2,
+   "decompiled_il_methods": 0,
+   "pseudocode_methods": 0,
+   "total_text_bytes": 1406
+  },
+  "methods": [
+   {
+    "token": "0x06000001",
+    "declaring_type": "Pacifico.Siniestros.Reglas.CalculadoraReserva",
+    "name": "Calcular",
+    "signature_sha256": "6bfd66da7d06ed8cc6f03eff3f4b19518dd0b6e61a8a72ebdadcb440ae27cbad",
+    "normalized_il_sha256": "d54040f8c359f67708af34155939c30a78a5b42083fd643ed4274fb5d4936ad8",
+    "body_sha256": "3ba983957e18b66bc528b958abcf102eedf4ded7d0e56345a75645a2a39d7187",
+    "il_size": 136,
+    "reconstruction": {
+     "kind": "decompiled-csharp",
+     "language": "csharp",
+     "text": "\tpublic static decimal Calcular(char tipo, decimal montoUF, int diasAbierto)\n\t{\n\t\tif (montoUF < 0m)\n\t\t{\n\t\t\tthrow new ArgumentOutOfRangeException(\"montoUF\");\n\t\t}\n\t\tdecimal num;\n\t\tswitch (char.ToUpperInvariant(tipo))\n\t\t{\n\t\tcase 'V':\n\t\t\tnum = 1.2m;\n\t\t\tbreak;\n\t\tcase 'A':\n\t\tcase 'H':\n\t\t\tnum = 1.0m;\n\t\t\tbreak;\n\t\tdefault:\n\t\t\tthrow new ArgumentException(\"Tipo de siniestro desconocido: \" + tipo);\n\t\t}\n\t\tif (diasAbierto > 60)\n\t\t{\n\t\t\tnum *= 1.1m;\n\t\t}\n\t\treturn Math.Round(montoUF * num, 2);\n\t}",
+     "text_sha256": "13c4b3a6385cab98902a91de6612e7508193a6f62fb06c349e9e1a8e05b11d46",
+     "text_length": 483,
+     "line_count": 25,
+     "source_path": "/home/user/poc-pacifico-seguros/sistemas/siniestros/reingenieria/rea/Pacifico.Siniestros.Reglas.dll/decompilado/Pacifico.Siniestros.Reglas/CalculadoraReserva.cs",
+     "start_line": 11,
+     "end_line": 35
+    },
+    "validation": {
+     "matched_static_member": true,
+     "exact_build_required": true,
+     "canonical_observation": false,
+     "confidence_floor": "inference"
+    }
+   },
+   {
+    "token": "0x06000002",
+    "declaring_type": "Pacifico.Siniestros.Reglas.CalculadoraReserva",
+    "name": "ReservaRegistrada",
+    "signature_sha256": "09bd38225fe4a20eec3412e1cc2ad3dd9f87798ceea6b785d86798f564fd534c",
+    "normalized_il_sha256": "773a53772bbaadd6d0bd1b02f41c370c261ba8390207072190d86978613b9b3c",
+    "body_sha256": "45a8c1ad43729ab80234d2a8de382062a8cd69b9a4927108387eb4cb6a9fc3a2",
+    "il_size": 103,
+    "reconstruction": {
+     "kind": "decompiled-csharp",
+     "language": "csharp",
+     "text": "\tpublic static decimal ReservaRegistrada(string numSiniestro)\n\t{\n\t\t//IL_0005: Unknown result type (might be due to invalid IL or missing references)\n\t\t//IL_000b: Expected Obj, but got Unknown\n\t\t//IL_0011: Unknown result type (might be due to invalid IL or missing references)\n\t\t//IL_0017: Expected Obj, but got Unknown\n\t\tSqlConnection val = new SqlConnection(\"Data Source=SRVSQL02;Initial Catalog=Siniestros;User ID=reglas;Password=r3gl4s\");\n\t\ttry\n\t\t{\n\t\t\tSqlCommand val2 = new SqlCommand(\"SELECT ReservaUF FROM dbo.Siniestros WHERE NumSiniestro = @n\", val);\n\t\t\ttry\n\t\t\t{\n\t\t\t\tval2.Parameters.AddWithValue(\"@n\", (object)numSiniestro);\n\t\t\t\t((DbConnection)(object)val).Open();\n\t\t\t\tobject obj = ((DbCommand)(object)val2).ExecuteScalar();\n\t\t\t\treturn (obj == DBNull.Value || obj == null) ? 0m : ((decimal)obj);\n\t\t\t}\n\t\t\tfinally\n\t\t\t{\n\t\t\t\t((IDisposable)val2)?.Dispose();\n\t\t\t}\n\t\t}\n\t\tfinally\n\t\t{\n\t\t\t((IDisposable)val)?.Dispose();\n\t\t}\n\t}",
+     "text_sha256": "8313180c317eaab0bafa230e7dd0f7fbc406edba5048fb9cdf7f11a35a427870",
+     "text_length": 923,
+     "line_count": 27,
+     "source_path": "/home/user/poc-pacifico-seguros/sistemas/siniestros/reingenieria/rea/Pacifico.Siniestros.Reglas.dll/decompilado/Pacifico.Siniestros.Reglas/CalculadoraReserva.cs",
+     "start_line": 37,
+     "end_line": 63
+    },
+    "validation": {
+     "matched_static_member": true,
+     "exact_build_required": true,
+     "canonical_observation": false,
+     "confidence_floor": "inference"
+    }
+   }
+  ],
+  "notes": [
+   "Tipo Pacifico.Siniestros.Reglas.CalculadoraReserva reconstruido desde el binario con ILSpy."
+  ],
+  "evidence_links": [
+   "ev_72df9b17fa9695a7e6120f76d6aa2442e136eb06394b6a1fa3928e74f863f8ec"
+  ],
+  "limitations": [
+   "Decompiler output is imported as reconstruction evidence and analyst inference; metadata and IL observations remain canonical.",
+   "This operation did not execute, load, reflect over, debug, instrument, patch, or decompile the target artifact.",
+   "The imported reconstruction is valid only for the exact artifact SHA-256, MVID, method signature, and normalized IL shape recorded here.",
+   "Obfuscated names, decompiler variables, and control-flow restructuring are not treated as proof without separate validation."
+  ]
+ },
+ "confidence": "inferred",
+ "authority": "analyst-inference",
+ "environment": null,
+ "limitations": [
+  "Decompiler output is imported as reconstruction evidence and analyst inference; metadata and IL observations remain canonical.",
+  "This operation did not execute, load, reflect over, debug, instrument, patch, or decompile the target artifact.",
+  "The imported reconstruction is valid only for the exact artifact SHA-256, MVID, method signature, and normalized IL shape recorded here.",
+  "Obfuscated names, decompiler variables, and control-flow restructuring are not treated as proof without separate validation."
+ ],
+ "relationship_coverage": null,
+ "locations": [
+  {
+   "kind": "artifact-path",
+   "path": "/home/user/poc-pacifico-seguros/sistemas/siniestros/fuentes/componentes/bin/Pacifico.Siniestros.Reglas.dll"
+  }
+ ],
+ "evidence_links": [
+  "ev_72df9b17fa9695a7e6120f76d6aa2442e136eb06394b6a1fa3928e74f863f8ec"
+ ]
+}

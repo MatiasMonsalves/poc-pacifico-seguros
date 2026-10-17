@@ -1,0 +1,14 @@
+{
+    "name": "DS_DW_stg_Siniestros",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "LS_SQL_DW",
+            "type": "LinkedServiceReference"
+        },
+        "type": "AzureSqlTable",
+        "typeProperties": {
+            "schema": "stg",
+            "table": "Siniestros"
+        }
+    }
+}

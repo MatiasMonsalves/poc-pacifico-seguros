@@ -38,16 +38,18 @@ public sealed class EjecucionPipeline
     public string Message { get; set; } = "";
     public DateTimeOffset LastUpdated { get; set; } = DateTimeOffset.UtcNow;
     internal ConcurrentQueue<EjecucionActividad> Actividades { get; } = new();
+    internal Factoria Factoria { get; init; } = null!;
+    internal Task Tarea { get; set; } = Task.CompletedTask;
 }
 
 /// <summary>Ejecuta pipelines de ADF con sus reglas de dependencias y de estado final.</summary>
-public sealed class Ejecutor(Factoria factoria, ILogger<Ejecutor> log)
+public sealed class Ejecutor(ILogger<Ejecutor> log)
 {
     private readonly ConcurrentDictionary<string, EjecucionPipeline> _ejecuciones = new();
 
     public EjecucionPipeline? Obtener(string runId) => _ejecuciones.GetValueOrDefault(runId);
 
-    public EjecucionPipeline Iniciar(string nombrePipeline, JsonObject definicion, JsonObject? parametros)
+    public EjecucionPipeline Iniciar(Factoria factoria, string nombrePipeline, JsonObject definicion, JsonObject? parametros)
     {
         // Parámetros: valores recibidos sobre los defaultValue del pipeline (ADF no distingue mayúsculas)
         var valores = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
@@ -56,9 +58,9 @@ public sealed class Ejecutor(Factoria factoria, ILogger<Ejecutor> log)
         foreach (var (nombre, valor) in parametros ?? [])
             valores[nombre] = Expresiones.DesdeJson(valor);
 
-        var ejecucion = new EjecucionPipeline { RunId = Guid.NewGuid().ToString(), PipelineName = nombrePipeline, Parameters = valores };
+        var ejecucion = new EjecucionPipeline { RunId = Guid.NewGuid().ToString(), PipelineName = nombrePipeline, Parameters = valores, Factoria = factoria };
         _ejecuciones[ejecucion.RunId] = ejecucion;
-        _ = Task.Run(() => Ejecutar(ejecucion, definicion));
+        ejecucion.Tarea = Task.Run(() => Ejecutar(ejecucion, definicion));
         return ejecucion;
     }
 
@@ -77,7 +79,7 @@ public sealed class Ejecutor(Factoria factoria, ILogger<Ejecutor> log)
                 ["parameters"] = ejecucion.Parameters,
                 ["RunId"] = ejecucion.RunId,
                 ["Pipeline"] = ejecucion.PipelineName,
-                ["DataFactory"] = "adf-emulador",
+                ["DataFactory"] = ejecucion.Factoria.Nombre,
                 ["TriggerTime"] = ejecucion.RunStart.Value.ToString("o"),
             },
             Actividad = nombre => estados.TryGetValue(nombre, out var a)
@@ -191,9 +193,10 @@ public sealed class Ejecutor(Factoria factoria, ILogger<Ejecutor> log)
         {
             registro.Output = registro.ActivityType switch
             {
-                "Script" => await Script(a, ctx, registro),
-                "SqlServerStoredProcedure" => await ProcedimientoAlmacenado(a, ctx, registro),
-                "Copy" => await Copiar(a, ctx, registro),
+                "Script" => await Script(ejecucion.Factoria, a, ctx, registro),
+                "SqlServerStoredProcedure" => await ProcedimientoAlmacenado(ejecucion.Factoria, a, ctx, registro),
+                "Copy" => await Copiar(ejecucion.Factoria, a, ctx, registro),
+                "ExecutePipeline" => await EjecutarPipeline(ejecucion.Factoria, a, ctx, registro),
                 "Fail" => throw new FalloActividad(new ErrorActividad(
                     Expresiones.ResolverTexto(a["typeProperties"]?["errorCode"], ctx),
                     Expresiones.ResolverTexto(a["typeProperties"]?["message"], ctx), "UserError", registro.ActivityName)),
@@ -224,6 +227,8 @@ public sealed class Ejecutor(Factoria factoria, ILogger<Ejecutor> log)
         registro.DurationInMs = reloj.ElapsedMilliseconds;
         ejecucion.LastUpdated = DateTimeOffset.UtcNow;
         log.LogInformation("  {Actividad} ({Tipo}): {Estado} {Error}", registro.ActivityName, registro.ActivityType, registro.Status, registro.Error?.Message);
+        if (((string?)a["description"])?.StartsWith("MARCADOR", StringComparison.Ordinal) == true)
+            log.LogWarning("  {Actividad} es un marcador sin migrar: {Descripcion}", registro.ActivityName, (string?)a["description"]);
     }
 
     private sealed class FalloActividad(ErrorActividad error) : Exception(error.Message)
@@ -233,7 +238,7 @@ public sealed class Ejecutor(Factoria factoria, ILogger<Ejecutor> log)
 
     // -- Actividades ------------------------------------------------------
 
-    private async Task<object> Script(JsonObject a, ContextoExpresion ctx, EjecucionActividad registro)
+    private static async Task<object> Script(Factoria factoria, JsonObject a, ContextoExpresion ctx, EjecucionActividad registro)
     {
         await using var cn = new SqlConnection(factoria.CadenaConexion(LinkedServiceDe(a)));
         await cn.OpenAsync();
@@ -250,7 +255,7 @@ public sealed class Ejecutor(Factoria factoria, ILogger<Ejecutor> log)
         return new { resultSetCount = 0, recordsAffected = afectados, resultSets = Array.Empty<object>(), outputParameters = new { }, outputLogs = "" };
     }
 
-    private async Task<object> ProcedimientoAlmacenado(JsonObject a, ContextoExpresion ctx, EjecucionActividad registro)
+    private static async Task<object> ProcedimientoAlmacenado(Factoria factoria, JsonObject a, ContextoExpresion ctx, EjecucionActividad registro)
     {
         var tp = a["typeProperties"]!;
         var nombre = Expresiones.ResolverTexto(tp["storedProcedureName"], ctx);
@@ -285,38 +290,52 @@ public sealed class Ejecutor(Factoria factoria, ILogger<Ejecutor> log)
         };
     }
 
-    private async Task<object> Copiar(JsonObject a, ContextoExpresion ctx, EjecucionActividad registro)
+    private async Task<object> EjecutarPipeline(Factoria factoria, JsonObject a, ContextoExpresion ctx, EjecucionActividad registro)
     {
-        // Origen: DelimitedText en Blob Storage (carpeta local en el emulador)
+        var tp = a["typeProperties"]!;
+        var nombre = (string)tp["pipeline"]!["referenceName"]!;
+        var definicion = factoria.Pipeline(nombre)
+            ?? throw new FalloActividad(new ErrorActividad("2104", $"El pipeline {nombre} no existe en la factoría {factoria.Nombre}"));
+        var parametros = new JsonObject();
+        foreach (var (clave, valor) in tp["parameters"]?.AsObject() ?? [])
+            parametros[clave] = Expresiones.ResolverTexto(valor, ctx);
+        registro.Input = new { pipeline = nombre, parameters = parametros };
+
+        var hijo = Iniciar(factoria, nombre, definicion, parametros);
+        var salida = new { pipelineRunId = hijo.RunId, pipelineName = nombre };
+        if ((bool?)tp["waitOnCompletion"] == false)
+            return salida;
+        await hijo.Tarea;
+        if (hijo.Status != "Succeeded")
+            throw new FalloActividad(new ErrorActividad("2105",
+                $"Operation on target {nombre} failed (run {hijo.RunId}): {hijo.Message}"));
+        return salida;
+    }
+
+    private static async Task<object> Copiar(Factoria factoria, JsonObject a, ContextoExpresion ctx, EjecucionActividad registro)
+    {
+        var tp = a["typeProperties"]!;
         var refEntrada = a["inputs"]![0]!;
         var dsEntrada = factoria.Dataset((string)refEntrada["referenceName"]!);
         var ctxEntrada = ctx.ConDataset(ParametrosDataset(dsEntrada, refEntrada, ctx));
-        var tpEntrada = dsEntrada["properties"]!["typeProperties"]!;
-        var ubicacion = tpEntrada["location"]!;
-        var contenedor = Expresiones.ResolverTexto(ubicacion["container"], ctxEntrada);
-        var carpeta = Expresiones.ResolverTexto(ubicacion["folderPath"], ctxEntrada);
-        var archivo = Expresiones.ResolverTexto(ubicacion["fileName"], ctxEntrada);
-        var ruta = Path.Combine(factoria.RaizBlob, contenedor, carpeta, archivo);
-        if (!File.Exists(ruta))
-            throw new FalloActividad(new ErrorActividad("2200",
-                $"ErrorCode=UserErrorSourceBlobNotExists,'Type=Microsoft.DataTransfer.Common.Shared.HybridDeliveryException,Message=The required Blob is missing. ContainerName: {contenedor}, path: {Path.Combine(carpeta, archivo)}.'"));
+        var tipoOrigen = (string?)tp["source"]?["type"] ?? "";
 
-        var delimitador = Expresiones.ResolverTexto(tpEntrada["columnDelimiter"], ctxEntrada) is { Length: > 0 } d ? d : ",";
-        var conEncabezado = (bool?)tpEntrada["firstRowAsHeader"] ?? false;
-        var lineas = (await File.ReadAllLinesAsync(ruta, Encoding.UTF8)).Where(l => l.Length > 0).ToList();
-        var encabezado = conEncabezado ? Separar(lineas[0], delimitador) : [];
-        var filas = lineas.Skip(conEncabezado ? 1 : 0).Select(l => Separar(l, delimitador)).ToList();
+        // Origen: archivo DelimitedText en Blob Storage, o tabla/consulta de Azure SQL
+        var (origen, descripcion, bytes) = tipoOrigen is "AzureSqlSource" or "SqlServerSource" or "SqlSource"
+            ? await LeerSql(factoria, dsEntrada, tp["source"]!, ctxEntrada)
+            : await LeerArchivo(factoria, dsEntrada, ctxEntrada);
 
         // Destino: tabla de Azure SQL (SQL Server en el emulador)
         var dsSalida = factoria.Dataset((string)a["outputs"]![0]!["referenceName"]!);
         var tpSalida = dsSalida["properties"]!["typeProperties"]!;
         var tabla = $"[{Expresiones.ResolverTexto(tpSalida["schema"], ctx)}].[{Expresiones.ResolverTexto(tpSalida["table"], ctx)}]";
         var lsSalida = (string)dsSalida["properties"]!["linkedServiceName"]!["referenceName"]!;
-        registro.Input = new { source = new { type = "DelimitedTextSource", path = $"{contenedor}/{archivo}" }, sink = new { type = "AzureSqlSink", table = tabla } };
+        registro.Input = new { source = new { type = tipoOrigen, origen = descripcion }, sink = new { type = "AzureSqlSink", table = tabla } };
 
-        var mapeos = a["typeProperties"]?["translator"]?["mappings"]?.AsArray()
+        // Sin translator, ADF mapea las columnas por nombre
+        var mapeos = tp["translator"]?["mappings"]?.AsArray()
             .Select(m => (Origen: (string)m!["source"]!["name"]!, Destino: (string)m["sink"]!["name"]!)).ToList()
-            ?? encabezado.Select(c => (Origen: c, Destino: c)).ToList();
+            ?? origen.Columns.Cast<DataColumn>().Select(c => (Origen: c.ColumnName, Destino: c.ColumnName)).ToList();
 
         await using var cn = new SqlConnection(factoria.CadenaConexion(lsSalida));
         await cn.OpenAsync();
@@ -324,18 +343,21 @@ public sealed class Ejecutor(Factoria factoria, ILogger<Ejecutor> log)
         using (var adaptador = new SqlDataAdapter($"SELECT TOP 0 * FROM {tabla}", cn))
             adaptador.FillSchema(datos, SchemaType.Source);
 
-        for (var i = 0; i < filas.Count; i++)
+        for (var i = 0; i < origen.Rows.Count; i++)
         {
             var fila = datos.NewRow();
-            foreach (var (origen, destino) in mapeos)
+            foreach (var (columnaOrigen, columnaDestino) in mapeos)
             {
-                var indice = Array.FindIndex(encabezado, c => c.Equals(origen, StringComparison.OrdinalIgnoreCase));
-                if (indice < 0 || indice >= filas[i].Length)
+                if (!origen.Columns.Contains(columnaOrigen))
                     throw new FalloActividad(new ErrorActividad("2200",
-                        $"ErrorCode=DelimitedTextColumnNameNotAllowNull,'Message=La columna de origen {origen} no existe en la fila {i + 1}.'"));
-                var columna = datos.Columns[destino] ?? throw new FalloActividad(new ErrorActividad("2200",
-                    $"ErrorCode=UserErrorInvalidColumnMappingColumnNotFound,'Message=La columna {destino} no existe en {tabla}.'"));
-                fila[columna] = ConvertirCelda(filas[i][indice], columna, i + 1);
+                        $"ErrorCode=UserErrorInvalidColumnMappingColumnNotFound,'Message=La columna de origen {columnaOrigen} no existe.'"));
+                var columna = datos.Columns[columnaDestino] ?? throw new FalloActividad(new ErrorActividad("2200",
+                    $"ErrorCode=UserErrorInvalidColumnMappingColumnNotFound,'Message=La columna {columnaDestino} no existe en {tabla}.'"));
+                fila[columna] = origen.Rows[i][columnaOrigen] switch
+                {
+                    string texto => ConvertirCelda(texto, columna, i + 1),
+                    var valor => valor,
+                };
             }
             datos.Rows.Add(fila);
         }
@@ -343,7 +365,54 @@ public sealed class Ejecutor(Factoria factoria, ILogger<Ejecutor> log)
         using var bulk = new SqlBulkCopy(cn) { DestinationTableName = tabla };
         foreach (var (_, destino) in mapeos) bulk.ColumnMappings.Add(destino, destino);
         await bulk.WriteToServerAsync(datos);
-        return new { dataRead = new FileInfo(ruta).Length, rowsRead = filas.Count, rowsCopied = filas.Count, sourcePeakConnections = 1, sinkPeakConnections = 1 };
+        return new { dataRead = bytes, rowsRead = origen.Rows.Count, rowsCopied = origen.Rows.Count, sourcePeakConnections = 1, sinkPeakConnections = 1 };
+    }
+
+    private static async Task<(DataTable, string, long)> LeerArchivo(Factoria factoria, JsonObject ds, ContextoExpresion ctx)
+    {
+        var tp = ds["properties"]!["typeProperties"]!;
+        var ubicacion = tp["location"]!;
+        var contenedor = Expresiones.ResolverTexto(ubicacion["container"], ctx);
+        var carpeta = Expresiones.ResolverTexto(ubicacion["folderPath"], ctx);
+        var archivo = Expresiones.ResolverTexto(ubicacion["fileName"], ctx);
+        var ruta = Path.Combine(factoria.RaizBlob, contenedor, carpeta, archivo);
+        if (!File.Exists(ruta))
+            throw new FalloActividad(new ErrorActividad("2200",
+                $"ErrorCode=UserErrorSourceBlobNotExists,'Type=Microsoft.DataTransfer.Common.Shared.HybridDeliveryException,Message=The required Blob is missing. ContainerName: {contenedor}, path: {Path.Combine(carpeta, archivo)}.'"));
+
+        var delimitador = Expresiones.ResolverTexto(tp["columnDelimiter"], ctx) is { Length: > 0 } d ? d : ",";
+        var conEncabezado = (bool?)tp["firstRowAsHeader"] ?? false;
+        var lineas = (await File.ReadAllLinesAsync(ruta, Encoding.UTF8)).Where(l => l.Length > 0).ToList();
+        var datos = new DataTable();
+        var primera = Separar(lineas.FirstOrDefault() ?? "", delimitador);
+        for (var i = 0; i < primera.Length; i++)
+            datos.Columns.Add(conEncabezado ? primera[i] : $"Prop_{i}", typeof(string));
+        foreach (var linea in lineas.Skip(conEncabezado ? 1 : 0))
+        {
+            var campos = Separar(linea, delimitador);
+            if (campos.Length != datos.Columns.Count)
+                throw new FalloActividad(new ErrorActividad("2200",
+                    $"ErrorCode=DelimitedTextColumnCountMismatch,'Message=La fila tiene {campos.Length} columnas y el encabezado {datos.Columns.Count}: {linea}'"));
+            datos.Rows.Add(campos.Cast<object>().ToArray());
+        }
+        return (datos, $"{contenedor}/{archivo}", new FileInfo(ruta).Length);
+    }
+
+    private static async Task<(DataTable, string, long)> LeerSql(Factoria factoria, JsonObject ds, JsonNode source, ContextoExpresion ctx)
+    {
+        var props = ds["properties"]!;
+        var consulta = Expresiones.ResolverTexto(source["sqlReaderQuery"], ctx);
+        if (consulta.Length == 0)
+        {
+            var tp = props["typeProperties"]!;
+            consulta = $"SELECT * FROM [{Expresiones.ResolverTexto(tp["schema"], ctx)}].[{Expresiones.ResolverTexto(tp["table"], ctx)}]";
+        }
+        await using var cn = new SqlConnection(factoria.CadenaConexion((string)props["linkedServiceName"]!["referenceName"]!));
+        await cn.OpenAsync();
+        var datos = new DataTable();
+        using (var adaptador = new SqlDataAdapter(consulta, cn))
+            adaptador.Fill(datos);
+        return (datos, consulta, 0);
     }
 
     private static object ConvertirCelda(string valor, DataColumn columna, int fila)
@@ -405,7 +474,11 @@ public sealed class Ejecutor(Factoria factoria, ILogger<Ejecutor> log)
     {
         var segundos = Convert.ToInt32(Expresiones.Resolver(a["typeProperties"]?["waitTimeInSeconds"], ctx), CultureInfo.InvariantCulture);
         await Task.Delay(TimeSpan.FromSeconds(segundos));
-        return new { waitTimeInSeconds = segundos };
+        // ssis2adf deja Wait "MARCADOR ..." donde una tarea SSIS no se pudo convertir: se avisa para que no pase inadvertido
+        var descripcion = (string?)a["description"] ?? "";
+        return descripcion.StartsWith("MARCADOR", StringComparison.Ordinal)
+            ? new { waitTimeInSeconds = segundos, advertencia = $"Actividad pendiente de migrar: {descripcion}" }
+            : (object)new { waitTimeInSeconds = segundos };
     }
 
     private static string LinkedServiceDe(JsonObject a) =>

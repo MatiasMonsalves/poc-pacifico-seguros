@@ -1,0 +1,9 @@
+{
+  "id": "polizas",
+  "nombre": "Pólizas",
+  "descripcion": "Mantenedor y cotización de pólizas (VB6 + componente COM .NET 4.8) y carga diaria de pólizas desde archivo (SSIS).",
+  "criticidad": "Alta",
+  "estado": "POC construida (app .NET 10 + ADF)",
+  "binarios": ["fuentes/componente-net/bin"],
+  "adf": {"prefijoSecretos": "polizas", "contenedorBlob": "entrada", "zonaHoraria": "Pacific SA Standard Time"}
+}

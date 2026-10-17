@@ -1,0 +1,113 @@
+{
+ "evidence_id": "ev_d13092cf917c219d6488673d01833cc851e3435966887a2606f6e2bae3dc0045",
+ "subject": {
+  "name": "Pacifico.Tarificador.dll",
+  "digest": {
+   "sha256": "55030199ef3febbdb750ed2f0105f4fe4093e379bf5d1c191be2633451b6343a"
+  },
+  "local_path": "/home/user/poc-pacifico-seguros/sistemas/polizas/fuentes/componente-net/bin/Pacifico.Tarificador.dll",
+  "format": "pe",
+  "architecture": "x86"
+ },
+ "provider": {
+  "id": "rea-dotnet-static",
+  "name": "REA managed static analysis provider",
+  "version": "1"
+ },
+ "analysis_profile": null,
+ "predicate_type": "rea.analysis",
+ "operation": "inspect_managed_native_boundaries",
+ "parameters": {},
+ "raw_result": null,
+ "normalized_result": {
+  "artifact": {
+   "path": "/home/user/poc-pacifico-seguros/sistemas/polizas/fuentes/componente-net/bin/Pacifico.Tarificador.dll",
+   "sha256": "55030199ef3febbdb750ed2f0105f4fe4093e379bf5d1c191be2633451b6343a",
+   "byte_length": 8192,
+   "format": "pe"
+  },
+  "module": {
+   "name": "Pacifico.Tarificador.dll",
+   "generation": 0,
+   "mvid": "ba9fb8e9-8647-4291-ada2-314ba9ffb934",
+   "enc_id": null,
+   "enc_base_id": null,
+   "token": "0x00000001",
+   "row_offset": 1568
+  },
+  "metadata": {
+   "status": "complete",
+   "version": "v4.0.30319",
+   "table_row_counts": {
+    "Module": 1,
+    "TypeRef": 41,
+    "TypeDef": 7,
+    "Field": 9,
+    "MethodDef": 21,
+    "Param": 10,
+    "MemberRef": 58,
+    "Constant": 1,
+    "CustomAttribute": 53,
+    "StandAloneSig": 4,
+    "PropertyMap": 2,
+    "Property": 5,
+    "MethodSemantics": 5,
+    "TypeSpec": 8,
+    "Assembly": 1,
+    "AssemblyRef": 3,
+    "NestedClass": 2,
+    "GenericParam": 3,
+    "MethodSpec": 2
+   }
+  },
+  "identity_scope": {
+   "token_identity": "build-local",
+   "requires_artifact_sha256": "55030199ef3febbdb750ed2f0105f4fe4093e379bf5d1c191be2633451b6343a",
+   "requires_mvid": "ba9fb8e9-8647-4291-ada2-314ba9ffb934"
+  },
+  "cli_native": {
+   "il_only": true,
+   "requires_32bit": false,
+   "strong_name_signed": false,
+   "native_entry_point": false,
+   "ready_to_run_signature": false,
+   "managed_native_header_rva": 0,
+   "managed_native_header_size": 0
+  },
+  "module_refs": [],
+  "pinvoke_imports": [],
+  "native_implementations": [],
+  "summary": {
+   "module_ref_count": 0,
+   "pinvoke_import_count": 0,
+   "native_implementation_count": 0,
+   "ready_to_run": false,
+   "mixed_mode_or_native_header": false
+  },
+  "coverage": {
+   "state": "complete",
+   "issues": []
+  },
+  "limitations": [
+   "P/Invoke rows prove managed import declarations only; this inspection does not verify that a native library, export, thunk, or provider-qualified function exists.",
+   "Managed metadata tokens are build-local coordinates and are only meaningful with the reported artifact SHA-256 and MVID.",
+   "ReadyToRun, NativeAOT, C++/CLI, and IL2CPP native semantics require separately selected native-provider evidence; this tool does not translate managed tokens into native addresses."
+  ]
+ },
+ "confidence": "observed",
+ "authority": "shipped-artifact",
+ "environment": null,
+ "limitations": [
+  "P/Invoke rows prove managed import declarations only; this inspection does not verify that a native library, export, thunk, or provider-qualified function exists.",
+  "Managed metadata tokens are build-local coordinates and are only meaningful with the reported artifact SHA-256 and MVID.",
+  "ReadyToRun, NativeAOT, C++/CLI, and IL2CPP native semantics require separately selected native-provider evidence; this tool does not translate managed tokens into native addresses."
+ ],
+ "relationship_coverage": null,
+ "locations": [
+  {
+   "kind": "file-offset",
+   "offset": 1568
+  }
+ ],
+ "evidence_links": []
+}

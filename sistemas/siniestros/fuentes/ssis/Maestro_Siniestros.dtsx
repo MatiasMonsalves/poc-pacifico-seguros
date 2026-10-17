@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<DTS:Executable xmlns:DTS="www.microsoft.com/SqlServer/Dts" DTS:refId="Package" DTS:ObjectName="Maestro_Siniestros" DTS:ExecutableType="Microsoft.Package">
+  <DTS:Property DTS:Name="PackageFormatVersion">8</DTS:Property>
+  <DTS:ConnectionManagers>
+    <DTS:ConnectionManager DTS:refId="Package.ConnectionManagers[DW]" DTS:ObjectName="DW" DTS:CreationName="OLEDB">
+      <DTS:ObjectData><DTS:ConnectionManager DTS:ConnectionString="Data Source=SRVSQL02;Initial Catalog=Siniestros;Provider=SQLNCLI11.1;User ID=etl;Password=etl2014;" /></DTS:ObjectData>
+    </DTS:ConnectionManager>
+  </DTS:ConnectionManagers>
+  <DTS:Variables>
+    <DTS:Variable DTS:Namespace="User" DTS:ObjectName="FechaCorte" DTS:Expression="(DT_DBDATE)GETDATE()"><DTS:VariableValue>2026-10-17</DTS:VariableValue></DTS:Variable>
+  </DTS:Variables>
+  <DTS:Executables>
+    <DTS:Executable DTS:refId="Package\Ejecutar carga" DTS:ObjectName="Ejecutar carga" DTS:ExecutableType="Microsoft.ExecutePackageTask">
+      <DTS:ObjectData>
+        <ExecutePackageTask><UseProjectReference>True</UseProjectReference><PackageName>Carga_Siniestros.dtsx</PackageName></ExecutePackageTask>
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable DTS:refId="Package\Calcular reservas" DTS:ObjectName="Calcular reservas" DTS:ExecutableType="Microsoft.ExecuteSQLTask">
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" SQLTask:Connection="Package.ConnectionManagers[DW]" SQLTask:SqlStatementSource="EXEC dbo.usp_CalcularReservas ?">
+          <SQLTask:ParameterBinding SQLTask:ParameterName="0" SQLTask:DtsVariableName="User::FechaCorte" SQLTask:ParameterDirection="Input" SQLTask:DataType="133" />
+        </SQLTask:SqlTaskData>
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable DTS:refId="Package\Avisar falla" DTS:ObjectName="Avisar falla" DTS:ExecutableType="Microsoft.SendMailTask">
+      <DTS:ObjectData><SendMailTask ToLine="operaciones@ejemplo.cl" Subject="Falla carga siniestros" /></DTS:ObjectData>
+    </DTS:Executable>
+  </DTS:Executables>
+  <DTS:PrecedenceConstraints>
+    <DTS:PrecedenceConstraint DTS:From="Package\Ejecutar carga" DTS:To="Package\Calcular reservas" />
+    <DTS:PrecedenceConstraint DTS:From="Package\Calcular reservas" DTS:To="Package\Avisar falla" DTS:Value="1" />
+  </DTS:PrecedenceConstraints>
+</DTS:Executable>

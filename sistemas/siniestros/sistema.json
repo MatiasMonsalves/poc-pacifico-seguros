@@ -1,0 +1,9 @@
+{
+  "id": "siniestros",
+  "nombre": "Siniestros",
+  "descripcion": "Extracción de siniestros desde el core, cálculo de reservas (SSIS maestro/hijo), web service ASMX .NET 3.5 y reportes WinForms con Crystal Reports.",
+  "criticidad": "Media",
+  "estado": "Analizado y convertido a ADF",
+  "binarios": ["fuentes/componentes/bin"],
+  "adf": {"prefijoSecretos": "siniestros", "contenedorBlob": "entrada", "zonaHoraria": "Pacific SA Standard Time"}
+}

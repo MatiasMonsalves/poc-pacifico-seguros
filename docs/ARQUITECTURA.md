@@ -1,6 +1,6 @@
 # Arquitectura: legado → objetivo → entorno local
 
-## Sistema legado (emulado en `legacy/`)
+## Sistema legado de ejemplo: pólizas (emulado en `sistemas/polizas/fuentes/`)
 
 ```mermaid
 flowchart LR
@@ -36,10 +36,10 @@ flowchart LR
     DEMO["scripts/demo.sh / curl"] --> API["api :8080<br/>.NET 10"]
     API --> SQL[("sqlserver :1433<br/>SQL Server 2022")]
     API -- "mismo API REST ARM" --> EMU["adf-emulador :5080<br/>.NET 10"]
-    EMU -- "lee adf/*.json<br/>(formato Git de ADF)" --> JSON["adf/"]
-    EMU -- "lee data/blob/entrada" --> CSV["CSV"]
+    EMU -- "una factoría por sistema<br/>sistemas/&lt;id&gt;/adf (formato Git)" --> JSON["sistemas/*/adf"]
+    EMU -- "Blob: sistemas/&lt;id&gt;/datos/blob" --> CSV["CSV"]
     EMU --> SQL
-    INIT["db-init"] -- "legacy/db/*.sql" --> SQL
+    INIT["db-init"] -- "sistemas/*/fuentes/db/*.sql" --> SQL
 ```
 
 Para pasar a Azure **no cambia el código de la API**, solo su configuración:
@@ -57,11 +57,11 @@ La identidad de la API necesita el rol **Data Factory Contributor** (o un rol pr
 
 | Emula | No emula (o simplifica) |
 |---|---|
-| Rutas y formato del API REST: `createRun`, `pipelineruns/{id}`, `queryActivityruns`, `pipelines` | Autenticación (acepta cualquier solicitud) |
-| Actividades `Script`, `SqlServerStoredProcedure`, `Copy` (DelimitedText → AzureSqlTable), `Fail`, `Wait` | Mapping Data Flows, ForEach, If, Lookup, Execute Pipeline y demás actividades |
+| Rutas y formato del API REST: `createRun`, `pipelineruns/{id}`, `queryActivityruns`, `pipelines`; varias factorías (una por sistema) | Autenticación (acepta cualquier solicitud) |
+| Actividades `Script`, `SqlServerStoredProcedure`, `Copy` (DelimitedText o tabla/consulta SQL → AzureSqlTable), `ExecutePipeline`, `Fail`, `Wait` | Mapping Data Flows, ForEach, If, Lookup y demás actividades |
 | Condiciones `Succeeded`/`Failed`/`Completed`/`Skipped` y la regla de estado final por actividades hoja (con Skipped se evalúa el padre) | Reintentos, timeouts y concurrencia de la factoría |
 | Parámetros de pipeline y de dataset; expresiones `pipeline()`, `dataset()`, `activity()`, `concat`, `if`, `empty`, `utcNow`, `formatDateTime`, `convertFromUtc`… | El resto del lenguaje de expresiones |
 | Key Vault (secretos desde variables `KeyVault__<secreto>`) y Blob Storage (carpeta local) | Integration Runtime, red privada, triggers |
 | Mensajes de error con el formato de ADF (aproximado) | Códigos de error exactos de cada conector |
 
-La validación final del pipeline se hace publicándolo en una factoría real (los JSON de `adf/` se importan tal cual con la integración Git de ADF).
+La validación final del pipeline se hace publicándolo en una factoría real (los JSON de `sistemas/<id>/adf/` se importan tal cual con la integración Git de ADF).

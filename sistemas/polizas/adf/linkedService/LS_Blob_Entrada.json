@@ -1,0 +1,19 @@
+{
+    "name": "LS_Blob_Entrada",
+    "properties": {
+        "type": "AzureBlobStorage",
+        "annotations": [
+            "Reemplaza las carpetas compartidas de los paquetes SSIS"
+        ],
+        "typeProperties": {
+            "connectionString": {
+                "type": "AzureKeyVaultSecret",
+                "store": {
+                    "referenceName": "LS_KeyVault",
+                    "type": "LinkedServiceReference"
+                },
+                "secretName": "polizas-blob-connstring"
+            }
+        }
+    }
+}

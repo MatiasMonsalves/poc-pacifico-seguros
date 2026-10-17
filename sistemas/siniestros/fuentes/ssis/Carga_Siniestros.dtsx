@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<DTS:Executable xmlns:DTS="www.microsoft.com/SqlServer/Dts" DTS:refId="Package" DTS:ObjectName="Carga_Siniestros" DTS:ExecutableType="Microsoft.Package">
+  <DTS:Property DTS:Name="PackageFormatVersion">8</DTS:Property>
+  <DTS:ConnectionManagers>
+    <DTS:ConnectionManager DTS:refId="Package.ConnectionManagers[CORE]" DTS:ObjectName="CORE" DTS:CreationName="OLEDB">
+      <DTS:ObjectData><DTS:ConnectionManager DTS:ConnectionString="Data Source=SRVCORE;Initial Catalog=CoreLegado;Provider=SQLNCLI11.1;Integrated Security=SSPI;" /></DTS:ObjectData>
+    </DTS:ConnectionManager>
+    <DTS:ConnectionManager DTS:refId="Package.ConnectionManagers[DW]" DTS:ObjectName="DW" DTS:CreationName="OLEDB">
+      <DTS:ObjectData><DTS:ConnectionManager DTS:ConnectionString="Data Source=SRVSQL02;Initial Catalog=Siniestros;Provider=SQLNCLI11.1;User ID=etl;Password=etl2014;" /></DTS:ObjectData>
+    </DTS:ConnectionManager>
+  </DTS:ConnectionManagers>
+  <DTS:Executables>
+    <DTS:Executable DTS:refId="Package\Limpiar staging" DTS:ObjectName="Limpiar staging" DTS:ExecutableType="Microsoft.ExecuteSQLTask">
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" SQLTask:Connection="Package.ConnectionManagers[DW]" SQLTask:SqlStatementSource="TRUNCATE TABLE stg.Siniestros" />
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable DTS:refId="Package\Extraer siniestros del core" DTS:ObjectName="Extraer siniestros del core" DTS:ExecutableType="Microsoft.Pipeline">
+      <DTS:ObjectData>
+        <pipeline>
+          <components>
+            <component name="Movimientos vigentes" componentClassID="Microsoft.OLEDBSource">
+              <properties><property name="SqlCommand">SELECT NRO_SINIESTRO AS NumSiniestro, NRO_POLIZA AS NumPoliza, TIPO AS Tipo, FEC_DENUNCIA AS FechaDenuncia, MONTO_UF AS MontoUF FROM dbo.SINIESTRO_MOV WHERE VIGENTE = 1</property></properties>
+              <connections><connection connectionManagerRefId="Package.ConnectionManagers[CORE]" /></connections>
+            </component>
+            <component name="Convertir montos" componentClassID="Microsoft.DataConvert" />
+            <component name="Staging siniestros" componentClassID="Microsoft.OLEDBDestination">
+              <properties><property name="OpenRowset">[stg].[Siniestros]</property></properties>
+              <connections><connection connectionManagerRefId="Package.ConnectionManagers[DW]" /></connections>
+            </component>
+          </components>
+        </pipeline>
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable DTS:refId="Package\Validar totales" DTS:ObjectName="Validar totales" DTS:ExecutableType="Microsoft.ScriptTask">
+      <DTS:ObjectData><ScriptProject Name="ST_ValidarTotales" Language="CSharp" /></DTS:ObjectData>
+    </DTS:Executable>
+  </DTS:Executables>
+  <DTS:PrecedenceConstraints>
+    <DTS:PrecedenceConstraint DTS:From="Package\Limpiar staging" DTS:To="Package\Extraer siniestros del core" />
+    <DTS:PrecedenceConstraint DTS:From="Package\Extraer siniestros del core" DTS:To="Package\Validar totales" />
+  </DTS:PrecedenceConstraints>
+</DTS:Executable>

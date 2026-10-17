@@ -1,84 +1,78 @@
-# POC Pacífico Seguros: ingeniería inversa y migración a la nube
+# Fábrica de migración Pacífico Seguros: VB6 / .NET antiguo / SSIS → .NET 10 + Azure Data Factory
 
-POC que emula el sistema legado del cliente (app **VB6** + componente **.NET Framework 4.8** por COM + ETL **SSIS** + lógica en **T-SQL**) y lo lleva a:
+Kit para hacer ingeniería inversa de **varios sistemas legados** (aplicaciones **VB6** y **.NET Framework** antiguas, ETL **SSIS**, lógica en **T-SQL**) y llevarlos a:
 
-- **.NET 10 LTS**: API ASP.NET Core en contenedor Linux que reemplaza la app VB6 y el componente COM.
-- **Azure Data Factory**: el paquete SSIS se convierte en un pipeline de ADF.
-- El sistema nuevo **invoca a ADF por su API REST**. En local lo hace contra un emulador con el mismo API, para reproducir la problemática del cliente sin una suscripción de Azure.
+- **.NET 10 LTS** en contenedores Linux.
+- **Azure Data Factory**: los paquetes SSIS se convierten en pipelines.
+- El sistema nuevo **invoca a ADF por su API REST**. En local lo hace contra un emulador con el mismo API, para reproducir la problemática sin una suscripción de Azure.
 
-La ingeniería inversa del componente compilado se hizo con **[REA](https://github.com/morluto/rea)** (solo desde el binario) y se validó con pruebas de paridad que ejecutan el binario legado.
+La ingeniería inversa de los binarios sin fuente usa **[REA](https://github.com/morluto/rea)**, y las reglas recuperadas se validan con pruebas de paridad contra el binario legado.
 
-## Levantar y probar
+**Cómo usarlo con un sistema nuevo: [docs/GUIA_MULTISISTEMA.md](docs/GUIA_MULTISISTEMA.md)**
 
-Requisitos: Docker con Compose y Python 3.
+## Sistemas de ejemplo (emulados)
+
+| Sistema | Legado | Resultado |
+|---|---|---|
+| [`polizas`](sistemas/polizas/reingenieria/HALLAZGOS.md) | VB6 + componente COM .NET 4.8 + SSIS (archivo → tabla) | Análisis, pipeline ADF y **app .NET 10 completa** con pruebas de paridad |
+| [`siniestros`](sistemas/siniestros/reingenieria/HALLAZGOS.md) | ASMX .NET 3.5 + WinForms .NET 4.0 con Crystal Reports + DLL .NET 4.0 sin fuente + SSIS maestro/hijo (tabla → tabla) | Análisis, REA y pipelines ADF ejecutados en el emulador |
+
+Consolidado: [portafolio/PORTAFOLIO.md](portafolio/PORTAFOLIO.md).
+
+## Uso rápido
+
+Requisitos: Python 3.9+, Docker con Compose y, para binarios, `npm install -g rea-agents` (Node.js ≥ 22.19).
 
 ```bash
-docker compose up -d --build   # sqlserver + db-init + adf-emulador + api
-scripts/demo.sh                # 12 verificaciones de punta a punta
+# Crear un sistema y analizarlo (inventario + REA + SSIS→ADF + resumen)
+python3 tools/portafolio/portafolio.py nuevo cobranza --nombre "Cobranza"
+#   ...copiar los fuentes en sistemas/cobranza/fuentes/...
+python3 tools/portafolio/portafolio.py analizar --solo cobranza --decompilar
+
+# Analizar todo el portafolio
+python3 tools/portafolio/portafolio.py analizar --decompilar
+
+# Entorno local: SQL Server + BDs legadas + emulador ADF (una factoría por sistema) + app de pólizas
+docker compose up -d --build
+scripts/demo.sh            # 15 verificaciones de punta a punta (pólizas y siniestros)
 ```
 
 Detrás de un proxy con certificado propio: `CA_BUNDLE=/ruta/ca.crt docker compose -f docker-compose.yml -f docker-compose.proxy.yml up -d --build`.
 
 | Servicio | URL |
 |---|---|
-| API (.NET 10) | http://localhost:8080 · OpenAPI en `/openapi/v1.json` |
-| Emulador ADF | http://localhost:5080/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.DataFactory/factories/{f}/... |
+| API de pólizas (.NET 10) | http://localhost:8080 · OpenAPI en `/openapi/v1.json` |
+| Emulador ADF | `http://localhost:5080/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.DataFactory/factories/{id-del-sistema}/...` |
 | SQL Server | `localhost,1433` (usuario `sa`, clave en `.env.example`) |
-
-### API
-
-| Endpoint | Reemplaza en VB6 |
-|---|---|
-| `GET /api/clientes/{id}/polizas` | `cmdBuscar_Click` (SQL concatenado) |
-| `POST /api/cotizaciones` `{idCliente, tipoSeguro, sumaAsegurada, siniestros}` | `cmdCotizar_Click` + componente COM |
-| `POST /api/primas/recalcular` `{fechaProceso?}` | `cmdRecalcular_Click` |
-| `POST /api/cargas` `{archivo, fechaProceso?, esperar?}` → ejecuta `PL_CargaPolizas` en ADF | `cmdCargar_Click` (`Shell dtexec`) |
-| `GET /api/cargas/{runId}` → estado del pipeline y de cada actividad | (no existía) |
-
-Archivos de prueba en `data/blob/entrada/`: `polizas_20261017.csv` (válido), `polizas_rut_invalido.csv` (falla la consolidación → rama de error) y `polizas_formato_invalido.csv` (falla la copia).
 
 ## Estructura
 
 ```
-legacy/                  Sistema legado emulado (lo que entregaría el cliente)
-  db/                    Esquema, SPs y datos de la BD Seguros
-  ssis/                  CargaPolizas.dtsx
-  vb6/                   App VB6 (Polizas.vbp, frmPolizas.frm, modConexion.bas)
-  componente-net/bin/    Pacifico.Tarificador.dll: SOLO el binario
-reingenieria/            Resultados de la ingeniería inversa
-  HALLAZGOS.md           Reglas recuperadas y problemas detectados (P1–P9)
-  rea/                   Evidencia de REA (artifact, members, decompilación, reconstrucción verificada)
-  inventario/            Inventario de SSIS, T-SQL y VB6
-adf/                     Pipeline, datasets y linked services de ADF (formato Git), generados desde el SSIS
-app/                     Sistema nuevo .NET 10 (Dominio, Api, Pruebas con paridad contra el binario legado)
-adf-emulador/            Emulador local del API REST de ADF (.NET 10) y sus pruebas en adf-emulador.Pruebas/
+sistemas/<id>/            Un sistema legado: sistema.json, fuentes/, reingenieria/, adf/, datos/, app/
+portafolio/               PORTAFOLIO.md y portafolio.json (generados)
 tools/
-  re_inventario/         Inventario automático (SSIS, T-SQL, VB6/.NET)
-  ssis2adf/              Convertidor SSIS → ADF
-  rea/                   Arma la entrada de `rea import-managed-reconstruction` desde ILSpy
-  generar-legado/        Fuente usado solo para fabricar el binario legado emulado
-infra/db-init.sh         Inicialización de la BD en docker compose
-scripts/                 demo.sh (prueba de punta a punta) y dotnet.sh (SDK .NET 10 en contenedor)
-docs/                    Plan, arquitectura y mapeo SSIS → ADF
+  portafolio/             Orquestador: analiza todos los sistemas y crea sistemas nuevos
+  re_inventario/          Inventario: SSIS, T-SQL, código VB6/.NET y proyectos (ruta de migración)
+  rea/                    REA en lote sobre binarios + import de la reconstrucción ILSpy
+  ssis2adf/               Convertidor SSIS → ADF (varios paquetes, Execute Package, tabla→tabla)
+  generar-legado/         Fuentes usados solo para fabricar los binarios de los sistemas emulados
+adf-emulador/             Emulador del API REST de ADF (.NET 10), pruebas en adf-emulador.Pruebas/
+infra/db-init.sh          Crea las BDs de todos los sistemas en docker compose
+scripts/                  demo.sh (punta a punta) y dotnet.sh (SDK .NET 10 en contenedor)
+docs/                     Guía multisistema, arquitectura, mapeo SSIS → ADF y plan
 ```
 
-## Regenerar los artefactos
+## Pruebas
 
 ```bash
-# Inventario del legado
-python3 tools/re_inventario/inventario.py legacy reingenieria/inventario
-# SSIS → ADF (los nombres de parámetros de los SPs se leen de legacy/db)
-python3 tools/ssis2adf/ssis2adf.py legacy/ssis/CargaPolizas.dtsx legacy/db adf
-# Ingeniería inversa con REA: ver reingenieria/HALLAZGOS.md § "Cómo reproducir"
-# Pruebas (.NET 10 en contenedor; no requiere instalar el SDK)
-DOTNET_DIR=app scripts/dotnet.sh test
-DOTNET_DIR=adf-emulador.Pruebas scripts/dotnet.sh test
+DOTNET_DIR=sistemas/polizas/app scripts/dotnet.sh test     # 30 pruebas, incluida la paridad con el binario legado
+DOTNET_DIR=adf-emulador.Pruebas scripts/dotnet.sh test     # 12 pruebas del lenguaje de expresiones
+scripts/demo.sh                                            # con docker compose levantado
 ```
 
 ## Documentación
 
-- [Hallazgos de la ingeniería inversa](reingenieria/HALLAZGOS.md)
+- [Guía para varios sistemas](docs/GUIA_MULTISISTEMA.md)
 - [Arquitectura legado → objetivo → local, y alcance del emulador](docs/ARQUITECTURA.md)
-- [Reporte de conversión SSIS → ADF](adf/REPORTE_PL_CargaPolizas.md)
 - [Equivalencias SSIS → ADF](docs/MAPEO_SSIS_ADF.md)
 - [Plan de la POC](docs/PLAN_POC.md)

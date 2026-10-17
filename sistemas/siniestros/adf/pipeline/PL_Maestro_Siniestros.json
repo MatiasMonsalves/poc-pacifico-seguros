@@ -1,0 +1,96 @@
+{
+    "name": "PL_Maestro_Siniestros",
+    "properties": {
+        "description": "Convertido desde el paquete SSIS Maestro_Siniestros con tools/ssis2adf",
+        "activities": [
+            {
+                "name": "Ejecutar carga",
+                "type": "ExecutePipeline",
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "PL_Carga_Siniestros",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true,
+                    "parameters": {}
+                }
+            },
+            {
+                "name": "Calcular reservas",
+                "type": "SqlServerStoredProcedure",
+                "linkedServiceName": {
+                    "referenceName": "LS_SQL_DW",
+                    "type": "LinkedServiceReference"
+                },
+                "policy": {
+                    "timeout": "0.02:00:00",
+                    "retry": 0
+                },
+                "typeProperties": {
+                    "storedProcedureName": "[dbo].[usp_CalcularReservas]",
+                    "storedProcedureParameters": {
+                        "FechaCorte": {
+                            "value": {
+                                "value": "@if(empty(pipeline().parameters.FechaCorte), convertFromUtc(utcNow(), 'Pacific SA Standard Time', 'yyyy-MM-dd'), pipeline().parameters.FechaCorte)",
+                                "type": "Expression"
+                            },
+                            "type": "DateTime"
+                        }
+                    }
+                },
+                "dependsOn": [
+                    {
+                        "activity": "Ejecutar carga",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Avisar falla",
+                "type": "Wait",
+                "description": "MARCADOR Send Mail: sin conversión automática",
+                "typeProperties": {
+                    "waitTimeInSeconds": 1
+                },
+                "dependsOn": [
+                    {
+                        "activity": "Calcular reservas",
+                        "dependencyConditions": [
+                            "Failed"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Fallar tras Avisar falla",
+                "type": "Fail",
+                "dependsOn": [
+                    {
+                        "activity": "Avisar falla",
+                        "dependencyConditions": [
+                            "Completed"
+                        ]
+                    }
+                ],
+                "typeProperties": {
+                    "message": {
+                        "value": "@concat('Calcular reservas falló: ', activity('Calcular reservas').error.message)",
+                        "type": "Expression"
+                    },
+                    "errorCode": "500"
+                }
+            }
+        ],
+        "parameters": {
+            "FechaCorte": {
+                "type": "string",
+                "defaultValue": ""
+            }
+        },
+        "annotations": [
+            "ssis2adf"
+        ]
+    }
+}

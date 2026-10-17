@@ -23,33 +23,36 @@ services:
     environment:
       MSSQL_SA_PASSWORD: *sql-password
     volumes:
-      - ./legacy/db:/scripts:ro
+      - ./sistemas:/sistemas:ro
       - ./infra/db-init.sh:/db-init.sh:ro
     entrypoint: ["/bin/bash", "/db-init.sh"]
     restart: "no"
 
-  # Reemplaza a Azure Data Factory en local: mismo API REST, ejecuta los JSON de adf/
+  # Reemplaza a Azure Data Factory en local: mismo API REST. Cada sistema es una factoría
+  # (sistemas/<id>/adf) y su Blob Storage es sistemas/<id>/datos/blob.
+  # Los secretos de Key Vault se pasan como KeyVault__<nombre-del-secreto>.
   adf-emulador:
     build: ./adf-emulador
     environment:
-      KeyVault__sql-oltp-connstring: "Server=sqlserver;Database=Seguros;User Id=sa;Password=${MSSQL_SA_PASSWORD:-Poc_Pacifico_2026!};TrustServerCertificate=True"
+      KeyVault__polizas-sql-oltp-connstring: "Server=sqlserver;Database=Seguros;User Id=sa;Password=${MSSQL_SA_PASSWORD:-Poc_Pacifico_2026!};TrustServerCertificate=True"
+      KeyVault__siniestros-sql-core-connstring: "Server=sqlserver;Database=CoreLegado;User Id=sa;Password=${MSSQL_SA_PASSWORD:-Poc_Pacifico_2026!};TrustServerCertificate=True"
+      KeyVault__siniestros-sql-dw-connstring: "Server=sqlserver;Database=Siniestros;User Id=sa;Password=${MSSQL_SA_PASSWORD:-Poc_Pacifico_2026!};TrustServerCertificate=True"
     volumes:
-      - ./adf:/adf:ro
-      - ./data/blob:/blob:ro
+      - ./sistemas:/sistemas:ro
     ports: ["5080:8080"]
     depends_on:
       db-init: { condition: service_completed_successfully }
 
-  # Sistema nuevo: reemplaza la app VB6 y el componente COM; dispara las cargas en ADF
+  # Sistema nuevo de "polizas": reemplaza la app VB6 y el componente COM; dispara las cargas en ADF
   api:
-    build: ./app
+    build: ./sistemas/polizas/app
     environment:
       ConnectionStrings__Seguros: "Server=sqlserver;Database=Seguros;User Id=sa;Password=${MSSQL_SA_PASSWORD:-Poc_Pacifico_2026!};TrustServerCertificate=True"
       DataFactory__BaseUrl: http://adf-emulador:8080
       DataFactory__UsarAzureAd: "false"
       DataFactory__SubscriptionId: 00000000-0000-0000-0000-000000000000
       DataFactory__ResourceGroup: rg-pacifico-poc
-      DataFactory__FactoryName: adf-pacifico-poc
+      DataFactory__FactoryName: polizas
       Cotizacion__CalculoEdad: ${CALCULO_EDAD:-Vb6DateDiff}
     ports: ["8080:8080"]
     depends_on:

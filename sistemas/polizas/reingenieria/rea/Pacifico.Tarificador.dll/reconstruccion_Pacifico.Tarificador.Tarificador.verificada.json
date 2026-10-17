@@ -1,0 +1,196 @@
+{
+ "evidence_id": "ev_1865de74ec944f10d0301aebe5d0225939d74d53510136b1d328b90ca7756e60",
+ "subject": {
+  "name": "Pacifico.Tarificador.dll",
+  "digest": {
+   "sha256": "55030199ef3febbdb750ed2f0105f4fe4093e379bf5d1c191be2633451b6343a"
+  },
+  "local_path": "/home/user/poc-pacifico-seguros/sistemas/polizas/fuentes/componente-net/bin/Pacifico.Tarificador.dll",
+  "format": "pe",
+  "architecture": null
+ },
+ "provider": {
+  "id": "rea-dotnet-workflows",
+  "name": "REA managed-code workflows",
+  "version": "1"
+ },
+ "analysis_profile": null,
+ "predicate_type": "rea.managed-reconstruction-import",
+ "operation": "import_managed_reconstruction",
+ "parameters": {
+  "static_members_evidence_id": "ev_87c3027df471a90dfae48e6933bbe0379debe9ea295a3a1f560085c25824283f",
+  "decompiler": {
+   "name": "ilspycmd",
+   "version": "11.1.0.9782",
+   "family": "ilspy",
+   "executable_sha256": null,
+   "options": [
+    "-p"
+   ],
+   "options_sha256": "708f1ffb7a2c2949deab1b501ee46ddbd52e36d40ce51d69d72a0e1af1e86aae"
+  },
+  "method_locks": [
+   {
+    "token": "0x06000009",
+    "signature_sha256": "45474660d0ab6088336201ad60ffe79f9df2995f2f99bcbb18e2ea4043f99a95",
+    "normalized_il_sha256": "c3fd4405def58f5c8e985b4cf4a09c876f4c842248e503d975bceaa2a3ed24e4"
+   },
+   {
+    "token": "0x0600000a",
+    "signature_sha256": "2c2af4c09c1246509625187e420c53157c0839ada2efbc254dee68edf7e06aee",
+    "normalized_il_sha256": "8c489178c0cd225405dfe33a4dad4ed4d2483dd2ce8be3b5d43f84eb6348686c"
+   },
+   {
+    "token": "0x0600000b",
+    "signature_sha256": "16148b531414562b74f2ccc8d23e30eb409d6798738c7bd3815c39ca52500eff",
+    "normalized_il_sha256": "6d16efb3f0eac9a3cd568b34a587fd28455ea2be4c79050c3f4e7f7dc649717c"
+   }
+  ],
+  "notes": [
+   "Tipo Pacifico.Tarificador.Tarificador reconstruido desde el binario con ILSpy."
+  ]
+ },
+ "raw_result": null,
+ "normalized_result": {
+  "reconstruction_id": "mre_fc4d2a4c7ad76c56ab0405e1960d3481bb0e82d5df343f6a99fa9bd0fa9c6b20",
+  "phase": "reconstruction-import",
+  "executed": false,
+  "static_observation": {
+   "evidence_id": "ev_87c3027df471a90dfae48e6933bbe0379debe9ea295a3a1f560085c25824283f",
+   "artifact_sha256": "55030199ef3febbdb750ed2f0105f4fe4093e379bf5d1c191be2633451b6343a",
+   "artifact_path": "/home/user/poc-pacifico-seguros/sistemas/polizas/fuentes/componente-net/bin/Pacifico.Tarificador.dll",
+   "byte_length": 8192,
+   "module_name": "Pacifico.Tarificador.dll",
+   "mvid": "ba9fb8e9-8647-4291-ada2-314ba9ffb934",
+   "metadata_status": "complete"
+  },
+  "decompiler": {
+   "name": "ilspycmd",
+   "version": "11.1.0.9782",
+   "family": "ilspy",
+   "executable_sha256": null,
+   "options": [
+    "-p"
+   ],
+   "options_sha256": "708f1ffb7a2c2949deab1b501ee46ddbd52e36d40ce51d69d72a0e1af1e86aae"
+  },
+  "summary": {
+   "imported_methods": 3,
+   "decompiled_csharp_methods": 3,
+   "decompiled_il_methods": 0,
+   "pseudocode_methods": 0,
+   "total_text_bytes": 1331
+  },
+  "methods": [
+   {
+    "token": "0x06000009",
+    "declaring_type": "Pacifico.Tarificador.Tarificador",
+    "name": "CalcularPrima",
+    "signature_sha256": "45474660d0ab6088336201ad60ffe79f9df2995f2f99bcbb18e2ea4043f99a95",
+    "normalized_il_sha256": "c3fd4405def58f5c8e985b4cf4a09c876f4c842248e503d975bceaa2a3ed24e4",
+    "body_sha256": "f5bc97a9fd3c0c639c43ec53745b18344091aa149fee8be1034418298e209bb2",
+    "il_size": 168,
+    "reconstruction": {
+     "kind": "decompiled-csharp",
+     "language": "csharp",
+     "text": "\tpublic decimal CalcularPrima(string tipoSeguro, int edad, decimal sumaAsegurada, int siniestros)\n\t{\n\t\tif (decimal.Compare(sumaAsegurada, 0m) <= 0)\n\t\t{\n\t\t\tthrow new ArgumentOutOfRangeException(\"sumaAsegurada\", \"La suma asegurada debe ser positiva\");\n\t\t}\n\t\tdecimal d = decimal.Multiply(decimal.Multiply(sumaAsegurada, ObtenerTasa(tipoSeguro)), FactorEdad(tipoSeguro, edad));\n\t\td = ((siniestros != 0) ? decimal.Multiply(d, decimal.Add(1m, decimal.Multiply(0.15m, new decimal(Math.Min(siniestros, 3))))) : decimal.Multiply(d, 0.95m));\n\t\tif (decimal.Compare(d, 12.5m) < 0)\n\t\t{\n\t\t\td = 12.5m;\n\t\t}\n\t\treturn Math.Round(d, 2);\n\t}",
+     "text_sha256": "1bebec6d34234c19f7999473318d3f91f99087c5d943763ebecaf1f4e3e9232e",
+     "text_length": 620,
+     "line_count": 14,
+     "source_path": "/home/user/poc-pacifico-seguros/sistemas/polizas/reingenieria/rea/Pacifico.Tarificador.dll/decompilado/Pacifico.Tarificador/Tarificador.cs",
+     "start_line": 22,
+     "end_line": 35
+    },
+    "validation": {
+     "matched_static_member": true,
+     "exact_build_required": true,
+     "canonical_observation": false,
+     "confidence_floor": "inference"
+    }
+   },
+   {
+    "token": "0x0600000a",
+    "declaring_type": "Pacifico.Tarificador.Tarificador",
+    "name": "ObtenerTasa",
+    "signature_sha256": "2c2af4c09c1246509625187e420c53157c0839ada2efbc254dee68edf7e06aee",
+    "normalized_il_sha256": "8c489178c0cd225405dfe33a4dad4ed4d2483dd2ce8be3b5d43f84eb6348686c",
+    "body_sha256": "9b03ac8480b5237f676b6738a736cf4f204bfbf045a479c78d1c25bb420c2a82",
+    "il_size": 119,
+    "reconstruction": {
+     "kind": "decompiled-csharp",
+     "language": "csharp",
+     "text": "\tpublic decimal ObtenerTasa(string tipoSeguro)\n\t{\n\t\treturn Strings.UCase(Strings.Trim(tipoSeguro)) switch\n\t\t{\n\t\t\t\"AUTO\" => 0.045m, \n\t\t\t\"HOGAR\" => 0.0035m, \n\t\t\t\"VIDA\" => 0.006m, \n\t\t\t_ => throw new ArgumentException(\"Tipo de seguro no soportado: \" + tipoSeguro), \n\t\t};\n\t}",
+     "text_sha256": "8630b9c97b519e32276b34c25890a8f65c0b15d844efb3d2628638b2990df5d1",
+     "text_length": 269,
+     "line_count": 10,
+     "source_path": "/home/user/poc-pacifico-seguros/sistemas/polizas/reingenieria/rea/Pacifico.Tarificador.dll/decompilado/Pacifico.Tarificador/Tarificador.cs",
+     "start_line": 37,
+     "end_line": 46
+    },
+    "validation": {
+     "matched_static_member": true,
+     "exact_build_required": true,
+     "canonical_observation": false,
+     "confidence_floor": "inference"
+    }
+   },
+   {
+    "token": "0x0600000b",
+    "declaring_type": "Pacifico.Tarificador.Tarificador",
+    "name": "FactorEdad",
+    "signature_sha256": "16148b531414562b74f2ccc8d23e30eb409d6798738c7bd3815c39ca52500eff",
+    "normalized_il_sha256": "6d16efb3f0eac9a3cd568b34a587fd28455ea2be4c79050c3f4e7f7dc649717c",
+    "body_sha256": "31011cfea60bb3416f7112530ddd81976c48f792ed0d364117b5b589f8fdbd2c",
+    "il_size": 111,
+    "reconstruction": {
+     "kind": "decompiled-csharp",
+     "language": "csharp",
+     "text": "\tpublic decimal FactorEdad(string tipoSeguro, int edad)\n\t{\n\t\tif (edad < 18)\n\t\t{\n\t\t\tthrow new ArgumentOutOfRangeException(\"edad\", \"El asegurado debe ser mayor de edad\");\n\t\t}\n\t\tdecimal result;\n\t\tif (edad < 25)\n\t\t{\n\t\t\tresult = 1.3m;\n\t\t}\n\t\telse\n\t\t{\n\t\t\tif (edad <= 60)\n\t\t\t{\n\t\t\t\treturn 1m;\n\t\t\t}\n\t\t\tresult = ((Operators.CompareString(Strings.UCase(Strings.Trim(tipoSeguro)), \"VIDA\", TextCompare: false) != 0) ? 1.45m : 1.8m);\n\t\t}\n\t\treturn result;\n\t}",
+     "text_sha256": "0712d7821aae7750ea814fc782e9245fa60a9ddf54ead1ce6b26b6b13f3f6dd3",
+     "text_length": 442,
+     "line_count": 21,
+     "source_path": "/home/user/poc-pacifico-seguros/sistemas/polizas/reingenieria/rea/Pacifico.Tarificador.dll/decompilado/Pacifico.Tarificador/Tarificador.cs",
+     "start_line": 48,
+     "end_line": 68
+    },
+    "validation": {
+     "matched_static_member": true,
+     "exact_build_required": true,
+     "canonical_observation": false,
+     "confidence_floor": "inference"
+    }
+   }
+  ],
+  "notes": [
+   "Tipo Pacifico.Tarificador.Tarificador reconstruido desde el binario con ILSpy."
+  ],
+  "evidence_links": [
+   "ev_87c3027df471a90dfae48e6933bbe0379debe9ea295a3a1f560085c25824283f"
+  ],
+  "limitations": [
+   "Decompiler output is imported as reconstruction evidence and analyst inference; metadata and IL observations remain canonical.",
+   "This operation did not execute, load, reflect over, debug, instrument, patch, or decompile the target artifact.",
+   "The imported reconstruction is valid only for the exact artifact SHA-256, MVID, method signature, and normalized IL shape recorded here.",
+   "Obfuscated names, decompiler variables, and control-flow restructuring are not treated as proof without separate validation."
+  ]
+ },
+ "confidence": "inferred",
+ "authority": "analyst-inference",
+ "environment": null,
+ "limitations": [
+  "Decompiler output is imported as reconstruction evidence and analyst inference; metadata and IL observations remain canonical.",
+  "This operation did not execute, load, reflect over, debug, instrument, patch, or decompile the target artifact.",
+  "The imported reconstruction is valid only for the exact artifact SHA-256, MVID, method signature, and normalized IL shape recorded here.",
+  "Obfuscated names, decompiler variables, and control-flow restructuring are not treated as proof without separate validation."
+ ],
+ "relationship_coverage": null,
+ "locations": [
+  {
+   "kind": "artifact-path",
+   "path": "/home/user/poc-pacifico-seguros/sistemas/polizas/fuentes/componente-net/bin/Pacifico.Tarificador.dll"
+  }
+ ],
+ "evidence_links": [
+  "ev_87c3027df471a90dfae48e6933bbe0379debe9ea295a3a1f560085c25824283f"
+ ]
+}

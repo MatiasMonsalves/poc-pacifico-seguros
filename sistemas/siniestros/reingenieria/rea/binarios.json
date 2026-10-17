@@ -1,0 +1,38 @@
+[
+  {
+    "binario": "Pacifico.Siniestros.Reglas.dll",
+    "bytes": 5120,
+    "tipo": ".NET Framework",
+    "assembly": "Pacifico.Siniestros.Reglas 1.4.0.0",
+    "framework": ".NETFramework,Version=v4.0",
+    "referencias": [
+      "mscorlib",
+      "System.Data"
+    ],
+    "tipos": [
+      "Pacifico.Siniestros.Reglas.CalculadoraReserva"
+    ],
+    "metodos": 2,
+    "pinvoke": 0,
+    "accede_a_datos": [
+      "System.Data.Common.DbCommand.ExecuteScalar",
+      "System.Data.Common.DbConnection.Open",
+      "System.Data.SqlClient.SqlCommand..ctor",
+      "System.Data.SqlClient.SqlCommand.get_Parameters",
+      "System.Data.SqlClient.SqlConnection..ctor",
+      "System.Data.SqlClient.SqlParameterCollection.AddWithValue"
+    ],
+    "sql": [
+      "SELECT ReservaUF FROM dbo.Siniestros WHERE NumSiniestro = @n"
+    ],
+    "procedimientos": [],
+    "conexiones": [
+      "Data Source=SRVSQL02;Initial Catalog=Siniestros;User ID=reglas;Password=****"
+    ],
+    "siguiente_paso": "Leer la decompilación, migrar las reglas y validarlas con pruebas de paridad contra este binario",
+    "decompilacion": "11.1.0.9782",
+    "reconstruccion_verificada": {
+      "Pacifico.Siniestros.Reglas.CalculadoraReserva": 2
+    }
+  }
+]
