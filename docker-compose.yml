@@ -58,3 +58,18 @@ services:
     depends_on:
       db-init: { condition: service_completed_successfully }
       adf-emulador: { condition: service_started }
+
+  # Resultado AUTOMÁTICO de tools/vb62net (sin retoques): sirve para comparar con la app terminada.
+  # Cotizar responde 501 porque la lógica del componente COM no es traducible de forma mecánica.
+  polizas-generado:
+    build: ./sistemas/polizas/transformacion/Polizas.Generado
+    environment:
+      ConnectionStrings__Legado: "Server=sqlserver;Database=Seguros;User Id=sa;Password=${MSSQL_SA_PASSWORD:-Poc_Pacifico_2026!};TrustServerCertificate=True"
+      DataFactory__BaseUrl: http://adf-emulador:8080
+      DataFactory__SubscriptionId: 00000000-0000-0000-0000-000000000000
+      DataFactory__ResourceGroup: rg-pacifico-poc
+      DataFactory__FactoryName: polizas
+    ports: ["8081:8080"]
+    depends_on:
+      db-init: { condition: service_completed_successfully }
+      adf-emulador: { condition: service_started }

@@ -1,0 +1,196 @@
+[
+  {
+    "modulo": "frmPolizas",
+    "nombre": "Form_Load",
+    "tipo": "Sub",
+    "parametros": "",
+    "retorno": "",
+    "comentario": "",
+    "clase": "evento",
+    "sql": [],
+    "sps": [],
+    "com": [],
+    "adf": null,
+    "controles": [],
+    "catalogo": {
+      "cboTipo": [
+        "AUTO",
+        "HOGAR",
+        "VIDA"
+      ]
+    },
+    "destino": "/api/polizas/catalogos",
+    "estado": "Automático",
+    "notas": []
+  },
+  {
+    "modulo": "frmPolizas",
+    "nombre": "cmdBuscar_Click",
+    "tipo": "Sub",
+    "parametros": "",
+    "retorno": "",
+    "comentario": "Lista las pólizas del cliente (el SQL se arma concatenando el texto ingresado)",
+    "clase": "evento",
+    "sql": [
+      {
+        "sql": "SELECT NumPoliza, TipoSeguro, Prima, Estado FROM dbo.Polizas WHERE IdCliente = @Cliente",
+        "parametros": [
+          {
+            "nombre": "Cliente",
+            "origen": "txtCliente.Text"
+          }
+        ],
+        "original": "rs.Open \"SELECT NumPoliza, TipoSeguro, Prima, Estado FROM dbo.Polizas \" &             \"WHERE IdCliente = \" & txtCliente.Text, cn"
+      }
+    ],
+    "sps": [],
+    "com": [],
+    "adf": null,
+    "controles": [
+      "txtCliente"
+    ],
+    "catalogo": {},
+    "destino": "/api/polizas/buscar",
+    "estado": "Automático",
+    "notas": [
+      "El SQL original se armaba concatenando texto del usuario (inyección SQL); el generado está parametrizado"
+    ]
+  },
+  {
+    "modulo": "frmPolizas",
+    "nombre": "cmdCotizar_Click",
+    "tipo": "Sub",
+    "parametros": "",
+    "retorno": "",
+    "comentario": "Cotiza con el componente .NET Pacifico.Tarificador expuesto por COM",
+    "clase": "evento",
+    "sql": [
+      {
+        "sql": "SELECT FechaNacimiento FROM dbo.Clientes WHERE IdCliente = @Cliente",
+        "parametros": [
+          {
+            "nombre": "Cliente",
+            "origen": "txtCliente.Text"
+          }
+        ],
+        "original": "rs.Open \"SELECT FechaNacimiento FROM dbo.Clientes WHERE IdCliente = \" & txtCliente.Text, cn"
+      }
+    ],
+    "sps": [],
+    "com": [
+      {
+        "progid": "PacificoTarificador.Tarificador",
+        "metodos": [
+          "CalcularPrima"
+        ]
+      }
+    ],
+    "adf": null,
+    "controles": [
+      "cboTipo",
+      "txtCliente",
+      "txtSiniestros",
+      "txtSuma"
+    ],
+    "catalogo": {},
+    "destino": "/api/polizas/cotizar",
+    "estado": "Parcial",
+    "notas": [
+      "El SQL original se armaba concatenando texto del usuario (inyección SQL); el generado está parametrizado"
+    ]
+  },
+  {
+    "modulo": "frmPolizas",
+    "nombre": "cmdRecalcular_Click",
+    "tipo": "Sub",
+    "parametros": "",
+    "retorno": "",
+    "comentario": "",
+    "clase": "evento",
+    "sql": [],
+    "sps": [
+      {
+        "nombre": "dbo.usp_RecalcularPrimas",
+        "parametros": [
+          {
+            "nombre": "FechaProceso",
+            "origen": "Date"
+          }
+        ]
+      }
+    ],
+    "com": [],
+    "adf": null,
+    "controles": [],
+    "catalogo": {},
+    "destino": "/api/polizas/recalcular",
+    "estado": "Automático",
+    "notas": []
+  },
+  {
+    "modulo": "frmPolizas",
+    "nombre": "cmdCargar_Click",
+    "tipo": "Sub",
+    "parametros": "",
+    "retorno": "",
+    "comentario": "Ejecuta el paquete SSIS en el servidor y espera a que termine",
+    "clase": "evento",
+    "sql": [],
+    "sps": [],
+    "com": [],
+    "adf": {
+      "paquete": "CargaPolizas.dtsx",
+      "pipeline": "PL_CargaPolizas",
+      "parametros": {
+        "FechaProceso": "Format(Date, \"yyyy-mm-dd\")"
+      }
+    },
+    "controles": [],
+    "catalogo": {},
+    "destino": "/api/polizas/cargar",
+    "estado": "Automático",
+    "notas": [
+      "MsgBox se devuelve como respuesta JSON"
+    ]
+  },
+  {
+    "modulo": "modConexion",
+    "nombre": "AbrirConexion",
+    "tipo": "Function",
+    "parametros": "",
+    "retorno": "ADODB",
+    "comentario": "",
+    "clase": "infraestructura",
+    "sql": [],
+    "sps": [],
+    "com": [],
+    "adf": null,
+    "controles": [],
+    "catalogo": {},
+    "destino": "Db (inyección de SqlConnection)",
+    "estado": "Reemplazado",
+    "notas": [
+      "Conexión ADODB con credenciales en el código → cadena de conexión por configuración/Key Vault"
+    ]
+  },
+  {
+    "modulo": "modConexion",
+    "nombre": "CalcularEdad",
+    "tipo": "Function",
+    "parametros": "ByVal fechaNacimiento As Date",
+    "retorno": "Integer",
+    "comentario": "",
+    "clase": "funcion",
+    "sql": [],
+    "sps": [],
+    "com": [],
+    "adf": null,
+    "controles": [],
+    "catalogo": {},
+    "destino": "modConexion.CalcularEdad",
+    "estado": "Automático",
+    "notas": [
+      "DateDiff de VB6 cuenta cambios de período, no tiempo transcurrido; Vb6.DateDiff conserva ese comportamiento"
+    ]
+  }
+]

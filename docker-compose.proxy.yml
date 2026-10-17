@@ -11,6 +11,11 @@ services:
       network: host
       args: { HTTPS_PROXY: "${HTTPS_PROXY:-}", HTTP_PROXY: "${HTTP_PROXY:-}", NO_PROXY: "${NO_PROXY:-}" }
       secrets: [ca]
+  polizas-generado:
+    build:
+      network: host
+      args: { HTTPS_PROXY: "${HTTPS_PROXY:-}", HTTP_PROXY: "${HTTP_PROXY:-}", NO_PROXY: "${NO_PROXY:-}" }
+      secrets: [ca]
 
 secrets:
   ca:

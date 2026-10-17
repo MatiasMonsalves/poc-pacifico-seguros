@@ -36,12 +36,21 @@ public static class Endpoints
     {
         var api = app.MapGroup("/api");
 
+        // Reemplaza Form_Load: tipos de seguro que se cargaban en cboTipo
+        api.MapGet("/catalogos", () => Results.Ok(new
+            {
+                tiposSeguro = Enum.GetNames<TipoSeguro>().Select(t => t.ToUpperInvariant()),
+            }))
+            .WithSummary("Catálogos para la interfaz")
+            .WithDescription("Reemplaza VB6 frmPolizas.Form_Load");
+
         // Reemplaza cmdBuscar_Click
         api.MapGet("/clientes/{idCliente:int}/polizas", async (int idCliente, RepositorioSeguros repo, CancellationToken ct) =>
             await repo.ObtenerClienteAsync(idCliente, ct) is { } cliente
                 ? Results.Ok(new { cliente, polizas = await repo.PolizasDeClienteAsync(idCliente, ct) })
                 : Results.Problem($"No existe el cliente {idCliente}", statusCode: 404))
-            .WithSummary("Pólizas de un cliente");
+            .WithSummary("Pólizas de un cliente")
+            .WithDescription("Reemplaza VB6 frmPolizas.cmdBuscar_Click");
 
         // Reemplaza cmdCotizar_Click + el componente COM Pacifico.Tarificador
         api.MapPost("/cotizaciones", async (CotizacionSolicitud s, RepositorioSeguros repo, IOptions<OpcionesCotizacion> op,
@@ -55,7 +64,8 @@ public static class Endpoints
                 return Results.Ok(new CotizacionRespuesta(cliente.IdCliente, edad, op.Value.CalculoEdad.ToString(),
                     tipo.ToString().ToUpperInvariant(), s.SumaAsegurada, s.Siniestros, prima, "UF"));
             })
-            .WithSummary("Cotiza la prima anual");
+            .WithSummary("Cotiza la prima anual")
+            .WithDescription("Reemplaza VB6 frmPolizas.cmdCotizar_Click");
 
         // Reemplaza cmdRecalcular_Click
         api.MapPost("/primas/recalcular", async (RecalculoSolicitud? s, RepositorioSeguros repo, IOptions<OpcionesCotizacion> op,
@@ -65,7 +75,8 @@ public static class Endpoints
                 await repo.RecalcularPrimasAsync(fecha, ct);
                 return Results.Ok(new { fechaProceso = fecha, recalculado = true });
             })
-            .WithSummary("Recalcula primas vigentes (usp_RecalcularPrimas)");
+            .WithSummary("Recalcula primas vigentes (usp_RecalcularPrimas)")
+            .WithDescription("Reemplaza VB6 frmPolizas.cmdRecalcular_Click");
 
         // Reemplaza cmdCargar_Click (Shell dtexec): dispara el pipeline de ADF y permite seguirlo
         api.MapPost("/cargas", async (CargaSolicitud s, IClienteDataFactory adf, IOptions<OpcionesDataFactory> opAdf,
@@ -92,7 +103,8 @@ public static class Endpoints
                 } while (!estado.Terminada && DateTimeOffset.UtcNow < limite);
                 return Results.Ok(estado);
             })
-            .WithSummary("Ejecuta la carga de pólizas en Azure Data Factory");
+            .WithSummary("Ejecuta la carga de pólizas en Azure Data Factory")
+            .WithDescription("Reemplaza VB6 frmPolizas.cmdCargar_Click");
 
         api.MapGet("/cargas/{runId}", async (string runId, IClienteDataFactory adf, CancellationToken ct) =>
                 await Estado(adf, runId, ct) is { } estado ? Results.Ok(estado) : Results.Problem($"No existe la ejecución {runId}", statusCode: 404))

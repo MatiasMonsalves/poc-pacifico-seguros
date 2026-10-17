@@ -12,3 +12,4 @@ bin/
 obj/
 .env
 TestResults/
+portafolio/logs/

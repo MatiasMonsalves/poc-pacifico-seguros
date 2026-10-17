@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mantenedor de Pólizas</title>
+<style>
+  :root {
+    --fondo: #f6f7f9; --panel: #ffffff; --texto: #1d2330; --suave: #5b6475; --borde: #d9dde5;
+    --acento: #1f5fbf; --acento-texto: #ffffff; --ok: #1b7f4b; --error: #b3261e; --aviso: #8a5a00; --saltado: #6b7280;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --fondo: #14171c; --panel: #1d2128; --texto: #e7eaf0; --suave: #a3abba; --borde: #333a45;
+      --acento: #6aa1ff; --acento-texto: #0d1420; --ok: #5fd39a; --error: #ff8a80; --aviso: #f2c14e; --saltado: #9aa3b2;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 15px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--fondo); color: var(--texto); }
+  header { padding: 20px 16px 8px; max-width: 1100px; margin: 0 auto; }
+  header h1 { margin: 0; font-size: 22px; }
+  header p { margin: 4px 0 0; color: var(--suave); }
+  main { max-width: 1100px; margin: 0 auto; padding: 8px 16px 32px; display: grid; gap: 16px;
+         grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+  section { background: var(--panel); border: 1px solid var(--borde); border-radius: 10px; padding: 16px; min-width: 0; }
+  section.ancho { grid-column: 1 / -1; }
+  h2 { margin: 0 0 4px; font-size: 16px; }
+  .origen { margin: 0 0 12px; color: var(--suave); font-size: 13px; }
+  form { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+  label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--suave); flex: 1 1 120px; }
+  input, select { font: inherit; padding: 7px 9px; border: 1px solid var(--borde); border-radius: 6px; background: var(--fondo); color: var(--texto); min-width: 0; }
+  button { font: inherit; padding: 8px 14px; border: 0; border-radius: 6px; background: var(--acento); color: var(--acento-texto); cursor: pointer; }
+  button:disabled { opacity: .6; cursor: progress; }
+  .resultado { margin-top: 12px; font-size: 14px; overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--borde); white-space: nowrap; }
+  td.mensaje { white-space: normal; min-width: 240px; color: var(--suave); }
+  th { color: var(--suave); font-weight: 600; font-size: 13px; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .estado { font-weight: 600; }
+  .Succeeded { color: var(--ok); } .Failed { color: var(--error); } .Skipped { color: var(--saltado); }
+  .InProgress, .Queued { color: var(--aviso); }
+  .error { color: var(--error); }
+  .destacado { font-size: 26px; font-weight: 700; }
+  code { font-size: 13px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Mantenedor de Pólizas</h1>
+  <p>Reemplazo web del formulario VB6 <code>frmPolizas</code>. API .NET 10; las cargas se ejecutan en Azure Data Factory (en local, en el emulador).</p>
+</header>
+<main>
+  <section>
+    <h2>Buscar pólizas</h2>
+    <p class="origen">Antes: <code>cmdBuscar_Click</code> con SQL concatenado. Ahora: consulta parametrizada.</p>
+    <form id="fBuscar">
+      <label>Id de cliente <input name="cliente" type="number" min="1" value="1" required></label>
+      <button>Buscar</button>
+    </form>
+    <div class="resultado" id="rBuscar"></div>
+  </section>
+
+  <section>
+    <h2>Cotizar</h2>
+    <p class="origen">Antes: <code>cmdCotizar_Click</code> + componente COM <code>Pacifico.Tarificador</code>.</p>
+    <form id="fCotizar">
+      <label>Id de cliente <input name="idCliente" type="number" min="1" value="5" required></label>
+      <label>Tipo <select name="tipoSeguro" id="tipos"></select></label>
+      <label>Suma asegurada (UF) <input name="sumaAsegurada" type="number" min="1" step="0.01" value="600" required></label>
+      <label>Siniestros <input name="siniestros" type="number" min="0" value="0" required></label>
+      <button>Cotizar</button>
+    </form>
+    <div class="resultado" id="rCotizar"></div>
+  </section>
+
+  <section>
+    <h2>Recalcular primas</h2>
+    <p class="origen">Antes: <code>cmdRecalcular_Click</code>. Ejecuta <code>dbo.usp_RecalcularPrimas</code>.</p>
+    <form id="fRecalcular">
+      <label>Fecha de proceso <input name="fechaProceso" type="date"></label>
+      <button>Recalcular</button>
+    </form>
+    <div class="resultado" id="rRecalcular"></div>
+  </section>
+
+  <section class="ancho">
+    <h2>Cargar archivo de pólizas</h2>
+    <p class="origen">Antes: <code>cmdCargar_Click</code> lanzaba <code>dtexec</code> y decía «revise el log del servidor». Ahora ejecuta el pipeline <code>PL_CargaPolizas</code> y muestra cada actividad.</p>
+    <form id="fCargar">
+      <label>Archivo en el contenedor <code>entrada</code>
+        <input name="archivo" list="archivos" value="polizas_20261017.csv" required>
+        <datalist id="archivos">
+          <option value="polizas_20261017.csv">válido</option>
+          <option value="polizas_rut_invalido.csv">RUT sin cliente: falla la consolidación</option>
+          <option value="polizas_formato_invalido.csv">número mal formado: falla la copia</option>
+        </datalist>
+      </label>
+      <label>Fecha de proceso <input name="fechaProceso" type="date"></label>
+      <button>Ejecutar carga</button>
+    </form>
+    <div class="resultado" id="rCargar"></div>
+  </section>
+</main>
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const num = (v) => Number(v).toLocaleString("es-CL", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+async function llamar(url, opciones) {
+  const r = await fetch(url, opciones);
+  const cuerpo = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(cuerpo.detail || cuerpo.title || `Error ${r.status}`);
+  return cuerpo;
+}
+const post = (url, datos) => llamar(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(datos) });
+
+function enviar(formId, salidaId, accion) {
+  $(formId).addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const boton = e.target.querySelector("button");
+    boton.disabled = true;
+    try { $(salidaId).innerHTML = await accion(Object.fromEntries(new FormData(e.target))); }
+    catch (err) { $(salidaId).innerHTML = `<p class="error">${esc(err.message)}</p>`; }
+    finally { boton.disabled = false; }
+  });
+}
+
+enviar("fBuscar", "rBuscar", async (d) => {
+  const r = await llamar(`/api/clientes/${encodeURIComponent(d.cliente)}/polizas`);
+  const filas = r.polizas.map((p) => `<tr><td>${esc(p.numPoliza)}</td><td>${esc(p.tipoSeguro)}</td>
+    <td class="num">${num(p.sumaAsegurada)}</td><td class="num">${num(p.prima)}</td><td>${p.siniestros}</td><td>${esc(p.estado)}</td></tr>`).join("");
+  return `<p>${esc(r.cliente.nombre)} · ${esc(r.cliente.rut)}</p>` + (filas
+    ? `<table><tr><th>Póliza</th><th>Tipo</th><th class="num">Suma UF</th><th class="num">Prima UF</th><th>Siniestros</th><th>Estado</th></tr>${filas}</table>`
+    : "<p>Sin pólizas.</p>");
+});
+
+enviar("fCotizar", "rCotizar", async (d) => {
+  const r = await post("/api/cotizaciones", { idCliente: +d.idCliente, tipoSeguro: d.tipoSeguro, sumaAsegurada: +d.sumaAsegurada, siniestros: +d.siniestros });
+  return `<div class="destacado">${num(r.prima)} UF</div><p>Edad ${r.edad} (cálculo ${esc(r.calculoEdad)}) · ${esc(r.tipoSeguro)}</p>`;
+});
+
+enviar("fRecalcular", "rRecalcular", async (d) => {
+  const r = await post("/api/primas/recalcular", d.fechaProceso ? { fechaProceso: d.fechaProceso } : {});
+  return `<p class="Succeeded">Primas recalculadas al ${esc(r.fechaProceso)}.</p>`;
+});
+
+function tablaCarga(c) {
+  const filas = c.actividades.map((a) => `<tr><td>${esc(a.nombre)}</td><td>${esc(a.tipo)}</td>
+    <td class="estado ${esc(a.estado)}">${esc(a.estado)}</td><td class="num">${a.duracionMs ?? ""}</td>
+    <td class="mensaje">${esc(a.error || (a.salida && a.salida.rowsCopied != null ? `${a.salida.rowsCopied} filas copiadas` : ""))}</td></tr>`).join("");
+  return `<p>Pipeline <code>${esc(c.pipeline)}</code> · run <code>${esc(c.runId)}</code> ·
+    <span class="estado ${esc(c.estado)}">${esc(c.estado)}</span></p>
+    ${c.mensaje ? `<p class="error">${esc(c.mensaje)}</p>` : ""}
+    <table><tr><th>Actividad</th><th>Tipo</th><th>Estado</th><th class="num">ms</th><th>Detalle</th></tr>${filas}</table>`;
+}
+
+enviar("fCargar", "rCargar", async (d) => {
+  const inicio = await post("/api/cargas", { archivo: d.archivo, fechaProceso: d.fechaProceso || null });
+  // Se consulta el estado hasta que el pipeline termina, como haría el monitor de ADF
+  for (let i = 0; i < 90; i++) {
+    await new Promise((ok) => setTimeout(ok, 1000));
+    const c = await llamar(`/api/cargas/${inicio.runId}`);
+    $("rCargar").innerHTML = tablaCarga(c);
+    if (c.terminada) return tablaCarga(c);
+  }
+  return $("rCargar").innerHTML + `<p class="error">La carga no terminó en 90 segundos; consulte /api/cargas/${esc(inicio.runId)}</p>`;
+});
+
+llamar("/api/catalogos").then((c) => {
+  $("tipos").innerHTML = c.tiposSeguro.map((t) => `<option>${esc(t)}</option>`).join("");
+}).catch(() => { $("tipos").innerHTML = "<option>AUTO</option><option>HOGAR</option><option>VIDA</option>"; });
+</script>
+</body>
+</html>

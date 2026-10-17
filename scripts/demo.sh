@@ -56,6 +56,15 @@ RUN=$(post /api/cargas '{"archivo":"polizas_20261017.csv"}' | campo "['runId']")
 sleep 5
 verificar "Estado consultado por runId" "$(curl -s "$API/api/cargas/$RUN" | campo "['estado']")" "Succeeded"
 
+titulo "Pólizas: app generada automáticamente por vb62net (puerto 8081)"
+GEN=${GEN:-http://localhost:8081}
+verificar "Buscar (SQL parametrizado)" "$(curl -s "$GEN/api/polizas/buscar?Cliente=1" | campo "['filas'][0]['NumPoliza']")" "POL-0001"
+verificar "Intento de inyección SQL rechazado" "$(curl -s "$GEN/api/polizas/buscar?Cliente=1%20OR%201%3D1" | campo "['status']")" "400"
+verificar "Cotizar queda pendiente (lógica COM)" "$(curl -s -o /dev/null -w '%{http_code}' -X POST "$GEN/api/polizas/cotizar" -H 'Content-Type: application/json' -d '{"Cliente":"5","Tipo":"AUTO","Suma":"600","Siniestros":"0"}')" "501"
+RUN=$(curl -s -X POST "$GEN/api/polizas/cargar" | campo "['runId']")
+sleep 5
+verificar "Cargar (Shell dtexec → pipeline ADF)" "$(curl -s "$API/api/cargas/$RUN" | campo "['estado']")" "Succeeded"
+
 titulo "Siniestros: pipeline maestro → pipeline hijo (Execute Package → Execute Pipeline) en el emulador"
 ADF=${ADF:-http://localhost:5080}
 FAB="$ADF/subscriptions/sub-poc/resourceGroups/rg-poc/providers/Microsoft.DataFactory/factories/siniestros"

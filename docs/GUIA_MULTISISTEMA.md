@@ -35,8 +35,10 @@ sistemas/<id>/
 4. **Revisar** `reingenieria/RESUMEN.md` y escribir `reingenieria/HALLAZGOS.md`: reglas recuperadas (de la decompilación de REA/ILSpy y del código fuente), inconsistencias y decisiones de negocio pendientes. Este paso es de una persona: las herramientas encuentran, no deciden.
 5. **Completar ADF**: reemplazar los `Wait` con descripción `MARCADOR` (Script Tasks, Send Mail, contenedores) y resolver las advertencias del reporte de conversión.
 6. **Probar en el emulador**: agregar los secretos `KeyVault__<id>-...` del reporte al servicio `adf-emulador` de `docker-compose.yml`, levantar el entorno y ejecutar los pipelines (`docker compose up -d --build`).
-7. **Construir el sistema nuevo .NET 10** tomando `sistemas/polizas/app` como patrón: dominio con las reglas migradas, **pruebas de paridad contra el binario legado**, API que invoca ADF con `ClienteDataFactory` (cambia solo `DataFactory__FactoryName`).
-8. **Agregar verificaciones** del sistema a `scripts/demo.sh`.
+7. **Transformar el VB6**: `python3 tools/vb62net/vb62net.py sistemas/<id>/fuentes/vb6/<Proyecto>.vbp --salida sistemas/<id>/transformacion --factoria <id>` genera un proyecto .NET 10 que compila y `MAPEO_VB6_NET.md` (lo hace también `scripts/verificar.sh`).
+8. **Completar el sistema nuevo .NET 10** partiendo de lo generado y tomando `sistemas/polizas/app` como patrón: dominio con las reglas migradas, **pruebas de paridad contra el binario legado**, API que invoca ADF con `ClienteDataFactory` (cambia solo `DataFactory__FactoryName`).
+   Marcar cada endpoint con `.WithDescription("Reemplaza VB6 <formulario>.<evento>")` y definir `appUrl` en `sistema.json` para que `tools/vb62net/cobertura.py` compruebe que no falta ningún evento.
+9. **Agregar verificaciones** del sistema a `scripts/demo.sh` y correr `scripts/verificar.sh`.
 
 ## Qué hace cada herramienta
 

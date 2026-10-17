@@ -43,6 +43,9 @@ app.UseExceptionHandler(e => e.Run(async ctx =>
     await Results.Problem(title: titulo, detail: estado == 500 ? null : error?.Message, statusCode: estado).ExecuteAsync(ctx);
 }));
 
+// Pantalla web que reemplaza el formulario VB6 (wwwroot/index.html)
+app.UseDefaultFiles();
+app.UseStaticFiles();
 app.MapOpenApi();
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 app.MapPolizas();
