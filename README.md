@@ -4,6 +4,7 @@ POC para hacer ingeniería inversa de un sistema legado (ETL **SSIS** + lógica 
 
 - Plan y fases: [`docs/PLAN_POC.md`](docs/PLAN_POC.md)
 - Equivalencias SSIS → ADF: [`docs/MAPEO_SSIS_ADF.md`](docs/MAPEO_SSIS_ADF.md)
+- Ingeniería inversa de binarios sin fuente (.NET, VB6): [REA](https://github.com/morluto/rea), ver Fase 1 del plan
 
 ## Inventario automático
 
