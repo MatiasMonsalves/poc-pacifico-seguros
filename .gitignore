@@ -1,0 +1,10 @@
+# Fuentes y reportes del cliente: no se versionan
+fuentes/*
+!fuentes/.gitkeep
+salida/*
+!salida/.gitkeep
+__pycache__/
+bin/
+!legacy/componente-net/bin/
+obj/
+.env
