@@ -6,27 +6,52 @@ La primera vez se descargan unos **4,5 GB** de imágenes (SQL Server 2,4 GB, SDK
 
 ## 1. Instalar los requisitos
 
-### Windows 10/11 (recomendado: WSL2)
+### Windows 10 y 11
 
-Los scripts son de bash y los contenedores son Linux, así que lo más directo es trabajar dentro de Ubuntu en WSL2.
+**Requisitos del equipo**
 
-1. En PowerShell como administrador: `wsl --install -d Ubuntu-24.04`, reiniciar y crear el usuario de Ubuntu.
-2. Instalar **Docker Desktop** y en *Settings*:
-   - *General* → **Use the WSL 2 based engine**
-   - *Resources → WSL integration* → activar **Ubuntu-24.04**
-3. Si el equipo tiene poca memoria asignada a WSL, crear `C:\Users\<usuario>\.wslconfig` con:
-   ```ini
-   [wsl2]
-   memory=8GB
-   ```
-   y ejecutar `wsl --shutdown`.
-4. En la terminal de **Ubuntu**:
+| Requisito | Detalle |
+|---|---|
+| Windows | 64 bits. Windows 10 **22H2** (build 19045) recomendado; WSL2 funciona desde la versión 2004 (build 19041) |
+| Edición | Cualquiera con la opción recomendada. Docker Desktop **no** soporta la edición Home |
+| Virtualización | Activada en la BIOS/UEFI (Intel VT-x o AMD-V). Se ve en *Administrador de tareas → Rendimiento → CPU → Virtualización: Habilitado* |
+| Memoria | 8 GB mínimo, 16 GB recomendado |
+| Disco | 15 GB libres en C: |
+| Permisos | Administrador local para instalar WSL (una sola vez); si no lo tiene, lo hace TI |
+| Red | Acceso a `mcr.microsoft.com`, `download.docker.com`, `api.nuget.org` y GitHub; con proxy corporativo, el certificado raíz de la empresa |
+
+**Paso 0: revisar el equipo.** Descargue `scripts/windows/revisar-windows.ps1` desde GitHub (botón *Download raw file*) y ejecútelo en PowerShell. No instala nada:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\revisar-windows.ps1
+```
+
+**Opción recomendada: Docker Engine dentro de WSL2 (sin Docker Desktop).** Es gratuita y no depende de la edición ni del ciclo de soporte de Windows.
+
+1. PowerShell **como administrador**: `wsl --install -d Ubuntu-24.04` (si WSL ya existe: `wsl --update`). Reinicie el equipo y cree el usuario de Ubuntu cuando se lo pida.
+2. En la terminal de **Ubuntu**:
    ```bash
-   sudo apt update && sudo apt install -y git python3 curl
-   # Opcional, para REA (análisis de binarios): Node.js 22
-   curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash - && sudo apt install -y nodejs
-   sudo npm install -g rea-agents
+   git clone https://github.com/matiasmonsalves/poc-pacifico-seguros.git
+   cd poc-pacifico-seguros
+   git checkout poc/estructura-ingenieria-inversa
+   scripts/instalar-wsl.sh
    ```
+   Instala Docker Engine y Compose, Python, Git y, si puede, Node.js 22 con REA (opcional). También activa systemd para que Docker arranque solo.
+3. En PowerShell: `wsl --shutdown`. Vuelva a abrir Ubuntu y siga en el [paso 2](#2-obtener-el-código-y-revisar-el-equipo) (`scripts/requisitos.sh`).
+
+Las páginas (`http://localhost:8080`, etc.) se abren desde el navegador de Windows: WSL2 publica los puertos en `localhost`.
+
+**Alternativa: Docker Desktop.** Úsela solo si cumple tres condiciones: Windows 10 22H2 **Pro, Enterprise o Education**, soporte vigente de Microsoft (por ejemplo, con actualizaciones extendidas ESU) y **licencia de Docker** cuando la empresa tiene más de 250 empleados o más de USD 10 millones de ingresos anuales.
+- Instálelo con el backend WSL 2.
+- Active *Settings → Resources → WSL integration → Ubuntu-24.04*.
+- No ejecute `instalar-wsl.sh`. Instale solo `sudo apt install -y git python3 curl` en Ubuntu.
+
+**Si WSL tiene poca memoria**, cree `C:\Users\<usuario>\.wslconfig` con estas líneas y ejecute `wsl --shutdown`:
+
+```ini
+[wsl2]
+memory=8GB
+```
 
 > Clone el repositorio dentro de Ubuntu (`~/...`), **no** en `/mnt/c/...`: en el disco de Windows es mucho más lento y pueden fallar los permisos de los scripts.
 
@@ -132,3 +157,7 @@ docker compose down          # detiene todo; al volver a levantarlo las BDs se c
 | `db-init` termina con error | `docker compose logs db-init`: normalmente SQL Server todavía no estaba listo o la clave no cumple la política (mínimo 8 caracteres con mayúsculas, minúsculas, números y símbolos) |
 | La primera ejecución es lenta | Descarga de imágenes y paquetes NuGet; las siguientes reutilizan la caché |
 | REA no instalado | Es opcional: se reutiliza el análisis de binarios guardado en el repositorio |
+| `WslRegisterDistribution failed with error: 0x80370102` | La virtualización está desactivada en la BIOS/UEFI, o falta la característica *Plataforma de máquina virtual* (la activa `wsl --install`) |
+| `wsl --install` muestra la ayuda en vez de instalar | Windows 10 anterior a 2004 o sin actualizar: actualice a 22H2 con Windows Update |
+| `permission denied ... docker.sock` en Ubuntu | Después de `instalar-wsl.sh` falta reiniciar WSL: `wsl --shutdown` en PowerShell y abrir Ubuntu de nuevo |
+| `Cannot connect to the Docker daemon` en Ubuntu | Docker no arrancó: `sudo systemctl start docker`; si systemd no está activo, `sudo service docker start` |

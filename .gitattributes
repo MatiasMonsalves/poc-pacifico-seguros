@@ -13,3 +13,4 @@ Dockerfile text eol=lf
 *.frm   -text
 *.bas   -text
 *.vbp   -text
+*.ps1   text eol=crlf
