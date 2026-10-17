@@ -8,6 +8,18 @@
 | Lógica de negocio en BD | T-SQL (SPs, funciones, vistas) | Azure SQL DB / Managed Instance (SPs migrados o la lógica sacada al servicio) |
 | Aplicación | VB6 / .NET Framework | **Por definir** (lenguaje y contenedor Docker en la nube según las especificaciones del cliente) |
 
+## Estado
+
+La POC está implementada sobre un sistema legado **emulado** (`legacy/`), a la espera de los fuentes reales y de las especificaciones de destino:
+
+- [x] Ingeniería inversa: inventario automático + REA sobre el componente compilado (`reingenieria/HALLAZGOS.md`)
+- [x] SSIS → ADF con convertidor automático (`adf/`, `tools/ssis2adf`)
+- [x] VB6 + COM → API .NET 10 LTS con pruebas de paridad contra el binario legado (`app/`)
+- [x] El sistema nuevo invoca ADF por su API REST; en local, contra un emulador (`adf-emulador/`)
+- [x] Entorno local con Docker Compose y demostración de punta a punta (`scripts/demo.sh`)
+- [ ] Repetir con los fuentes/binarios reales del cliente
+- [ ] Publicar el pipeline en una factoría real y desplegar la API según las especificaciones (contenedores, CI/CD)
+
 ## Fases
 
 ### Fase 0 — Recepción de insumos (pendiente del cliente)

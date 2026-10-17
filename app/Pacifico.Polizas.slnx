@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Pacifico.Polizas.Dominio/Pacifico.Polizas.Dominio.csproj" />
+    <Project Path="src/Pacifico.Polizas.Api/Pacifico.Polizas.Api.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Pacifico.Polizas.Pruebas/Pacifico.Polizas.Pruebas.csproj" />
+  </Folder>
+</Solution>

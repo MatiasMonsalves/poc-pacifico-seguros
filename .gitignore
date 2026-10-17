@@ -4,3 +4,7 @@ fuentes/*
 salida/*
 !salida/.gitkeep
 __pycache__/
+bin/
+!legacy/componente-net/bin/
+obj/
+.env

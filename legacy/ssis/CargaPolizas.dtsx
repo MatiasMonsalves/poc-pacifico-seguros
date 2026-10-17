@@ -8,7 +8,18 @@
     </DTS:ConnectionManager>
     <DTS:ConnectionManager DTS:refId="Package.ConnectionManagers[ArchivoPolizas]" DTS:ObjectName="ArchivoPolizas" DTS:CreationName="FLATFILE">
       <DTS:ObjectData>
-        <DTS:ConnectionManager DTS:ConnectionString="\\fileserver\entrada\polizas_*.csv" />
+        <DTS:ConnectionManager DTS:ConnectionString="\\fileserver\entrada\polizas.csv" DTS:Format="Delimited" DTS:ColumnNamesInFirstDataRow="True" DTS:HeaderRowDelimiter="_x000D__x000A_">
+          <DTS:FlatFileColumns>
+            <DTS:FlatFileColumn DTS:ObjectName="NumPoliza" DTS:ColumnDelimiter="_x003B_" DTS:DataType="129" />
+            <DTS:FlatFileColumn DTS:ObjectName="Rut" DTS:ColumnDelimiter="_x003B_" DTS:DataType="129" />
+            <DTS:FlatFileColumn DTS:ObjectName="TipoSeguro" DTS:ColumnDelimiter="_x003B_" DTS:DataType="129" />
+            <DTS:FlatFileColumn DTS:ObjectName="SumaAsegurada" DTS:ColumnDelimiter="_x003B_" DTS:DataType="129" />
+            <DTS:FlatFileColumn DTS:ObjectName="PrimaBase" DTS:ColumnDelimiter="_x003B_" DTS:DataType="129" />
+            <DTS:FlatFileColumn DTS:ObjectName="Siniestros" DTS:ColumnDelimiter="_x003B_" DTS:DataType="129" />
+            <DTS:FlatFileColumn DTS:ObjectName="FechaInicio" DTS:ColumnDelimiter="_x003B_" DTS:DataType="129" />
+            <DTS:FlatFileColumn DTS:ObjectName="FechaTermino" DTS:ColumnDelimiter="_x000D__x000A_" DTS:DataType="129" />
+          </DTS:FlatFileColumns>
+        </DTS:ConnectionManager>
       </DTS:ObjectData>
     </DTS:ConnectionManager>
   </DTS:ConnectionManagers>
@@ -32,7 +43,10 @@
             </component>
             <component name="Convertir tipos" componentClassID="Microsoft.DataConvert" />
             <component name="Buscar Cliente" componentClassID="Microsoft.Lookup">
-              <properties><property name="SqlCommand">SELECT IdCliente, Rut FROM dbo.Clientes</property></properties>
+              <properties>
+                <property name="SqlCommand">SELECT IdCliente, Rut FROM dbo.Clientes</property>
+                <property name="NoMatchBehavior">0</property>
+              </properties>
             </component>
             <component name="Destino Staging" componentClassID="Microsoft.OLEDBDestination">
               <properties><property name="OpenRowset">[stg].[Polizas]</property></properties>
@@ -44,7 +58,9 @@
     </DTS:Executable>
     <DTS:Executable DTS:refId="Package\Consolidar" DTS:ObjectName="Consolidar" DTS:ExecutableType="Microsoft.ExecuteSQLTask">
       <DTS:ObjectData>
-        <SQLTask:SqlTaskData xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" SQLTask:Connection="Package.ConnectionManagers[OLTP]" SQLTask:SqlStatementSource="EXEC dbo.usp_ConsolidarPolizas ?" />
+        <SQLTask:SqlTaskData xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" SQLTask:Connection="Package.ConnectionManagers[OLTP]" SQLTask:SqlStatementSource="EXEC dbo.usp_ConsolidarPolizas ?">
+          <SQLTask:ParameterBinding SQLTask:ParameterName="0" SQLTask:DtsVariableName="User::FechaProceso" SQLTask:ParameterDirection="Input" SQLTask:DataType="133" />
+        </SQLTask:SqlTaskData>
       </DTS:ObjectData>
     </DTS:Executable>
     <DTS:Executable DTS:refId="Package\Registrar Error" DTS:ObjectName="Registrar Error" DTS:ExecutableType="Microsoft.ExecuteSQLTask">

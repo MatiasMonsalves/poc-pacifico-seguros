@@ -1,0 +1,14 @@
+{
+    "name": "DS_stg_Polizas",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "LS_SQL_OLTP",
+            "type": "LinkedServiceReference"
+        },
+        "type": "AzureSqlTable",
+        "typeProperties": {
+            "schema": "stg",
+            "table": "Polizas"
+        }
+    }
+}

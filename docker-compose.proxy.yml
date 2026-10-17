@@ -1,0 +1,17 @@
+# Solo para construir detrás de un proxy con certificado propio (por ejemplo, este entorno de desarrollo):
+#   CA_BUNDLE=/ruta/ca.crt docker compose -f docker-compose.yml -f docker-compose.proxy.yml up --build
+services:
+  adf-emulador:
+    build:
+      network: host
+      args: { HTTPS_PROXY: "${HTTPS_PROXY:-}", HTTP_PROXY: "${HTTP_PROXY:-}", NO_PROXY: "${NO_PROXY:-}" }
+      secrets: [ca]
+  api:
+    build:
+      network: host
+      args: { HTTPS_PROXY: "${HTTPS_PROXY:-}", HTTP_PROXY: "${HTTP_PROXY:-}", NO_PROXY: "${NO_PROXY:-}" }
+      secrets: [ca]
+
+secrets:
+  ca:
+    file: ${CA_BUNDLE:-/dev/null}

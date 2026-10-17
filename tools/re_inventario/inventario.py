@@ -75,6 +75,8 @@ class ArchivoCodigo:
     conexiones: list[str] = field(default_factory=list)
     sql_embebido: list[str] = field(default_factory=list)
     procedimientos_llamados: list[str] = field(default_factory=list)
+    componentes_com: list[str] = field(default_factory=list)
+    procesos_externos: list[str] = field(default_factory=list)
 
 
 # ---------------------------------------------------------------------------
@@ -274,6 +276,12 @@ RE_PROC = re.compile(
     re.IGNORECASE,
 )
 
+# CreateObject("Prog.Id") / New Prog.Id en VB6
+RE_COM = re.compile(r"""CreateObject\(\s*["']([\w.]+)["']""", re.IGNORECASE)
+# Shell / Process.Start: ejecutables invocados (dtexec = paquetes SSIS)
+RE_PROCESO = re.compile(r"\b(?:Shell|Process\.Start)\b[^\n]*", re.IGNORECASE)
+RE_EXE = re.compile(r"([\w\\:. ]+?\.(?:exe|dtsx|bat|cmd))", re.IGNORECASE)
+
 
 def analizar_codigo(ruta: Path, base: Path) -> ArchivoCodigo:
     texto = _leer_texto(ruta)
@@ -285,7 +293,23 @@ def analizar_codigo(ruta: Path, base: Path) -> ArchivoCodigo:
         conexiones=sorted({_ocultar_password(m.group(1)) for m in RE_CONN.finditer(unido)}),
         sql_embebido=list(dict.fromkeys(m.group(1).strip() for m in RE_SQL_STR.finditer(unido))),
         procedimientos_llamados=sorted({m.group(1) for m in RE_PROC.finditer(unido)}),
+        componentes_com=sorted({m.group(1) for m in RE_COM.finditer(unido)}),
+        procesos_externos=_procesos_externos(unido),
     )
+
+
+def _procesos_externos(texto: str) -> list[str]:
+    # Las rutas suelen estar en constantes: se resuelven RUTA = "..." del mismo archivo.
+    constantes = dict(re.findall(r'(?i)Const\s+(\w+)\s+As\s+String\s*=\s*"([^"]*)"', texto))
+    procesos = []
+    for m in RE_PROCESO.finditer(texto):
+        linea = m.group(0)
+        for nombre, valor in constantes.items():
+            linea = linea.replace(nombre, valor)
+        procesos.append(linea.strip())
+    # Constantes con ejecutables aunque la llamada esté en otro archivo
+    procesos += [f"{n} = {v}" for n, v in constantes.items() if RE_EXE.search(v)]
+    return list(dict.fromkeys(procesos))
 
 
 def _leer_texto(ruta: Path) -> str:
@@ -366,6 +390,11 @@ def generar_markdown(inv: dict) -> str:
         out += [f"### `{c['archivo']}` ({c['lenguaje']})", ""]
         out.append(f"- Conexiones: {_lista(c['conexiones'])}")
         out.append(f"- Procedimientos llamados: {_lista(c['procedimientos_llamados'])}")
+        if c["componentes_com"]:
+            out.append(f"- Componentes COM: {_lista(c['componentes_com'])}")
+        if c["procesos_externos"]:
+            out.append("- Procesos externos:")
+            out += [f"  - `{p}`" for p in c["procesos_externos"]]
         if c["sql_embebido"]:
             out.append("- SQL embebido:")
             out += [f"  - `{q}`" for q in c["sql_embebido"]]
@@ -398,6 +427,7 @@ def _dependencias(paquetes, sqls, codigos) -> dict[str, list[str]]:
         agregar(s.lee + s.escribe + s.ejecuta, f"SQL:{definidos}")
     for c in codigos:
         agregar(c.procedimientos_llamados, f"APP:{c.archivo}")
+        agregar([f"COM:{p}" for p in c.componentes_com], f"APP:{c.archivo}")
         for q in c.sql_embebido:
             a = analizar_tsql(q)
             agregar(a["lee"] + a["escribe"] + a["ejecuta"], f"APP:{c.archivo}")

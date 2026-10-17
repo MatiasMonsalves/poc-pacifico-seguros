@@ -1,0 +1,57 @@
+# Entorno local de la POC: BD legada + emulador de Azure Data Factory + sistema nuevo (.NET 10)
+name: poc-pacifico
+
+x-sql-password: &sql-password ${MSSQL_SA_PASSWORD:-Poc_Pacifico_2026!}
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: *sql-password
+    ports: ["1433:1433"]
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -Q 'SELECT 1' -b -o /dev/null"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  db-init:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    depends_on:
+      sqlserver: { condition: service_healthy }
+    environment:
+      MSSQL_SA_PASSWORD: *sql-password
+    volumes:
+      - ./legacy/db:/scripts:ro
+      - ./infra/db-init.sh:/db-init.sh:ro
+    entrypoint: ["/bin/bash", "/db-init.sh"]
+    restart: "no"
+
+  # Reemplaza a Azure Data Factory en local: mismo API REST, ejecuta los JSON de adf/
+  adf-emulador:
+    build: ./adf-emulador
+    environment:
+      KeyVault__sql-oltp-connstring: "Server=sqlserver;Database=Seguros;User Id=sa;Password=${MSSQL_SA_PASSWORD:-Poc_Pacifico_2026!};TrustServerCertificate=True"
+    volumes:
+      - ./adf:/adf:ro
+      - ./data/blob:/blob:ro
+    ports: ["5080:8080"]
+    depends_on:
+      db-init: { condition: service_completed_successfully }
+
+  # Sistema nuevo: reemplaza la app VB6 y el componente COM; dispara las cargas en ADF
+  api:
+    build: ./app
+    environment:
+      ConnectionStrings__Seguros: "Server=sqlserver;Database=Seguros;User Id=sa;Password=${MSSQL_SA_PASSWORD:-Poc_Pacifico_2026!};TrustServerCertificate=True"
+      DataFactory__BaseUrl: http://adf-emulador:8080
+      DataFactory__UsarAzureAd: "false"
+      DataFactory__SubscriptionId: 00000000-0000-0000-0000-000000000000
+      DataFactory__ResourceGroup: rg-pacifico-poc
+      DataFactory__FactoryName: adf-pacifico-poc
+      Cotizacion__CalculoEdad: ${CALCULO_EDAD:-Vb6DateDiff}
+    ports: ["8080:8080"]
+    depends_on:
+      db-init: { condition: service_completed_successfully }
+      adf-emulador: { condition: service_started }
