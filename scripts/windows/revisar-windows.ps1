@@ -32,6 +32,9 @@ if ($build -lt 19041) {
 } else {
     Ok "Versión de Windows compatible con WSL2"
 }
+if ($build -ge 22000 -and $build -lt 22631) {
+    Aviso "Windows 11 build ${build}: WSL2 funciona, pero Docker Desktop exige Windows 11 23H2 (build 22631) o superior. Actualice con Windows Update o use la opción recomendada (Docker Engine dentro de WSL2)."
+}
 if ($build -lt 22000) {
     Aviso "Windows 10 ya no recibe soporte general de Microsoft (octubre de 2025). Docker Desktop solo soporta versiones con soporte vigente; Docker Engine dentro de WSL2 (opción recomendada) no depende de eso."
 }

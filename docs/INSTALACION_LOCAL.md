@@ -12,7 +12,7 @@ La primera vez se descargan unos **4,5 GB** de imágenes (SQL Server 2,4 GB, SDK
 
 | Requisito | Detalle |
 |---|---|
-| Windows | 64 bits. Windows 10 **22H2** (build 19045) recomendado; WSL2 funciona desde la versión 2004 (build 19041) |
+| Windows | 64 bits. **Windows 11**: cualquier versión con WSL2; Docker Desktop exige 23H2 (build 22631) o superior. **Windows 10**: 22H2 (build 19045) recomendado; WSL2 funciona desde la 2004 (build 19041) |
 | Edición | Cualquiera con la opción recomendada. Docker Desktop **no** soporta la edición Home |
 | Virtualización | Activada en la BIOS/UEFI (Intel VT-x o AMD-V). Se ve en *Administrador de tareas → Rendimiento → CPU → Virtualización: Habilitado* |
 | Memoria | 8 GB mínimo, 16 GB recomendado |
@@ -41,7 +41,7 @@ powershell -ExecutionPolicy Bypass -File .\revisar-windows.ps1
 
 Las páginas (`http://localhost:8080`, etc.) se abren desde el navegador de Windows: WSL2 publica los puertos en `localhost`.
 
-**Alternativa: Docker Desktop.** Úsela solo si cumple tres condiciones: Windows 10 22H2 **Pro, Enterprise o Education**, soporte vigente de Microsoft (por ejemplo, con actualizaciones extendidas ESU) y **licencia de Docker** cuando la empresa tiene más de 250 empleados o más de USD 10 millones de ingresos anuales.
+**Alternativa: Docker Desktop.** Úsela solo si cumple tres condiciones: Windows 11 23H2 o superior (o Windows 10 22H2) en edición **Pro, Enterprise o Education**, soporte vigente de Microsoft (en Windows 10, por ejemplo, con actualizaciones extendidas ESU) y **licencia de Docker** cuando la empresa tiene más de 250 empleados o más de USD 10 millones de ingresos anuales.
 - Instálelo con el backend WSL 2.
 - Active *Settings → Resources → WSL integration → Ubuntu-24.04*.
 - No ejecute `instalar-wsl.sh`. Instale solo `sudo apt install -y git python3 curl` en Ubuntu.
