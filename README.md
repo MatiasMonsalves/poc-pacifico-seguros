@@ -37,6 +37,8 @@ docker compose up -d --build
 scripts/demo.sh            # 19 verificaciones de punta a punta (pólizas y siniestros)
 # o todo de una vez (análisis, transformación, validación, pruebas, entorno, punta a punta, cobertura):
 scripts/verificar.sh
+# en Windows con Docker Desktop, desde PowerShell (sin Ubuntu):
+#   powershell -ExecutionPolicy Bypass -File scripts\windows\verificar.ps1
 ```
 
 Detrás de un proxy con certificado propio: `CA_BUNDLE=/ruta/ca.crt docker compose -f docker-compose.yml -f docker-compose.proxy.yml up -d --build`.

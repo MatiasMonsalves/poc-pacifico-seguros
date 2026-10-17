@@ -148,7 +148,7 @@ def _componentes_data_flow(executable: ET.Element) -> list[dict]:
 def analizar_dtsx(ruta: Path, base: Path) -> PaqueteSSIS:
     raiz = ET.parse(ruta).getroot()
     paquete = PaqueteSSIS(
-        archivo=str(ruta.relative_to(base)),
+        archivo=ruta.relative_to(base).as_posix(),
         nombre=raiz.get(dts("ObjectName"), ruta.stem),
         version_formato=version_formato_dtsx(raiz),
     )
@@ -266,7 +266,7 @@ def analizar_tsql(texto: str) -> dict:
 
 def analizar_sql(ruta: Path, base: Path) -> ArchivoSQL:
     texto = _leer_texto(ruta)
-    return ArchivoSQL(archivo=str(ruta.relative_to(base)), **analizar_tsql(texto))
+    return ArchivoSQL(archivo=ruta.relative_to(base).as_posix(), **analizar_tsql(texto))
 
 
 # ---------------------------------------------------------------------------
@@ -305,7 +305,7 @@ def analizar_codigo(ruta: Path, base: Path) -> ArchivoCodigo:
     # VB6/VB.NET concatenan SQL con & y _ ; se unen las líneas continuadas.
     unido = re.sub(r'"\s*&\s*_?\s*\n\s*"', "", texto)
     return ArchivoCodigo(
-        archivo=str(ruta.relative_to(base)),
+        archivo=ruta.relative_to(base).as_posix(),
         lenguaje=EXT_CODIGO[ruta.suffix.lower()],
         conexiones=sorted({_ocultar_password(m.group(1)) for m in RE_CONN.finditer(unido)}),
         sql_embebido=list(dict.fromkeys(m.group(1).strip() for m in RE_SQL_STR.finditer(unido))),
@@ -479,7 +479,7 @@ def inventariar(fuentes: Path) -> dict:
             if ext in (".vbp", ".csproj", ".vbproj"):
                 proyectos.append(analizar_proyecto(ruta, fuentes))
         except (ET.ParseError, OSError) as e:
-            errores.append({"archivo": str(ruta.relative_to(fuentes)), "error": str(e)})
+            errores.append({"archivo": ruta.relative_to(fuentes).as_posix(), "error": str(e)})
 
     return {
         "resumen": {

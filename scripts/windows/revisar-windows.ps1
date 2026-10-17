@@ -4,6 +4,7 @@
 # Compatible con Windows PowerShell 5.1 (el que trae Windows 10).
 
 $ErrorActionPreference = 'SilentlyContinue'
+if ($PSVersionTable.PSVersion.Major -lt 6) { [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 }
 $script:errores = 0
 $script:avisos = 0
 function Ok($t)    { Write-Host "  [OK]    $t" -ForegroundColor Green }

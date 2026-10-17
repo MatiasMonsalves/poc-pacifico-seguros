@@ -29,6 +29,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from reconstruccion import armar_entrada  # noqa: E402
 
+# En Windows npm instala "rea.cmd": se usa la ruta completa para que subprocess lo encuentre
+REA = shutil.which("rea") or "rea"
 EXTENSIONES = {".dll", ".exe", ".ocx"}
 RE_SQL = re.compile(r"^\s*(SELECT|INSERT|UPDATE|DELETE|MERGE|EXEC|EXECUTE|TRUNCATE|CREATE|ALTER)\b.{6,}", re.IGNORECASE)
 RE_PROC = re.compile(r"^\[?\w*\]?\.?\[?(usp|sp|pr|proc)_\w+\]?$", re.IGNORECASE)
@@ -37,7 +39,7 @@ RE_PROGID = re.compile(r"^[A-Za-z]\w+\.[A-Za-z]\w+$")
 
 
 def rea(comando: str, binario: Path) -> dict:
-    r = subprocess.run(["rea", comando, str(binario), "--format", "json"], capture_output=True, text=True)
+    r = subprocess.run([REA, comando, str(binario), "--format", "json"], capture_output=True, text=True, encoding="utf-8", errors="replace")
     try:
         return json.loads(r.stdout)
     except json.JSONDecodeError:
@@ -73,7 +75,7 @@ def decompilar(binario: Path, destino: Path) -> str:
     script = ("[ -x /root/.dotnet/tools/ilspycmd ] || dotnet tool install -g ilspycmd >/dev/null; "
               "/root/.dotnet/tools/ilspycmd --version | head -1; "
               f"/root/.dotnet/tools/ilspycmd -p -o /salida '/entrada/{binario.name}' >/dev/null")
-    r = subprocess.run(args + ["mcr.microsoft.com/dotnet/sdk:10.0", "sh", "-c", script], capture_output=True, text=True)
+    r = subprocess.run(args + ["mcr.microsoft.com/dotnet/sdk:10.0", "sh", "-c", script], capture_output=True, text=True, encoding="utf-8", errors="replace")
     if r.returncode != 0:
         return "error: " + (r.stderr or r.stdout).strip()[-300:]
     return r.stdout.split(":")[-1].strip() or "desconocida"
@@ -91,7 +93,7 @@ def verificar_reconstruccion(miembros: dict, decompilado: Path, version: str, de
             continue
         ruta = destino / f"reconstruccion_{t['full_name']}.entrada.json"
         ruta.write_text(json.dumps(entrada, indent=1, ensure_ascii=False), encoding="utf-8")
-        r = subprocess.run(["rea", "import-managed-reconstruction", str(ruta), "--format", "json"], capture_output=True, text=True)
+        r = subprocess.run([REA, "import-managed-reconstruction", str(ruta), "--format", "json"], capture_output=True, text=True, encoding="utf-8", errors="replace")
         try:
             verificado = json.loads(r.stdout)
             (destino / f"reconstruccion_{t['full_name']}.verificada.json").write_text(

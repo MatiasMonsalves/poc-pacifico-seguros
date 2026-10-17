@@ -20,13 +20,44 @@ La primera vez se descargan unos **4,5 GB** de imágenes (SQL Server 2,4 GB, SDK
 | Permisos | Administrador local para instalar WSL (una sola vez); si no lo tiene, lo hace TI |
 | Red | Acceso a `mcr.microsoft.com`, `download.docker.com`, `api.nuget.org` y GitHub; con proxy corporativo, el certificado raíz de la empresa |
 
+#### Opción A: Docker Desktop + PowerShell (sin Ubuntu)
+
+Todo se ejecuta desde PowerShell. Docker Desktop corre los contenedores y Python ejecuta las herramientas.
+
+1. **Instalar**, en PowerShell:
+   ```powershell
+   winget install Docker.DockerDesktop
+   winget install Python.Python.3.12
+   winget install Git.Git
+   ```
+   Abra Docker Desktop y espere a que indique *Engine running*. Si es la primera vez, acepte usar WSL 2: Docker Desktop lo instala y lo usa internamente, y usted no tiene que abrirlo. Cierre y vuelva a abrir PowerShell para que reconozca Python y Git.
+   - Opcional, para REA: `winget install OpenJS.NodeJS.LTS` y luego `npm install -g rea-agents`.
+   - Licencia: Docker Desktop requiere suscripción en empresas de más de 250 empleados o más de USD 10 millones de ingresos.
+2. **Obtener el código y revisar el equipo:**
+   ```powershell
+   git clone https://github.com/matiasmonsalves/poc-pacifico-seguros.git
+   cd poc-pacifico-seguros
+   git checkout poc/estructura-ingenieria-inversa
+   powershell -ExecutionPolicy Bypass -File scripts\windows\requisitos.ps1
+   ```
+3. **Verificar todo**: análisis, transformación VB6 → .NET, validación de ADF, pruebas, entorno, 20 pruebas de punta a punta y cobertura.
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File scripts\windows\verificar.ps1
+   ```
+   Si solo quiere ver el sistema funcionando: `docker compose up -d --build`. Si necesita compilar o probar .NET sin instalarlo: `scripts\windows\dotnet.ps1 sistemas\polizas\app test`.
+4. Abra **http://localhost:8080** y siga el [recorrido sugerido](#4-verlo-funcionando).
+
+Con proxy corporativo, antes de los pasos 2 y 3: `$env:CA_BUNDLE = 'C:\ruta\certificado.pem'`. Si un puerto está ocupado: `copy .env.example .env` y cambie el puerto.
+
+#### Opción B: Ubuntu en WSL2
+
 **Paso 0: revisar el equipo.** Descargue `scripts/windows/revisar-windows.ps1` desde GitHub (botón *Download raw file*) y ejecútelo en PowerShell. No instala nada:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\revisar-windows.ps1
 ```
 
-**Opción recomendada: Docker Engine dentro de WSL2 (sin Docker Desktop).** Es gratuita y no depende de la edición ni del ciclo de soporte de Windows.
+**Con Docker Engine dentro de WSL2 (sin Docker Desktop):** es gratuita y no depende de la edición ni del ciclo de soporte de Windows.
 
 1. PowerShell **como administrador**: `wsl --install -d Ubuntu-24.04` (si WSL ya existe: `wsl --update`). Reinicie el equipo y cree el usuario de Ubuntu cuando se lo pida.
 2. En la terminal de **Ubuntu**:
@@ -41,7 +72,7 @@ powershell -ExecutionPolicy Bypass -File .\revisar-windows.ps1
 
 Las páginas (`http://localhost:8080`, etc.) se abren desde el navegador de Windows: WSL2 publica los puertos en `localhost`.
 
-**Alternativa: Docker Desktop.** Úsela solo si cumple tres condiciones: Windows 11 23H2 o superior (o Windows 10 22H2) en edición **Pro, Enterprise o Education**, soporte vigente de Microsoft (en Windows 10, por ejemplo, con actualizaciones extendidas ESU) y **licencia de Docker** cuando la empresa tiene más de 250 empleados o más de USD 10 millones de ingresos anuales.
+**Con Docker Desktop y Ubuntu:** úsela solo si cumple tres condiciones: Windows 11 23H2 o superior (o Windows 10 22H2) en edición **Pro, Enterprise o Education**, soporte vigente de Microsoft (en Windows 10, por ejemplo, con actualizaciones extendidas ESU) y **licencia de Docker** cuando la empresa tiene más de 250 empleados o más de USD 10 millones de ingresos anuales.
 - Instálelo con el backend WSL 2.
 - Active *Settings → Resources → WSL integration → Ubuntu-24.04*.
 - No ejecute `instalar-wsl.sh`. Instale solo `sudo apt install -y git python3 curl` en Ubuntu.

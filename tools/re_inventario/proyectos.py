@@ -106,7 +106,7 @@ def analizar_vbp(ruta: Path, base: Path) -> ProyectoLegado:
     objetos = [o.split(";")[-1].strip() for o in valores.get("Object", [])]
     compilacion = valores.get("CompilationType", [""])[0]
     p = ProyectoLegado(
-        archivo=str(ruta.relative_to(base)), plataforma="VB6", lenguaje="VB6", tipo_aplicacion=tipo,
+        archivo=ruta.relative_to(base).as_posix(), plataforma="VB6", lenguaje="VB6", tipo_aplicacion=tipo,
         framework="VB6 runtime (MSVBVM60)",
         # 0 es el valor por defecto de VB6 (código nativo); -1 se interpreta como P-Code. Confirmar con el equipo del cliente.
         compilacion={"0": "Código nativo", "-1": "P-Code"}.get(compilacion, compilacion or "desconocida"),
@@ -178,7 +178,7 @@ def analizar_proyecto_net(ruta: Path, base: Path) -> ProyectoLegado:
         tipo = "Biblioteca"
 
     p = ProyectoLegado(
-        archivo=str(ruta.relative_to(base)),
+        archivo=ruta.relative_to(base).as_posix(),
         plataforma=".NET (SDK)" if sdk and not framework.startswith(("net4", "net3", "net2")) else ".NET Framework",
         lenguaje="VB.NET" if ruta.suffix.lower() == ".vbproj" else "C#",
         tipo_aplicacion=tipo, framework=framework, archivos=archivos,
