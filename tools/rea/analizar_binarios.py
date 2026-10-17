@@ -198,7 +198,18 @@ def analizar_todos(rutas: list[Path], salida: Path, con_decompilacion: bool = Fa
     if not shutil.which("rea"):
         raise SystemExit("No se encontró `rea` en el PATH: npm install -g rea-agents")
     salida.mkdir(parents=True, exist_ok=True)
+    anteriores = {}
+    if (salida / "binarios.json").exists():
+        anteriores = {r["binario"]: r for r in json.loads((salida / "binarios.json").read_text(encoding="utf-8"))}
     resultados = [analizar(b, salida, con_decompilacion) for b in binarios(rutas)]
+    if not con_decompilacion:
+        # Sin --decompilar se conserva la decompilación anterior del mismo binario (mismo tamaño, carpeta presente)
+        for r in resultados:
+            previo = anteriores.get(r["binario"], {})
+            if previo.get("bytes") == r["bytes"] and (salida / r["binario"] / "decompilado").is_dir():
+                for clave in ("decompilacion", "reconstruccion_verificada"):
+                    if clave in previo:
+                        r[clave] = previo[clave]
     (salida / "binarios.json").write_text(json.dumps(resultados, indent=2, ensure_ascii=False), encoding="utf-8")
     (salida / "BINARIOS.md").write_text(reporte_md(resultados), encoding="utf-8")
     return resultados

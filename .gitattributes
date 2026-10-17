@@ -1,0 +1,15 @@
+# Los scripts se ejecutan en bash y dentro de contenedores Linux: siempre LF, también en Windows
+*.sh    text eol=lf
+*.py    text eol=lf
+Dockerfile text eol=lf
+*.yml   text eol=lf
+# Binarios legados y fuentes de los sistemas emulados: no se tocan
+*.dll   binary
+*.exe   binary
+*.ocx   binary
+*.png   binary
+*.csv   -text
+*.dtsx  -text
+*.frm   -text
+*.bas   -text
+*.vbp   -text

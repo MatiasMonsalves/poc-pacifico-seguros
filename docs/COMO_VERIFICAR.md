@@ -2,7 +2,7 @@
 
 ## Opción 1: un comando
 
-Requisitos: Docker con Compose, Python 3.9+, Node.js ≥ 22.19 con `npm install -g rea-agents` (para el análisis de binarios).
+Requisitos e instalación por sistema operativo: [INSTALACION_LOCAL.md](INSTALACION_LOCAL.md). `scripts/verificar.sh` ejecuta primero `scripts/requisitos.sh`.
 
 ```bash
 git clone <repo> && cd poc-pacifico-seguros

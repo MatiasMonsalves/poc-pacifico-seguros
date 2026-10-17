@@ -15,6 +15,8 @@ CON_DOCKER=1; DECOMPILAR="--decompilar"
 for a in "$@"; do
   case "$a" in --sin-docker) CON_DOCKER=0 ;; --sin-decompilar) DECOMPILAR="" ;; *) echo "Opción desconocida: $a"; exit 2 ;; esac
 done
+[[ -f .env ]] && set -a && . ./.env && set +a
+API_URL="http://localhost:${API_PORT:-8080}"; GEN_URL="http://localhost:${GEN_PORT:-8081}"
 COMPOSE=(docker compose -f docker-compose.yml); [[ -n "${CA_BUNDLE:-}" ]] && COMPOSE+=(-f docker-compose.proxy.yml)
 FILAS=(); FALLOS=0
 
@@ -58,15 +60,18 @@ cobertura_vb6() {
     local dir url; dir=$(dirname "$cfg")
     url=$(python3 -c "import json,sys; print(json.load(open(sys.argv[1])).get('appUrl',''))" "$cfg")
     [[ -n "$url" && -f "$dir/transformacion/mapeo.json" ]] || continue
+    url="${url/http:\/\/localhost:8080/$API_URL}"
     python3 tools/vb62net/cobertura.py "$dir/transformacion/mapeo.json" "$url/openapi/v1.json" --salida "$dir/transformacion/COBERTURA.md" || ok=1
   done
   return $ok
 }
 
 levantar() {
-  "${COMPOSE[@]}" up -d --build && for i in $(seq 1 60); do curl -sf http://localhost:8080/health >/dev/null && curl -sf http://localhost:8081/health >/dev/null && return 0; sleep 2; done; return 1
+  "${COMPOSE[@]}" up -d --build && for i in $(seq 1 60); do curl -sf "$API_URL/health" >/dev/null && curl -sf "$GEN_URL/health" >/dev/null && return 0; sleep 2; done; return 1
 }
 
+scripts/requisitos.sh $([[ $CON_DOCKER -eq 0 ]] && echo --sin-docker) || exit 1
+echo
 paso "1. Análisis del portafolio (inventario + REA + SSIS→ADF)" analisis.log python3 tools/portafolio/portafolio.py analizar $DECOMPILAR
 paso "2. Transformación VB6 → .NET 10 (generar y compilar)" vb62net.log transformar_vb6
 paso "3. Validación de los pipelines ADF" validar_adf.log validar_adf

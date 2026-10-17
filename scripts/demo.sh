@@ -3,7 +3,8 @@
 # la API .NET 10 (reemplazo de la app VB6) dispara el pipeline de ADF convertido desde SSIS.
 # Termina con código 1 si algún resultado no es el esperado.
 set -uo pipefail
-API=${API:-http://localhost:8080}
+[[ -f "$(dirname "$0")/../.env" ]] && set -a && . "$(dirname "$0")/../.env" && set +a
+API=${API:-http://localhost:${API_PORT:-8080}}
 FALLOS=0
 
 titulo() { printf '\n\033[1m== %s\033[0m\n' "$1"; }
@@ -57,7 +58,7 @@ sleep 5
 verificar "Estado consultado por runId" "$(curl -s "$API/api/cargas/$RUN" | campo "['estado']")" "Succeeded"
 
 titulo "Pólizas: app generada automáticamente por vb62net (puerto 8081)"
-GEN=${GEN:-http://localhost:8081}
+GEN=${GEN:-http://localhost:${GEN_PORT:-8081}}
 verificar "Buscar (SQL parametrizado)" "$(curl -s "$GEN/api/polizas/buscar?Cliente=1" | campo "['filas'][0]['NumPoliza']")" "POL-0001"
 verificar "Intento de inyección SQL rechazado" "$(curl -s "$GEN/api/polizas/buscar?Cliente=1%20OR%201%3D1" | campo "['status']")" "400"
 verificar "Cotizar queda pendiente (lógica COM)" "$(curl -s -o /dev/null -w '%{http_code}' -X POST "$GEN/api/polizas/cotizar" -H 'Content-Type: application/json' -d '{"Cliente":"5","Tipo":"AUTO","Suma":"600","Siniestros":"0"}')" "501"
@@ -66,7 +67,7 @@ sleep 5
 verificar "Cargar (Shell dtexec → pipeline ADF)" "$(curl -s "$API/api/cargas/$RUN" | campo "['estado']")" "Succeeded"
 
 titulo "Siniestros: pipeline maestro → pipeline hijo (Execute Package → Execute Pipeline) en el emulador"
-ADF=${ADF:-http://localhost:5080}
+ADF=${ADF:-http://localhost:${ADF_PORT:-5080}}
 FAB="$ADF/subscriptions/sub-poc/resourceGroups/rg-poc/providers/Microsoft.DataFactory/factories/siniestros"
 RUN=$(curl -s -X POST "$FAB/pipelines/PL_Maestro_Siniestros/createRun" -H 'Content-Type: application/json' -d '{"FechaCorte":"2026-10-17"}' | campo "['runId']")
 for i in $(seq 1 30); do
