@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<DTS:Executable xmlns:DTS="www.microsoft.com/SqlServer/Dts" DTS:refId="Package" DTS:ObjectName="CargaPolizas" DTS:ExecutableType="Microsoft.Package">
+  <DTS:ConnectionManagers>
+    <DTS:ConnectionManager DTS:refId="Package.ConnectionManagers[OLTP]" DTS:ObjectName="OLTP" DTS:CreationName="OLEDB">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager DTS:ConnectionString="Data Source=SRVSQL01;Initial Catalog=Seguros;Provider=SQLNCLI11.1;User ID=etl;Password=secreto;" />
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+    <DTS:ConnectionManager DTS:refId="Package.ConnectionManagers[ArchivoPolizas]" DTS:ObjectName="ArchivoPolizas" DTS:CreationName="FLATFILE">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager DTS:ConnectionString="\\fileserver\entrada\polizas_*.csv" />
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+  </DTS:ConnectionManagers>
+  <DTS:Variables>
+    <DTS:Variable DTS:Namespace="User" DTS:ObjectName="FechaProceso" DTS:Expression="(DT_DBDATE)GETDATE()">
+      <DTS:VariableValue>2026-10-17</DTS:VariableValue>
+    </DTS:Variable>
+  </DTS:Variables>
+  <DTS:Executables>
+    <DTS:Executable DTS:refId="Package\Truncar Staging" DTS:ObjectName="Truncar Staging" DTS:ExecutableType="Microsoft.ExecuteSQLTask">
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" SQLTask:Connection="Package.ConnectionManagers[OLTP]" SQLTask:SqlStatementSource="TRUNCATE TABLE stg.Polizas" />
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable DTS:refId="Package\Cargar CSV a Staging" DTS:ObjectName="Cargar CSV a Staging" DTS:ExecutableType="Microsoft.Pipeline">
+      <DTS:ObjectData>
+        <pipeline>
+          <components>
+            <component name="Origen CSV" componentClassID="Microsoft.FlatFileSource">
+              <connections><connection connectionManagerRefId="Package.ConnectionManagers[ArchivoPolizas]" /></connections>
+            </component>
+            <component name="Convertir tipos" componentClassID="Microsoft.DataConvert" />
+            <component name="Buscar Cliente" componentClassID="Microsoft.Lookup">
+              <properties><property name="SqlCommand">SELECT IdCliente, Rut FROM dbo.Clientes</property></properties>
+            </component>
+            <component name="Destino Staging" componentClassID="Microsoft.OLEDBDestination">
+              <properties><property name="OpenRowset">[stg].[Polizas]</property></properties>
+              <connections><connection connectionManagerRefId="Package.ConnectionManagers[OLTP]" /></connections>
+            </component>
+          </components>
+        </pipeline>
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable DTS:refId="Package\Consolidar" DTS:ObjectName="Consolidar" DTS:ExecutableType="Microsoft.ExecuteSQLTask">
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" SQLTask:Connection="Package.ConnectionManagers[OLTP]" SQLTask:SqlStatementSource="EXEC dbo.usp_ConsolidarPolizas ?" />
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable DTS:refId="Package\Registrar Error" DTS:ObjectName="Registrar Error" DTS:ExecutableType="Microsoft.ExecuteSQLTask">
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" SQLTask:Connection="Package.ConnectionManagers[OLTP]" SQLTask:SqlStatementSource="INSERT INTO log.ErroresETL (Paquete, Fecha) VALUES ('CargaPolizas', GETDATE())" />
+      </DTS:ObjectData>
+    </DTS:Executable>
+  </DTS:Executables>
+  <DTS:PrecedenceConstraints>
+    <DTS:PrecedenceConstraint DTS:From="Package\Truncar Staging" DTS:To="Package\Cargar CSV a Staging" />
+    <DTS:PrecedenceConstraint DTS:From="Package\Cargar CSV a Staging" DTS:To="Package\Consolidar" />
+    <DTS:PrecedenceConstraint DTS:From="Package\Consolidar" DTS:To="Package\Registrar Error" DTS:Value="1" />
+  </DTS:PrecedenceConstraints>
+</DTS:Executable>
