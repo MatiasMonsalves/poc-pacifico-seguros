@@ -35,11 +35,12 @@ Todo se ejecuta desde PowerShell. Docker Desktop corre los contenedores y Python
    - Licencia: Docker Desktop requiere suscripción en empresas de más de 250 empleados o más de USD 10 millones de ingresos.
 2. **Obtener el código y revisar el equipo:**
    ```powershell
-   git clone https://github.com/matiasmonsalves/poc-pacifico-seguros.git
+   cd $HOME
+   git clone -b poc/estructura-ingenieria-inversa https://github.com/matiasmonsalves/poc-pacifico-seguros.git
    cd poc-pacifico-seguros
-   git checkout poc/estructura-ingenieria-inversa
    powershell -ExecutionPolicy Bypass -File scripts\windows\requisitos.ps1
    ```
+   Clone en su carpeta de usuario (`cd $HOME`), no en `C:\Windows\system32`, que es donde abre PowerShell como administrador. Y clone directamente la rama con `-b`: si clona `main` y después cambia de rama, Git en Windows puede dejar scripts con saltos de línea CRLF. `requisitos.ps1` los repara, pero así se evita el problema.
 3. **Verificar todo**: análisis, transformación VB6 → .NET, validación de ADF, pruebas, entorno, 20 pruebas de punta a punta y cobertura.
    ```powershell
    powershell -ExecutionPolicy Bypass -File scripts\windows\verificar.ps1
@@ -106,9 +107,8 @@ Si la red inspecciona HTTPS, las descargas de imágenes y de paquetes NuGet fall
 ## 2. Obtener el código y revisar el equipo
 
 ```bash
-git clone https://github.com/matiasmonsalves/poc-pacifico-seguros.git
+git clone -b poc/estructura-ingenieria-inversa https://github.com/matiasmonsalves/poc-pacifico-seguros.git
 cd poc-pacifico-seguros
-git checkout poc/estructura-ingenieria-inversa
 scripts/requisitos.sh
 ```
 

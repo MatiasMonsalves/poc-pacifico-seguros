@@ -10,11 +10,29 @@ function Falla($t) { Write-Host "  [FALTA] $t" -ForegroundColor Red; $script:err
 
 Write-Host 'Requisitos (Windows + Docker Desktop)'
 
-# db-init.sh se ejecuta dentro de un contenedor Linux: con saltos de línea de Windows (CRLF) falla
-$conCrlf = Get-ChildItem (Join-Path $Raiz 'infra'), (Join-Path $Raiz 'scripts') -Filter *.sh -File |
-    Where-Object { [IO.File]::ReadAllText($_.FullName).Contains("`r") }
-if ($conCrlf) { Falla "Scripts con saltos de línea CRLF ($($conCrlf.Name -join ', ')). En la carpeta del repositorio: git add --renormalize . ; git checkout -- ." }
-else { Ok 'Saltos de línea de los scripts que corren en contenedores (LF)' }
+# Un repositorio dentro de C:\Windows (por ejemplo system32, la carpeta inicial de PowerShell como
+# administrador) da problemas de permisos y de redirección de archivos
+if ($env:windir -and $Raiz.StartsWith($env:windir, [StringComparison]::OrdinalIgnoreCase)) {
+    Falla "El repositorio está en $Raiz. Clónelo en una carpeta de usuario, por ejemplo: cd `$HOME; git clone ..."
+}
+
+# Los scripts .sh de infra/ corren dentro de contenedores Linux: con saltos de línea CRLF fallan.
+# Pasa al clonar la rama main y cambiar de rama: Git no reescribe los archivos que no cambiaron.
+# Se reparan solos volviendo a sacarlos de git (el repositorio los guarda en LF).
+function ConCrlf { @(Get-ChildItem (Join-Path $Raiz 'infra') -Filter *.sh -File | Where-Object { [IO.File]::ReadAllText($_.FullName).Contains("`r") }) }
+$conCrlf = ConCrlf
+if ($conCrlf.Count -gt 0 -and (Get-Command git -ErrorAction SilentlyContinue)) {
+    foreach ($archivo in $conCrlf) {
+        $relativo = $archivo.FullName.Substring($Raiz.Length + 1) -replace '\\', '/'
+        Remove-Item $archivo.FullName -Force
+        git -C $Raiz checkout -- $relativo 2>$null
+    }
+    if ((ConCrlf).Count -eq 0) { Ok "Saltos de línea de $($conCrlf.Name -join ', ') reparados a LF" }
+    $conCrlf = ConCrlf
+} elseif ($conCrlf.Count -eq 0) {
+    Ok 'Saltos de línea de los scripts que corren en contenedores (LF)'
+}
+if ($conCrlf.Count -gt 0) { Falla "Scripts con saltos de línea CRLF ($($conCrlf.Name -join ', ')). Vuelva a clonar con: git clone -b poc/estructura-ingenieria-inversa <url>" }
 
 $py = Obtener-Python
 if ($py) { $extra = @(); if ($py.Count -gt 1) { $extra = $py[1..($py.Count - 1)] }; Ok "Python $(& $py[0] @extra -c 'import platform; print(platform.python_version())') ($($py -join ' '))" }
