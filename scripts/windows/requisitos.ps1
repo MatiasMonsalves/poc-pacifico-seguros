@@ -36,6 +36,9 @@ if ($conCrlf.Count -gt 0) { Falla "Scripts con saltos de línea CRLF ($($conCrlf
 
 $py = Obtener-Python
 if ($py) { $extra = @(); if ($py.Count -gt 1) { $extra = $py[1..($py.Count - 1)] }; Ok "Python $(& $py[0] @extra -c 'import platform; print(platform.python_version())') ($($py -join ' '))" }
+elseif (Get-ChildItem "$env:LOCALAPPDATA\Programs\Python\Python3*\python.exe", "$env:ProgramFiles\Python3*\python.exe" -ErrorAction SilentlyContinue) {
+    Falla 'Python está instalado, pero esta ventana no lo encuentra: cierre PowerShell y abra una nueva (o reinicie el equipo)'
+}
 else { Falla 'Python 3.9 o superior. Instálelo con: winget install Python.Python.3.12 (y abra una nueva ventana de PowerShell)' }
 
 if (Get-Command git -ErrorAction SilentlyContinue) { Ok 'Git' } else { Aviso 'Git no está instalado (winget install Git.Git); solo hace falta para clonar y actualizar el repositorio' }
@@ -43,7 +46,11 @@ if (Get-Command rea -ErrorAction SilentlyContinue) { Ok 'REA' } else { Aviso 'RE
 
 if (-not $SinDocker) {
     if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
-        Falla 'Docker Desktop no está instalado (winget install Docker.DockerDesktop)'
+        if (Test-Path "$env:ProgramFiles\Docker\Docker\Docker Desktop.exe") {
+            Falla 'Docker Desktop está instalado, pero esta ventana no encuentra el comando docker: reinicie el equipo (o cierre sesión), abra Docker Desktop y luego una nueva ventana de PowerShell'
+        } else {
+            Falla 'Docker Desktop no está instalado (winget install Docker.DockerDesktop)'
+        }
     } else {
         $null = docker info 2>$null
         if ($LASTEXITCODE -ne 0) {
