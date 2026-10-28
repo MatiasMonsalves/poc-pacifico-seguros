@@ -47,6 +47,7 @@ Todo se ejecuta desde PowerShell. Docker Desktop corre los contenedores y Python
    ```
    Si solo quiere ver el sistema funcionando: `docker compose up -d --build`. Si necesita compilar o probar .NET sin instalarlo: `scripts\windows\dotnet.ps1 sistemas\polizas\app test`.
 4. Abra **http://localhost:8080** y siga el [recorrido sugerido](#4-verlo-funcionando).
+5. Para presentar la demo guiada: [DEMO_WINDOWS.md](DEMO_WINDOWS.md).
 
 Con proxy corporativo, antes de los pasos 2 y 3: `$env:CA_BUNDLE = 'C:\ruta\certificado.pem'`. Si un puerto está ocupado: `copy .env.example .env` y cambie el puerto.
 

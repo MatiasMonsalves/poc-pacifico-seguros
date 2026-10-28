@@ -11,8 +11,9 @@ proc:polizas/modconexion.abrirconexion,proc,,reemplazar,,Db (inyección de SqlCo
 proc:polizas/modconexion.calcularedad,proc,,migrar,,generado: modConexion.CalcularEdad,EdadTests;Vb6Tests,generado,vb6/modConexion.bas:14-16
 proc:polizas/modconexion.formatearrutviejo,proc,,no migrar (código muerto),,,,validar R3,vb6/modConexion.bas:19-21
 ssis_pkg:cargapolizas,ssis_pkg,,rediseño ADF,ETL-01,adf/pipeline/PL_CargaPolizas.json,validar_adf;emulador ADF (scripts/demo),convertido,ssis/CargaPolizas.dtsx
-table:clientes,table,,solo lectura,,,,,"escribe: — · lee: ssis:buscar cliente, vb6:frmpolizas.cmdcotizar_click"
-table:erroresetl,table,,coexistencia (misma BD),,,,,escribe: ssis:registrar error · lee: —
-table:polizas,table,,coexistencia (misma BD),,,,,"escribe: ssis:destino staging, ssis:truncar staging · lee: vb6:frmpolizas.cmdbuscar_click, vb6:frmpolizas.exportarexcelviejo"
-table:usp_consolidarpolizas,table,,solo lectura,,,,,escribe: — · lee: —
-table:usp_recalcularprimas,table,,solo lectura,,,,,escribe: — · lee: —
+db_proc:dbo.usp_consolidarpolizas,db_proc,,se conserva en la BD (la invoca el sistema nuevo),,,,,ejecuta: ssis:consolidar
+db_proc:dbo.usp_recalcularprimas,db_proc,,se conserva en la BD (la invoca el sistema nuevo),,,,,ejecuta: vb6:frmpolizas.cmdrecalcular_click
+table:dbo.clientes,table,,solo lectura,,,,,"escribe: — · lee: ssis:buscar cliente, vb6:frmpolizas.cmdcotizar_click"
+table:dbo.polizas,table,,solo lectura,,,,,"escribe: — · lee: vb6:frmpolizas.cmdbuscar_click, vb6:frmpolizas.exportarexcelviejo"
+table:log.erroresetl,table,,coexistencia (misma BD),,,,,escribe: ssis:registrar error · lee: —
+table:stg.polizas,table,,coexistencia (misma BD),,,,,"escribe: ssis:destino staging, ssis:truncar staging · lee: —"

@@ -8,7 +8,7 @@ Kit para hacer ingeniería inversa de **varios sistemas legados** (aplicaciones 
 
 La ingeniería inversa de los binarios sin fuente usa **[REA](https://github.com/morluto/rea)**, y las reglas recuperadas se validan con pruebas de paridad contra el binario legado.
 
-**Instalarlo en su equipo: [docs/INSTALACION_LOCAL.md](docs/INSTALACION_LOCAL.md)** · **Cómo verificar que funciona: [docs/COMO_VERIFICAR.md](docs/COMO_VERIFICAR.md)** (`scripts/verificar.sh`, un comando) · **Cómo usarlo con un sistema nuevo: [docs/GUIA_MULTISISTEMA.md](docs/GUIA_MULTISISTEMA.md)**
+**Presentar la demo en Windows: [docs/DEMO_WINDOWS.md](docs/DEMO_WINDOWS.md)** (`scripts\windows\presentacion.ps1`) · **Instalarlo en su equipo: [docs/INSTALACION_LOCAL.md](docs/INSTALACION_LOCAL.md)** · **Cómo verificar que funciona: [docs/COMO_VERIFICAR.md](docs/COMO_VERIFICAR.md)** (`scripts/verificar.sh`, un comando) · **Cómo usarlo con un sistema nuevo: [docs/GUIA_MULTISISTEMA.md](docs/GUIA_MULTISISTEMA.md)**
 
 ## Sistemas de ejemplo (emulados)
 
@@ -21,7 +21,7 @@ Consolidado: [portafolio/PORTAFOLIO.md](portafolio/PORTAFOLIO.md).
 
 ## Uso rápido
 
-Requisitos: Python 3.9+, Docker con Compose y, para binarios, `npm install -g rea-agents` (Node.js ≥ 22.19). `scripts/requisitos.sh` revisa el equipo; en Windows use WSL2 ([instalación](docs/INSTALACION_LOCAL.md)).
+Requisitos: Python 3.9+, Docker con Compose y, para binarios, `npm install -g rea-agents` (Node.js ≥ 22.19). `scripts/requisitos.sh` revisa el equipo; en Windows basta Docker Desktop + PowerShell ([instalación](docs/INSTALACION_LOCAL.md), [demo](docs/DEMO_WINDOWS.md)).
 
 ```bash
 # Crear un sistema y analizarlo (inventario + REA + SSIS→ADF + resumen)

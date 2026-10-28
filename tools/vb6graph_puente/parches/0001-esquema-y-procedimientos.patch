@@ -1,0 +1,270 @@
+diff --git a/vb6graph/cli.py b/vb6graph/cli.py
+index 15acd76..f36932d 100644
+--- a/vb6graph/cli.py
++++ b/vb6graph/cli.py
+@@ -24,7 +24,7 @@ from .store import Store
+ 
+ PLUGIN_MODULES = ("report", "export", "mcp_server", "enrich", "install")
+ TRACE_KINDS = ("CALLS", "CALLS_API", "OPENS_FORM", "UNLOADS_FORM", "INSTANTIATES", "EXECUTES_SQL", "READS",
+-               "WRITES", "USES_VAR")
++               "WRITES", "EXECUTES_PROC", "USES_VAR")
+ 
+ 
+ # ---------------------------------------------------------------------------
+@@ -226,7 +226,7 @@ def cmd_trace(a: argparse.Namespace) -> int:
+         return 1
+     kinds = a.kinds.split(",") if a.kinds else list(TRACE_KINDS)
+     if a.direction == "in" and not a.kinds:
+-        kinds = ["CALLS", "OPENS_FORM", "HANDLES_EVENT", "EXECUTES_SQL", "READS", "WRITES", "USES_VAR"]
++        kinds = ["CALLS", "OPENS_FORM", "HANDLES_EVENT", "EXECUTES_SQL", "READS", "WRITES", "EXECUTES_PROC", "USES_VAR"]
+     print(start["id"])
+     seen = {start["id"]}
+     lines: list[str] = []
+diff --git a/vb6graph/enrich/facts.py b/vb6graph/enrich/facts.py
+index ec6e1cf..aae9e6e 100644
+--- a/vb6graph/enrich/facts.py
++++ b/vb6graph/enrich/facts.py
+@@ -92,8 +92,8 @@ def reachable_procs(store: Store, roots: list[str]) -> set[str]:
+ def _proc_tables(store: Store, proc_id: str) -> set[str]:
+     out: set[str] = set()
+     for sql_id in _dsts(store, proc_id, "EXECUTES_SQL"):
+-        for kind in ("READS", "WRITES"):
+-            out.update(d for d in _dsts(store, sql_id, kind) if d.startswith("table:"))
++        for kind in ("READS", "WRITES", "EXECUTES_PROC"):
++            out.update(d for d in _dsts(store, sql_id, kind) if d.startswith(("table:", "db_proc:")))
+     return out
+ 
+ 
+diff --git a/vb6graph/mcp_server.py b/vb6graph/mcp_server.py
+index 58fdef3..13b4c2f 100644
+--- a/vb6graph/mcp_server.py
++++ b/vb6graph/mcp_server.py
+@@ -23,7 +23,7 @@ from pathlib import Path
+ from typing import Any, Callable
+ 
+ from .deadcode import DEAD_CODE_RULE
+-from .model import table_id
++from .model import db_proc_id, table_id
+ from .report import Analysis
+ from .store import CODE_FILE_KINDS, Store
+ 
+@@ -242,8 +242,11 @@ class GraphTools:
+                 "truncated": truncated}
+ 
+     def who_touches_table(self, table: str) -> dict[str, Any]:
+-        tid = table if table.startswith("table:") else table_id(table)
++        tid = table if table.startswith(("table:", "db_proc:")) else table_id(table)
+         u = self.a.table_usage.get(tid.lower())
++        if u is None and not table.startswith(("table:", "db_proc:")) and db_proc_id(table) in self.a.table_usage:
++            tid = db_proc_id(table)
++            u = self.a.table_usage[tid]
+         if u is None:
+             hits = [t for t in self.a.table_usage if tid.split(":", 1)[1] in t]
+             return {"error": "not_found", "table": tid, "similar": hits[:20]}
+@@ -434,7 +437,7 @@ no cambie de modelo salvo que el usuario lo pida (nunca escalar).
+ get_playbook(nombre); el usuario puede lanzarlos como prompts MCP (/mcp__vb6graph__<nombre> en Claude Code). Cuando un \
+ paso de next_steps trae "playbook", llame get_playbook y sígalo.
+ - Stack destino: no lo asuma; si el usuario no lo indicó, pregúntele (.NET es solo la referencia).
+-- IDs: proc:proyecto/modulo.proc, form:proyecto/frmx, table:nombre (global)."""
++- IDs: proc:proyecto/modulo.proc, form:proyecto/frmx, table:esquema.nombre y db_proc:esquema.nombre (globales; sin esquema = dbo)."""
+ 
+ GRAPH_TOOLS: list[tuple[str, str, str]] = [
+     ("overview", "overview", "Panorama del workspace activo: proyectos, nodos/aristas, LOC, resolución de llamadas, "
+diff --git a/vb6graph/model.py b/vb6graph/model.py
+index ad236cb..ee4170a 100644
+--- a/vb6graph/model.py
++++ b/vb6graph/model.py
+@@ -2,18 +2,19 @@
+ from __future__ import annotations
+ 
+ import hashlib
++import os
+ import re
+ from dataclasses import dataclass, field
+ from typing import Any
+ 
+ NODE_KINDS = {
+     "project", "file", "form", "usercontrol", "module", "class", "control", "menu",
+-    "proc", "var", "const", "api", "ref", "ocx", "table", "sql",
++    "proc", "var", "const", "api", "ref", "ocx", "table", "db_proc", "sql",
+     "ssis_pkg", "ssis_task", "ssis_conn", "ssis_component",
+ }
+ EDGE_KINDS = {
+     "CONTAINS", "CALLS", "HANDLES_EVENT", "OPENS_FORM", "UNLOADS_FORM", "INSTANTIATES",
+-    "USES_VAR", "CALLS_API", "DEPENDS_ON", "USES_OCX", "EXECUTES_SQL", "READS", "WRITES",
++    "USES_VAR", "CALLS_API", "DEPENDS_ON", "USES_OCX", "EXECUTES_SQL", "READS", "WRITES", "EXECUTES_PROC",
+     "SSIS_PRECEDES", "SSIS_USES_CONN", "SSIS_EXECUTES_PKG", "SSIS_EXECUTES_PROC",
+ }
+ RESOLUTIONS = {"resolved", "heuristic", "unresolved"}
+@@ -29,11 +30,28 @@ def node_id(kind: str, project: str | None, qualified: str) -> str:
+     return f"{kind}:{norm(project)}/{q}" if project else f"{kind}:{q}"
+ 
+ 
++DEFAULT_SCHEMA = os.environ.get("VB6GRAPH_DEFAULT_SCHEMA", "dbo")
++
++
++def qualify_db_object(name: str) -> str:
++    """`[srv].[db].[schema].[obj]` -> `schema.obj`, keeping case. Without a schema the default one (dbo) is
++    assumed, as SQL Server does; temp tables (#x, @x) keep no schema. `stg.Polizas` and `dbo.Polizas` stay apart."""
++    parts = re.sub(r'[\[\]"`]', "", name.strip()).split(".")
++    obj = parts[-1].strip()
++    if obj.startswith(("#", "@")):
++        return obj
++    schema = parts[-2].strip() if len(parts) >= 2 and parts[-2].strip() else DEFAULT_SCHEMA
++    return f"{schema}.{obj}"
++
++
+ def table_id(name: str) -> str:
+-    """Global table id shared by VB6 and SSIS: strips brackets, quotes and schema/db prefixes."""
+-    n = re.sub(r'[\[\]"`]', "", name.strip())
+-    n = n.split(".")[-1]
+-    return f"table:{n.lower()}"
++    """Global table id shared by VB6 and SSIS: `table:schema.table` (server/db prefixes dropped)."""
++    return f"table:{qualify_db_object(name).lower()}"
++
++
++def db_proc_id(name: str) -> str:
++    """Global stored procedure id shared by VB6 and SSIS: `db_proc:schema.proc`."""
++    return f"db_proc:{qualify_db_object(name).lower()}"
+ 
+ 
+ def unresolved_id(name: str) -> str:
+diff --git a/vb6graph/report.py b/vb6graph/report.py
+index a6b8a58..5bf56f2 100644
+--- a/vb6graph/report.py
++++ b/vb6graph/report.py
+@@ -193,8 +193,8 @@ class Analysis:
+     # ---- SQL / tables ------------------------------------------------------------
+     def sql_tables(self, sql_id: str) -> dict[str, set[str]]:
+         out: dict[str, set[str]] = defaultdict(set)
+-        for e in self.outs(sql_id, "READS", "WRITES"):
+-            mode = "EXEC" if e["props"].get("object_type") == "procedure" else e["kind"]
++        for e in self.outs(sql_id, "READS", "WRITES", "EXECUTES_PROC"):
++            mode = "EXEC" if e["kind"] == "EXECUTES_PROC" else e["kind"]
+             out[e["dst"]].add(mode)
+         return out
+ 
+@@ -212,13 +212,12 @@ class Analysis:
+     def table_usage(self) -> dict[str, dict[str, Any]]:
+         """table id -> {vb6: [...], ssis: [...], shared: bool, object_type}."""
+         usage: dict[str, dict[str, Any]] = {}
+-        for t in self.of_kind("table"):
++        for t in self.of_kind("table", "db_proc"):
+             vb6: list[dict[str, Any]] = []
+             ssis: list[dict[str, Any]] = []
+-            for e in self.ins(t["id"], "READS", "WRITES", "SSIS_EXECUTES_PROC"):
++            for e in self.ins(t["id"], "READS", "WRITES", "EXECUTES_PROC", "SSIS_EXECUTES_PROC"):
+                 src = self.nodes.get(e["src"], {})
+-                mode = "EXEC" if (e["kind"] == "SSIS_EXECUTES_PROC" or e["props"].get("object_type") == "procedure") \
+-                    else e["kind"]
++                mode = "EXEC" if e["kind"] in ("EXECUTES_PROC", "SSIS_EXECUTES_PROC") else e["kind"]
+                 if src.get("kind") == "sql":
+                     for x in self.ins(e["src"], "EXECUTES_SQL"):
+                         vb6.append({"id": x["src"], "mode": mode, "sql": e["src"], "file": x["file"],
+@@ -227,7 +226,7 @@ class Analysis:
+                     task = e["src"] if src.get("kind") == "ssis_task" else self.parent.get(e["src"], e["src"])
+                     ssis.append({"id": e["src"], "task": task, "mode": mode, "file": e["file"], "line": e["line"],
+                                  "resolution": e["resolution"]})
+-            usage[t["id"]] = {"name": t["name"], "object_type": t["props"].get("object_type", "table"),
++            usage[t["id"]] = {"name": t["name"], "object_type": "procedure" if t["kind"] == "db_proc" else "table",
+                               "vb6": vb6, "ssis": ssis, "shared": bool(vb6 and ssis)}
+         return usage
+ 
+@@ -712,7 +711,8 @@ def sec_tablas(a: Analysis) -> str:
+                                                                "SSIS (tareas / componentes)"], rows),
+                    f"Compartidas entre VB6 y SSIS: <b>{esc(', '.join(shared) or 'ninguna')}</b>. "
+                    "Los procedimientos VB6 llegan a la tabla a través de su sentencia SQL "
+-                   "(<code>EXECUTES_SQL → READS/WRITES</code>).")
++                   "(<code>EXECUTES_SQL → READS/WRITES/EXECUTES_PROC</code>). Los objetos se identifican por "
++                   "<code>esquema.nombre</code> (sin esquema se asume <code>dbo</code>).")
+ 
+ 
+ def sec_ssis(a: Analysis) -> str:
+diff --git a/vb6graph/resolve.py b/vb6graph/resolve.py
+index 0a7d346..e5701d4 100644
+--- a/vb6graph/resolve.py
++++ b/vb6graph/resolve.py
+@@ -12,7 +12,7 @@ from collections import Counter
+ from dataclasses import dataclass, field, replace
+ 
+ from .extract import (OCX_BY_LIBRARY, PLACEHOLDER, SQL_START, ProjectContext, SqlHit, Unit, control_node_id, find_sql, proc_node_id)
+-from .model import Diagnostic, Edge, Fragment, Node, node_id, table_id, unresolved_id
++from .model import Diagnostic, Edge, Fragment, Node, db_proc_id, node_id, qualify_db_object, table_id, unresolved_id
+ from .parser.fallback import _split_commas, expr_from_tokens
+ from .parser.lexer import _continued, _split_statements, strip_comment, tokenize_line
+ from .parser.ir import DEFAULT_PART, Expr, Proc, Ref, Var, arg_label, bare
+@@ -1712,15 +1712,19 @@ class Resolver:
+             self.sink.add(sid, self.table(t), "WRITES", u, h.line, tconf, tres)
+         sp = h.stored_procedure or info.procedure
+         if sp:
+-            self.sink.add(sid, self.table(sp, "procedure"), "READS", u, h.line, 0.7, "heuristic",
+-                          object_type="procedure", via="exec")
++            self.sink.add(sid, self.db_proc(sp), "EXECUTES_PROC", u, h.line, 0.7, "heuristic", via="exec")
+ 
+-    def table(self, name: str, object_type: str = "table") -> str:
+-        tid = table_id(name)
++    def table(self, name: str) -> str:
++        return self._db_object(table_id(name), "table", name, "table")
++
++    def db_proc(self, name: str) -> str:
++        return self._db_object(db_proc_id(name), "db_proc", name, "procedure")
++
++    def _db_object(self, tid: str, kind: str, name: str, object_type: str) -> str:
+         if tid not in self.table_ids and tid not in self.node_ids:
+             self.table_ids.add(tid)
+-            clean = re.sub(r'[\[\]"`]', "", name.strip())
+-            self.frag.nodes.append(Node(tid, "table", clean.split(".")[-1], clean.lower(), None, None, None, None,
++            qualified = qualify_db_object(name)
++            self.frag.nodes.append(Node(tid, kind, qualified, qualified.lower(), None, None, None, None,
+                                         None, {"object_type": object_type, "source": "vb6"}))
+         return tid
+ 
+diff --git a/vb6graph/ssis.py b/vb6graph/ssis.py
+index a04bdb5..f074f09 100644
+--- a/vb6graph/ssis.py
++++ b/vb6graph/ssis.py
+@@ -10,7 +10,8 @@ from typing import Any
+ 
+ from lxml import etree
+ 
+-from .model import Diagnostic, Edge, FileRec, Fragment, Node, node_id, sha256, table_id, unresolved_id
++from .model import (Diagnostic, Edge, FileRec, Fragment, Node, db_proc_id, node_id, qualify_db_object, sha256,
++                    table_id, unresolved_id)
+ from .sql import SqlInfo, analyze_sql
+ 
+ DTS = "www.microsoft.com/SqlServer/Dts"
+@@ -293,13 +294,20 @@ class _Builder:
+     def add_edge(self, edge: Edge) -> None:
+         self.frag.edges.append(edge)
+ 
+-    def table_node(self, name: str, object_type: str = "table") -> str:
+-        clean = re.sub(r'[\[\]"`]', "", name.strip())
+-        tid = table_id(clean)
+-        self.add_node(Node(id=tid, kind="table", name=clean.split(".")[-1], qualified_name=clean,
+-                           props={"object_type": object_type}))
++    def table_node(self, name: str) -> str:
++        qualified = qualify_db_object(name)
++        tid = table_id(name)
++        self.add_node(Node(id=tid, kind="table", name=qualified, qualified_name=qualified,
++                           props={"object_type": "table"}))
+         return tid
+ 
++    def proc_node(self, name: str) -> str:
++        qualified = qualify_db_object(name)
++        pid = db_proc_id(name)
++        self.add_node(Node(id=pid, kind="db_proc", name=qualified, qualified_name=qualified,
++                           props={"object_type": "procedure"}))
++        return pid
++
+ 
+ # ---------------------------------------------------------------- connection managers
+ 
+@@ -579,7 +587,7 @@ class _PackageExtractor:
+                 self.out.add_edge(Edge(src, self.out.table_node(name), kind, conf, resolution, self.doc.rel, line,
+                                        _evidence(sql), dict(meta)))
+         for proc in info.procedures:
+-            self.out.add_edge(Edge(src, self.out.table_node(proc, "procedure"), "SSIS_EXECUTES_PROC", conf,
++            self.out.add_edge(Edge(src, self.out.proc_node(proc), "SSIS_EXECUTES_PROC", conf,
+                                    resolution, self.doc.rel, line, _evidence(sql), dict(meta)))
+         return info
+ 

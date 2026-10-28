@@ -159,10 +159,11 @@ class Demo:
             info(f"- {p.modulo}.{p.nombre}  {p.evidencia}" + ("  · seguro de borrar" if p.seguro_borrar else ""))
         print()
         info(c("Linaje VB6 ↔ SSIS (quién lee y escribe cada tabla):", "1"))
-        tabla([[t["table"].removeprefix("table:"), t["origen"], t["modo"], t["actor"].split("/")[-1], f"{t['file']}:{t['line']}"]
-               for t in g.tablas], ["tabla", "sistema", "modo", "quién", "evidencia"])
-        if any(t["table"] == "table:polizas" and t["origen"] == "ssis" for t in g.tablas):
-            info(c("    Nota: SSIS escribe stg.Polizas (staging); el grafo aún une esquemas en 'polizas'. Ver docs/VB6GRAPH.md", "2"))
+        tabla([[t["table"].split(":", 1)[1], "proc. almacenado" if t["object_type"] == "procedure" else "tabla",
+                t["origen"], t["modo"], t["actor"].split("/")[-1], f"{t['file']}:{t['line']}"]
+               for t in g.tablas], ["objeto", "tipo", "sistema", "modo", "quién", "evidencia"])
+        compartidas = sorted({t["table"].split(":", 1)[1] for t in g.tablas if t["compartida"] == "True"})
+        info(c(f"    Compartidas VB6 ↔ SSIS: {', '.join(compartidas) or 'ninguna'} (stg.Polizas y dbo.Polizas se distinguen por esquema)", "2"))
         info(f"\n    Reporte completo: {carpeta / 'reporte.html'}")
         self.seguir()
 
@@ -295,6 +296,9 @@ def main(argv: list[str]) -> int:
     p.add_argument("--sin-docker", action="store_true")
     a = p.parse_args(argv[1:])
     con_docker = not a.sin_docker and shutil.which("docker") is not None
+    if con_docker and ejecutar(["docker", "info", "--format", "{{.ServerVersion}}"]).returncode != 0:
+        raise SystemExit("Docker está instalado pero no responde: abra Docker Desktop, espere a que diga "
+                         "'Engine running' y vuelva a ejecutar (o use --sin-docker).")
     if not a.sin_docker and not con_docker:
         aviso("Docker no está disponible: se omiten la compilación y la ejecución")
     d = Demo(pausa=not a.sin_pausa, con_docker=con_docker)

@@ -13,7 +13,7 @@
 
 | Tabla | Modo |
 |---|---|
-| Clientes | READ |
+| dbo.Clientes | READ |
 
 ## Destino
 

@@ -1,6 +1,6 @@
 # Verificación de la fábrica de migración
 
-Ejecutada el 28-10-2026 23:20 con `scripts/verificar.sh `.
+Ejecutada el 28-10-2026 23:37 con `scripts/verificar.sh `.
 
 | Paso | Resultado | Log |
 |---|---|---|

@@ -17,11 +17,12 @@ Generado desde el grafo de vb6graph y los resultados de la fábrica. Alcance aco
 
 | Tabla | Escribe hoy | Lee |
 |---|---|---|
-| `table:clientes` | — | ssis:buscar cliente, vb6:frmpolizas.cmdcotizar_click |
-| `table:erroresetl` | ssis:registrar error | — |
-| `table:polizas` | ssis:destino staging, ssis:truncar staging | vb6:frmpolizas.cmdbuscar_click, vb6:frmpolizas.exportarexcelviejo |
-| `table:usp_consolidarpolizas` | — | — |
-| `table:usp_recalcularprimas` | — | — |
+| `db_proc:dbo.usp_consolidarpolizas` | — | — |
+| `db_proc:dbo.usp_recalcularprimas` | — | — |
+| `table:dbo.clientes` | — | ssis:buscar cliente, vb6:frmpolizas.cmdcotizar_click |
+| `table:dbo.polizas` | — | vb6:frmpolizas.cmdbuscar_click, vb6:frmpolizas.exportarexcelviejo |
+| `table:log.erroresetl` | ssis:registrar error | — |
+| `table:stg.polizas` | ssis:destino staging, ssis:truncar staging | — |
 
 ## Fuera de alcance (código muerto, confirmar en R3)
 

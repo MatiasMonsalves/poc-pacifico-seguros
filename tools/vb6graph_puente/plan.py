@@ -119,6 +119,11 @@ def generar(carpeta: Path) -> dict:
         d.setdefault(t["modo"], set()).add(f"{t['origen']}:{t['actor'].split('/')[-1]}")
     for tabla, d in sorted(dueños.items()):
         escritores = sorted(d.get("WRITES", set()))
+        if tabla.startswith("db_proc:"):
+            filas.append({"legacy_node": tabla, "tipo": "db_proc", "tamano": "", "decision": "se conserva en la BD (la invoca el sistema nuevo)",
+                          "tarea": "", "componente_nuevo": "", "tests": "", "estado": "",
+                          "evidencia": "ejecuta: " + ", ".join(sorted(d.get("EXEC", set())))})
+            continue
         filas.append({"legacy_node": tabla, "tipo": "table", "tamano": "",
                       "decision": "coexistencia (misma BD)" if escritores else "solo lectura",
                       "tarea": "", "componente_nuevo": "", "tests": "", "estado": "",
@@ -188,7 +193,8 @@ def tarea_md(tarea: str, origen, extra: dict, fila: dict, g, sid: str) -> str:
         *([f"- Llama a: {', '.join(p.llama_a)}"] if p.llama_a else []),
         *([f"- Llamada sin resolver (enlace tardío/COM): {x}" for x in p.sin_resolver]), "",
         "## Datos", "", "| Tabla | Modo |", "|---|---|",
-        *[f"| {t} | READ |" for t in sorted(set(p.lee))], *[f"| {t} | WRITE |" for t in sorted(set(p.escribe))], "",
+        *[f"| {t} | READ |" for t in sorted(set(p.lee))], *[f"| {t} | WRITE |" for t in sorted(set(p.escribe))],
+        *[f"| {t} | EXEC (procedimiento almacenado) |" for t in sorted(set(p.ejecuta))], "",
         "## Destino", "",
         f"- Generado por vb62net: `{extra.get('destino', '—')}` ({extra.get('estado', '—')})",
         f"- App terminada: {fila['componente_nuevo'] or 'pendiente'}", "",

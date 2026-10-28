@@ -11,7 +11,7 @@
 
 | Tabla | Modo |
 |---|---|
-| usp_RecalcularPrimas | READ |
+| dbo.usp_RecalcularPrimas | EXEC (procedimiento almacenado) |
 
 ## Destino
 

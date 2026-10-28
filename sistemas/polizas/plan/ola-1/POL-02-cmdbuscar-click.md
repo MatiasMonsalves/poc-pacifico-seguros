@@ -11,7 +11,7 @@
 
 | Tabla | Modo |
 |---|---|
-| Polizas | READ |
+| dbo.Polizas | READ |
 
 ## Destino
 

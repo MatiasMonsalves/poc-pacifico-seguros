@@ -1,3 +1,3 @@
 ﻿id,kind,project,file,line,procs,events,controls,loc_code,loc_comment,loc_blank,loc_designer,cyclomatic_sum,cyclomatic_max,fan_in,fan_out,sql,resume_next,bucket,tables
-form:polizas/frmpolizas,form,Polizas,vb6/frmPolizas.frm,1,6,5,9,43,4,9,27,6,1,0,1,4,0,S,"table:clientes, table:polizas, table:usp_recalcularprimas"
+form:polizas/frmpolizas,form,Polizas,vb6/frmPolizas.frm,1,6,5,9,43,4,9,27,6,1,0,1,4,0,S,"db_proc:dbo.usp_recalcularprimas, table:dbo.clientes, table:dbo.polizas"
 module:polizas/modconexion,module,Polizas,vb6/modConexion.bas,1,3,0,0,15,1,4,1,3,1,1,0,0,0,S,

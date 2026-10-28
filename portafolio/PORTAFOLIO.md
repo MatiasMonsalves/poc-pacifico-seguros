@@ -1,6 +1,6 @@
 # Portafolio de sistemas legados
 
-Generado el 17-10-2026 con `tools/portafolio`.
+Generado el 28-10-2026 con `tools/portafolio`.
 
 | Sistema | Tecnologías | Paquetes SSIS | Proyectos | Binarios | Sin convertir | Riesgos | Complejidad |
 |---|---|---|---|---|---|---|---|
@@ -22,6 +22,6 @@ De menor a mayor complejidad: los primeros sistemas sirven para ajustar la fábr
 
 - (1 sistema) Compilado a código nativo: si falta el fuente, del ejecutable solo se obtiene pseudocódigo (REA + Ghidra/IDA)
 - (1 sistema) Servicios ASMX: no existen en .NET 10
+- (1 sistema) .NET Framework v3.5 (CLR 2): el salto a .NET 10 es mayor; revisar APIs obsoletas
 - (1 sistema) Crystal Reports: no tiene versión para .NET moderno en Linux; evaluar SSRS, Power BI o una librería de PDF
 - (1 sistema) LINQ to SQL: no existe en .NET 10; migrar a EF Core o SqlClient
-- (1 sistema) .NET Framework v3.5 (CLR 2): el salto a .NET 10 es mayor; revisar APIs obsoletas

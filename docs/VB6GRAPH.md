@@ -44,8 +44,17 @@ sistemas/<id>/plan/
 
 Un paquete SSIS con marcadores (Script Task, Send Mail…) cuenta como **parcial**, no como migrado.
 
-## Observaciones para el autor (encontradas al integrarlo)
+## Mejoras al grafo (parche para el autor)
 
-1. **Se pierde el esquema de la tabla.** `TRUNCATE TABLE stg.Polizas` y `SELECT … FROM dbo.Polizas` caen en el mismo nodo `table:polizas`. En `tablas.csv`, el VB6 aparece leyendo una tabla que SSIS "escribe", cuando en realidad SSIS escribe el staging (`stg.Polizas`). Eso produce un falso acoplamiento VB6↔SSIS en el linaje y en la propiedad de escritura. Propuesta: identificar las tablas por `esquema.tabla`, o por base de datos y esquema cuando haya varias.
-2. **Procedimientos almacenados como `table`.** `usp_RecalcularPrimas` es un nodo `table` con `object_type=procedure` y arista `READS` heurística. Funciona, pero un `kind` propio, o la arista `EXECUTES`, simplificaría a los consumidores del grafo.
-3. **Fallas de tareas SSIS.** La semántica de una tarea que falla con su rama de error (en ADF un try-catch deja el pipeline en *Succeeded*) no es parte del grafo. La fábrica la resuelve en `ssis2adf` agregando la actividad `Fail`.
+`tools/vb6graph_puente/parches/0001-esquema-y-procedimientos.patch` corrige dos problemas encontrados al integrarlo. Se aplica a la instalación local con `python tools/vb6graph_puente/aplicar_parche.py` (Windows o Linux, necesita git; es idempotente). Los grafos guardados de `polizas` y `siniestros` ya están generados con el parche.
+
+| | Antes | Con el parche |
+|---|---|---|
+| Esquema | `TRUNCATE TABLE stg.Polizas` y `SELECT … FROM dbo.Polizas` caían en el mismo nodo `table:polizas`: falso acoplamiento VB6↔SSIS en el linaje y en la propiedad de escritura | Nodos `table:stg.polizas` y `table:dbo.polizas`. Sin esquema se asume `dbo`, como hace SQL Server (configurable con `VB6GRAPH_DEFAULT_SCHEMA`); se descartan servidor y base; las temporales (`#x`) no llevan esquema |
+| Procedimientos almacenados | Nodo `table` con `object_type=procedure` y arista `READS` heurística | Nodo propio `db_proc:esquema.nombre`; desde VB6 la arista `EXECUTES_PROC`, desde SSIS `SSIS_EXECUTES_PROC` |
+
+Archivos que toca: `model.py` (`qualify_db_object`, `table_id`, `db_proc_id`, nuevos `db_proc` y `EXECUTES_PROC`), `resolve.py` y `ssis.py` (creación de nodos), `report.py` (sección Tablas y `tablas.csv`), `mcp_server.py` (`who_touches_table` acepta tablas y procedimientos), `enrich/facts.py` y `cli.py` (`trace`). El formato de `tablas.csv` no cambia: la columna `table` trae `table:esquema.tabla` o `db_proc:esquema.nombre`.
+
+Si se reindexa con un vb6graph sin el parche, `tools/vb6graph_puente/grafo.py` lo avisa.
+
+Queda pendiente para el autor: la semántica de una tarea SSIS que falla con su rama de error (en ADF un try-catch deja el pipeline en *Succeeded*) no es parte del grafo. La fábrica la resuelve en `ssis2adf` agregando la actividad `Fail`.

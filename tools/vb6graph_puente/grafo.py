@@ -42,6 +42,7 @@ class Proc:
     sql: list[dict] = field(default_factory=list)          # [{texto, operacion, linea}]
     lee: list[str] = field(default_factory=list)
     escribe: list[str] = field(default_factory=list)
+    ejecuta: list[str] = field(default_factory=list)       # procedimientos almacenados (EXEC)
     llama_a: list[str] = field(default_factory=list)
     sin_resolver: list[str] = field(default_factory=list)   # llamadas con enlace tardío / COM
     muerto: bool = False
@@ -58,7 +59,7 @@ class Grafo:
     procs: dict[str, Proc] = field(default_factory=dict)    # clave: "modulo.nombre" en minúsculas
     formularios: list[dict] = field(default_factory=list)   # filas de inventario.csv
     paquetes_ssis: list[dict] = field(default_factory=list)
-    tablas: list[dict] = field(default_factory=list)        # filas de tablas.csv (dueños de lectura/escritura)
+    tablas: list[dict] = field(default_factory=list)        # filas de tablas.csv: tablas (esquema.tabla) y procedimientos almacenados
     riesgos: list[dict] = field(default_factory=list)
     resolucion_llamadas: str = ""
 
@@ -78,6 +79,12 @@ def indexar(fuentes: Path, salida: Path) -> bool:
     db.unlink(missing_ok=True)
     subprocess.run([VB6GRAPH, "index", str(fuentes), "--out", str(db)], check=True,
                    capture_output=True, text=True, encoding="utf-8", errors="replace")
+    con = sqlite3.connect(db)
+    sin_parche = con.execute("SELECT COUNT(*) FROM nodes WHERE kind = 'table' AND props LIKE '%\"procedure\"%'").fetchone()[0]
+    con.close()
+    if sin_parche:
+        print("Aviso: vb6graph sin el parche de esquemas y procedimientos; ejecute tools/vb6graph_puente/aplicar_parche.py",
+              file=sys.stderr)
     shutil.rmtree(salida / "csv", ignore_errors=True)
     subprocess.run([VB6GRAPH, "report", str(db), "--out", str(salida / "reporte.html"), "--csv-dir", str(salida / "csv")],
                    check=True, capture_output=True, text=True, encoding="utf-8", errors="replace")
@@ -125,7 +132,7 @@ def cargar(carpeta: Path) -> Grafo | None:
             p.sql.append({"texto": props.get("text", ""), "operacion": props.get("operation", ""), "linea": e["line"]})
             for e2 in con.execute("SELECT kind, dst FROM edges WHERE src = ?", (e["dst"],)):
                 destino = (nodos[e2["dst"]]["name"] if e2["dst"] in nodos else e2["dst"])
-                (p.lee if e2["kind"] == "READS" else p.escribe if e2["kind"] == "WRITES" else []).append(destino)
+                {"READS": p.lee, "WRITES": p.escribe, "EXECUTES_PROC": p.ejecuta}.get(e2["kind"], []).append(destino)
         elif e["kind"] == "CALLS" and p:
             if e["resolution"] == "unresolved":
                 p.sin_resolver.append(f"{e['dst'].removeprefix('unresolved:')} ({p.archivo}:{e['line']})")

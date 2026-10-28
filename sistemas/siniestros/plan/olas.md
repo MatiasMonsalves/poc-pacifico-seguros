@@ -13,9 +13,9 @@ Generado desde el grafo de vb6graph y los resultados de la fábrica. Alcance aco
 
 | Tabla | Escribe hoy | Lee |
 |---|---|---|
-| `table:siniestro_mov` | — | ssis:movimientos vigentes |
-| `table:siniestros` | ssis:limpiar staging, ssis:staging siniestros | — |
-| `table:usp_calcularreservas` | — | — |
+| `db_proc:dbo.usp_calcularreservas` | — | — |
+| `table:dbo.siniestro_mov` | — | ssis:movimientos vigentes |
+| `table:stg.siniestros` | ssis:limpiar staging, ssis:staging siniestros | — |
 
 ## Fuera de alcance (código muerto, confirmar en R3)
 
