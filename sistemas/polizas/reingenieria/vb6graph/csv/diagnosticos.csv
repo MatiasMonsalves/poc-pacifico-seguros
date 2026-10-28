@@ -1,0 +1,4 @@
+﻿file,line,severity,code,message
+ssis/CargaPolizas.dtsx,1,info,ssis.format,PackageFormatVersion ? parsed best effort
+vb6/frmPolizas.frm,,info,parser_backend,parsed with tree-sitter
+vb6/modConexion.bas,,info,parser_backend,parsed with tree-sitter

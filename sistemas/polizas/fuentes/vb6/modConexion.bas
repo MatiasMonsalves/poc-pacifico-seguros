@@ -14,3 +14,8 @@ End Function
 Public Function CalcularEdad(ByVal fechaNacimiento As Date) As Integer
     CalcularEdad = DateDiff("yyyy", fechaNacimiento, Date)
 End Function
+
+' Formato antiguo de RUT, reemplazado por la validación en la base de datos
+Public Function FormatearRutViejo(ByVal rut As String) As String
+    FormatearRutViejo = UCase(Trim(rut))
+End Function

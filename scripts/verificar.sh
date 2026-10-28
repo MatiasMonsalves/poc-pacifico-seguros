@@ -35,7 +35,8 @@ transformar_vb6() {
   shopt -s globstar nullglob
   for vbp in sistemas/*/fuentes/**/*.vbp; do
     local sistema; sistema=$(echo "$vbp" | cut -d/ -f2)
-    python3 tools/vb62net/vb62net.py "$vbp" --salida "sistemas/$sistema/transformacion" --factoria "$sistema" || ok=1
+    local grafo=(); [[ -f "sistemas/$sistema/reingenieria/vb6graph/grafo.db" ]] && grafo=(--grafo "sistemas/$sistema/reingenieria/vb6graph")
+    python3 tools/vb62net/vb62net.py "$vbp" --salida "sistemas/$sistema/transformacion" --factoria "$sistema" "${grafo[@]}" || ok=1
     for proyecto in sistemas/"$sistema"/transformacion/*.Generado; do
       DOTNET_DIR="$proyecto" scripts/dotnet.sh build -nologo -v q || ok=1
     done
@@ -66,6 +67,15 @@ cobertura_vb6() {
   return $ok
 }
 
+plan_trazabilidad() {
+  local ok=0
+  for g in sistemas/*/reingenieria/vb6graph/grafo.db; do
+    [[ -f "$g" ]] || continue
+    python3 tools/vb6graph_puente/plan.py "$(dirname "$(dirname "$(dirname "$g")")")" || ok=1
+  done
+  return $ok
+}
+
 levantar() {
   "${COMPOSE[@]}" up -d --build && for i in $(seq 1 60); do curl -sf "$API_URL/health" >/dev/null && curl -sf "$GEN_URL/health" >/dev/null && return 0; sleep 2; done; return 1
 }
@@ -81,6 +91,7 @@ if [[ $CON_DOCKER -eq 1 ]]; then
   paso "6. Pruebas de punta a punta (scripts/demo.sh)" demo.log scripts/demo.sh
   paso "7. Cobertura VB6 → app terminada" cobertura.log cobertura_vb6
 fi
+paso "8. Plan y trazabilidad (grafo vb6graph)" plan.log plan_trazabilidad
 
 {
   echo "# Verificación de la fábrica de migración"
@@ -95,6 +106,7 @@ fi
   echo "- Portafolio: [PORTAFOLIO.md](PORTAFOLIO.md)"
   for m in sistemas/*/transformacion/MAPEO_VB6_NET.md; do [[ -f "$m" ]] && echo "- Transformación VB6 → .NET: [$m](../$m)"; done
   for m in sistemas/*/transformacion/COBERTURA.md; do [[ -f "$m" ]] && echo "- Cobertura: [$m](../$m)"; done
+  for m in sistemas/*/plan/AVANCE.md; do [[ -f "$m" ]] && echo "- Plan y avance: [$m](../$m)"; done
   for m in sistemas/*/adf/REPORTE_CONVERSION.md; do [[ -f "$m" ]] && echo "- SSIS → ADF: [$m](../$m)"; done
   echo
   echo "### Validación de ADF"; echo; echo '```'; cat "$LOGS/validar_adf.log"; echo '```'

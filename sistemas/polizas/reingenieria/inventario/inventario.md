@@ -93,6 +93,7 @@ flowchart TD
 - SQL embebido:
   - `SELECT NumPoliza, TipoSeguro, Prima, Estado FROM dbo.Polizas WHERE IdCliente =`
   - `SELECT FechaNacimiento FROM dbo.Clientes WHERE IdCliente =`
+  - `SELECT * FROM dbo.Polizas WHERE Estado =`
 
 ### `vb6/modConexion.bas` (VB6)
 

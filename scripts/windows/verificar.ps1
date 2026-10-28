@@ -41,7 +41,9 @@ Paso '2. Transformación VB6 -> .NET 10 (generar y compilar)' 'vb62net.log' {
     foreach ($vbp in Get-ChildItem (Join-Path $Raiz 'sistemas') -Recurse -Filter *.vbp | Where-Object { $_.FullName -match '[\\/]fuentes[\\/]' }) {
         $sistema = ($vbp.FullName.Substring($Raiz.Length + 1) -split '[\\/]')[1]
         $salida = "sistemas/$sistema/transformacion"
-        Invocar-Python @('tools/vb62net/vb62net.py', $vbp.FullName, '--salida', $salida, '--factoria', $sistema)
+        $argsVb = @('tools/vb62net/vb62net.py', $vbp.FullName, '--salida', $salida, '--factoria', $sistema)
+        if (Test-Path (Join-Path $Raiz "sistemas/$sistema/reingenieria/vb6graph/grafo.db")) { $argsVb += @('--grafo', "sistemas/$sistema/reingenieria/vb6graph") }
+        Invocar-Python $argsVb
         if (-not $SinDocker) {
             foreach ($proyecto in Get-ChildItem (Join-Path $Raiz $salida) -Directory -Filter *.Generado) {
                 Invocar-Dotnet "$salida/$($proyecto.Name)" @('build', '-nologo', '-v', 'q')
@@ -74,6 +76,12 @@ if (-not $SinDocker) {
             $url = $url -replace 'http://localhost:8080', $ApiUrl
             Invocar-Python @('tools/vb62net/cobertura.py', $mapeo, "$url/openapi/v1.json", '--salida', (Join-Path $cfg.DirectoryName 'transformacion/COBERTURA.md'))
         }
+    }
+}
+
+Paso '8. Plan y trazabilidad (grafo vb6graph)' 'plan.log' {
+    foreach ($s in Get-ChildItem (Join-Path $Raiz 'sistemas') -Directory) {
+        if (Test-Path (Join-Path $s.FullName 'reingenieria/vb6graph/grafo.db')) { Invocar-Python @('tools/vb6graph_puente/plan.py', $s.FullName) }
     }
 }
 

@@ -21,7 +21,9 @@
     },
     "destino": "/api/polizas/catalogos",
     "estado": "Automático",
-    "notas": []
+    "notas": [],
+    "nodo_grafo": "proc:polizas/frmpolizas.form_load",
+    "evidencia": "vb6/frmPolizas.frm:32-37"
   },
   {
     "modulo": "frmPolizas",
@@ -54,7 +56,9 @@
     "estado": "Automático",
     "notas": [
       "El SQL original se armaba concatenando texto del usuario (inyección SQL); el generado está parametrizado"
-    ]
+    ],
+    "nodo_grafo": "proc:polizas/frmpolizas.cmdbuscar_click",
+    "evidencia": "vb6/frmPolizas.frm:40-45"
   },
   {
     "modulo": "frmPolizas",
@@ -97,7 +101,9 @@
     "estado": "Parcial",
     "notas": [
       "El SQL original se armaba concatenando texto del usuario (inyección SQL); el generado está parametrizado"
-    ]
+    ],
+    "nodo_grafo": "proc:polizas/frmpolizas.cmdcotizar_click",
+    "evidencia": "vb6/frmPolizas.frm:48-60"
   },
   {
     "modulo": "frmPolizas",
@@ -125,7 +131,37 @@
     "catalogo": {},
     "destino": "/api/polizas/recalcular",
     "estado": "Automático",
-    "notas": []
+    "notas": [],
+    "nodo_grafo": "proc:polizas/frmpolizas.cmdrecalcular_click",
+    "evidencia": "vb6/frmPolizas.frm:62-69"
+  },
+  {
+    "modulo": "frmPolizas",
+    "nombre": "ExportarExcelViejo",
+    "tipo": "Sub",
+    "parametros": "",
+    "retorno": "",
+    "comentario": "Exportaba las pólizas a Excel; el botón se quitó del formulario en 2019",
+    "clase": "muerto",
+    "sql": [
+      {
+        "sql": "SELECT * FROM dbo.Polizas WHERE Estado = 'VIGENTE'",
+        "parametros": [],
+        "original": "rs.Open \"SELECT * FROM dbo.Polizas WHERE Estado = 'VIGENTE'\", cn"
+      }
+    ],
+    "sps": [],
+    "com": [],
+    "adf": null,
+    "controles": [],
+    "catalogo": {},
+    "destino": "— (no se migra)",
+    "estado": "Fuera de alcance",
+    "notas": [
+      "Código muerto según vb6graph (seguro de borrar)"
+    ],
+    "nodo_grafo": "proc:polizas/frmpolizas.exportarexcelviejo",
+    "evidencia": "vb6/frmPolizas.frm:72-75"
   },
   {
     "modulo": "frmPolizas",
@@ -151,7 +187,9 @@
     "estado": "Automático",
     "notas": [
       "MsgBox se devuelve como respuesta JSON"
-    ]
+    ],
+    "nodo_grafo": "proc:polizas/frmpolizas.cmdcargar_click",
+    "evidencia": "vb6/frmPolizas.frm:78-83"
   },
   {
     "modulo": "modConexion",
@@ -171,7 +209,9 @@
     "estado": "Reemplazado",
     "notas": [
       "Conexión ADODB con credenciales en el código → cadena de conexión por configuración/Key Vault"
-    ]
+    ],
+    "nodo_grafo": "proc:polizas/modconexion.abrirconexion",
+    "evidencia": "vb6/modConexion.bas:8-12"
   },
   {
     "modulo": "modConexion",
@@ -191,6 +231,30 @@
     "estado": "Automático",
     "notas": [
       "DateDiff de VB6 cuenta cambios de período, no tiempo transcurrido; Vb6.DateDiff conserva ese comportamiento"
-    ]
+    ],
+    "nodo_grafo": "proc:polizas/modconexion.calcularedad",
+    "evidencia": "vb6/modConexion.bas:14-16"
+  },
+  {
+    "modulo": "modConexion",
+    "nombre": "FormatearRutViejo",
+    "tipo": "Function",
+    "parametros": "ByVal rut As String",
+    "retorno": "String",
+    "comentario": "Formato antiguo de RUT, reemplazado por la validación en la base de datos",
+    "clase": "muerto",
+    "sql": [],
+    "sps": [],
+    "com": [],
+    "adf": null,
+    "controles": [],
+    "catalogo": {},
+    "destino": "— (no se migra)",
+    "estado": "Fuera de alcance",
+    "notas": [
+      "Código muerto según vb6graph (seguro de borrar)"
+    ],
+    "nodo_grafo": "proc:polizas/modconexion.formatearrutviejo",
+    "evidencia": "vb6/modConexion.bas:19-21"
   }
 ]

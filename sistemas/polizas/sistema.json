@@ -12,5 +12,19 @@
     "contenedorBlob": "entrada",
     "zonaHoraria": "Pacific SA Standard Time"
   },
-  "appUrl": "http://localhost:8080"
+  "appUrl": "http://localhost:8080",
+  "pruebas": {
+    "frmPolizas.cmdCotizar_Click": [
+      "ParidadLegadoTests",
+      "TarificadorTests",
+      "EdadTests"
+    ],
+    "modConexion.CalcularEdad": [
+      "EdadTests",
+      "Vb6Tests"
+    ],
+    "frmPolizas.cmdCargar_Click": [
+      "ClienteDataFactoryTests"
+    ]
+  }
 }

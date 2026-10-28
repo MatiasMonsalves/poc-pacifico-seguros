@@ -1,0 +1,5 @@
+﻿table,object_type,origen,actor,modo,file,line,compartida
+table:siniestro_mov,table,ssis,ssis_component:carga_siniestros/extraer siniestros del core/movimientos vigentes,READS,ssis/Carga_Siniestros.dtsx,23,False
+table:siniestros,table,ssis,ssis_task:carga_siniestros/limpiar staging,WRITES,ssis/Carga_Siniestros.dtsx,15,False
+table:siniestros,table,ssis,ssis_component:carga_siniestros/extraer siniestros del core/staging siniestros,WRITES,ssis/Carga_Siniestros.dtsx,28,False
+table:usp_calcularreservas,procedure,ssis,ssis_task:maestro_siniestros/calcular reservas,EXEC,ssis/Maestro_Siniestros.dtsx,20,False

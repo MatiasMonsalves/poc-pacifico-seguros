@@ -56,8 +56,11 @@ class Procedimiento:
     controles: list[str] = field(default_factory=list)
     catalogo: dict[str, list[str]] = field(default_factory=dict)
     destino: str = ""              # ruta del endpoint o método generado
-    estado: str = ""               # Automático | Parcial | Pendiente | Reemplazado
+    estado: str = ""               # Automático | Parcial | Pendiente | Reemplazado | Fuera de alcance
     notas: list[str] = field(default_factory=list)
+    # evidencia del grafo de vb6graph (si se pasó --grafo)
+    nodo_grafo: str = ""
+    evidencia: str = ""
 
 
 def leer(ruta: Path) -> str:
@@ -281,7 +284,8 @@ def ruta_endpoint(formulario: str, proc: Procedimiento) -> str:
 
 
 def comentario_vb(proc: Procedimiento) -> str:
-    return "\n".join(f"        // VB6| {l.rstrip()}" for l in proc.cuerpo.strip("\n").splitlines())
+    origen = f"        // Origen: {proc.evidencia} · {proc.nodo_grafo} (vb6graph)\n" if proc.evidencia else ""
+    return origen + "\n".join(f"        // VB6| {l.rstrip()}" for l in proc.cuerpo.strip("\n").splitlines())
 
 
 def valor_parametro(origen: str, solicitud: str) -> str:
@@ -375,6 +379,8 @@ def generar_funcion(proc: Procedimiento) -> str:
     otras = [l for l in proc.cuerpo.strip().splitlines() if l.strip() and not l.strip().startswith("'")]
     proc.destino = f"{proc.modulo}.{proc.nombre}"
     cabecera = f"    // VB6: {proc.tipo} {proc.nombre}({proc.parametros}){' As ' + proc.retorno if proc.retorno else ''}\n"
+    if proc.evidencia:
+        cabecera += f"    // Origen: {proc.evidencia} · {proc.nodo_grafo} (vb6graph)\n"
     if proc.tipo == "Function" and len(asignaciones) == 1 and len(otras) == 1:
         expr = a_csharp(asignaciones[0], locales)
         if expr:
@@ -424,11 +430,46 @@ ENTRYPOINT ["dotnet", "{ns}.dll"]
 """
 
 
+def aplicar_grafo(carpeta: Path, modulos: list[tuple[str, bool, list[Procedimiento]]]) -> dict | None:
+    """Usa el grafo de vb6graph como fuente de verdad: evidencia, código muerto y contraste de parsers."""
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "vb6graph_puente"))
+    import grafo as vb6graph  # noqa: PLC0415
+    g = vb6graph.cargar(carpeta)
+    if g is None:
+        print(f"Aviso: no hay grafo de vb6graph en {carpeta}; se continúa sin él")
+        return None
+    vistos, sql_distinto, sin_resolver = set(), [], []
+    for nombre_modulo, _, procs in modulos:
+        for proc in procs:
+            nodo = g.proc(nombre_modulo, proc.nombre)
+            if nodo is None:
+                continue
+            vistos.add(f"{nombre_modulo}.{proc.nombre}".lower())
+            proc.nodo_grafo, proc.evidencia = nodo.id, nodo.evidencia
+            if len(nodo.sql) != len(proc.sql) + len(proc.sps):
+                sql_distinto.append(f"{nombre_modulo}.{proc.nombre}")
+            sin_resolver += [(f"{nombre_modulo}.{proc.nombre}", x) for x in nodo.sin_resolver]
+            if nodo.muerto:
+                proc.clase, proc.estado = "muerto", "Fuera de alcance"
+                proc.destino = "— (no se migra)"
+                proc.notas.append("Código muerto según vb6graph" + (" (seguro de borrar)" if nodo.seguro_borrar else ""))
+    todos = {f"{m}.{p.nombre}".lower(): f"{m}.{p.nombre}" for m, _, ps in modulos for p in ps}
+    return {
+        "coinciden": len(vistos),
+        "solo_grafo": sorted(f"{p.modulo}.{p.nombre}" for k, p in g.procs.items() if k not in todos),
+        "solo_vb62net": sorted(v for k, v in todos.items() if k not in vistos),
+        "sql_distinto": sql_distinto,
+        "sin_resolver": sin_resolver,
+    }
+
+
 def main(argv: list[str]) -> int:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("vbp", type=Path)
     p.add_argument("--salida", type=Path, required=True)
     p.add_argument("--factoria", default="", help="nombre de la factoría ADF (id del sistema)")
+    p.add_argument("--grafo", type=Path, help="carpeta con el grafo de vb6graph (grafo.db + csv/): excluye el "
+                                              "código muerto, cita archivo:línea y contrasta ambos parsers")
     a = p.parse_args(argv[1:])
 
     vbp = leer(a.vbp)
@@ -445,6 +486,7 @@ def main(argv: list[str]) -> int:
     for _, es_form, procs in modulos:
         for proc in procs:
             analizar(proc, constantes, es_form)
+    contraste = aplicar_grafo(a.grafo, modulos) if a.grafo else None
 
     destino = a.salida / ns
     destino.mkdir(parents=True, exist_ok=True)
@@ -468,6 +510,8 @@ def main(argv: list[str]) -> int:
     for nombre, es_form, procs in modulos:
         for proc in procs:
             todos.append(proc)
+            if proc.clase == "muerto":
+                continue
             if proc.clase == "evento":
                 endpoints.append((nombre, proc))
             elif proc.clase == "infraestructura":
@@ -493,8 +537,9 @@ def main(argv: list[str]) -> int:
           "- **Automático**: traducido y funcional.",
           "- **Parcial**: el acceso a datos está traducido; falta lógica que no es mecánica (responde 501).",
           "- **Pendiente**: requiere migración manual (responde 501 o lanza excepción).",
-          "- **Reemplazado**: la infraestructura VB6 la cubre .NET (conexiones, configuración).", "",
-          "| VB6 | Destino .NET 10 | Estado | SQL / SP / ADF / COM | Notas |", "|---|---|---|---|---|"]
+          "- **Reemplazado**: la infraestructura VB6 la cubre .NET (conexiones, configuración).",
+          "- **Fuera de alcance**: código muerto según vb6graph; no se migra (confirmar con usuarios, checkpoint R3).", "",
+          "| VB6 | Evidencia (vb6graph) | Destino .NET 10 | Estado | SQL / SP / ADF / COM | Notas |", "|---|---|---|---|---|---|"]
     for p in todos:
         detalle = []
         detalle += [f"SQL `{s['sql']}`" for s in p.sql]
@@ -502,11 +547,20 @@ def main(argv: list[str]) -> int:
         detalle += [f"ADF `{p.adf['pipeline']}` (desde `{p.adf['paquete']}`)"] if p.adf else []
         detalle += [f"COM `{c['progid']}`" for c in p.com]
         detalle += [f"Catálogo {', '.join(p.catalogo)}"] if p.catalogo else []
-        md.append(f"| `{p.modulo}.{p.nombre}` | `{p.destino}` | {p.estado} | {'<br>'.join(detalle) or '—'} | {'<br>'.join(p.notas) or ''} |")
-    conteo = {e: sum(1 for p in todos if p.estado == e) for e in ("Automático", "Parcial", "Pendiente", "Reemplazado")}
+        md.append(f"| `{p.modulo}.{p.nombre}` | {('`' + p.evidencia + '`') if p.evidencia else '—'} | `{p.destino}` | {p.estado} | "
+                  f"{'<br>'.join(detalle) or '—'} | {'<br>'.join(p.notas) or ''} |")
+    conteo = {e: sum(1 for p in todos if p.estado == e) for e in ("Automático", "Parcial", "Pendiente", "Reemplazado", "Fuera de alcance")}
     md += ["", "**Resumen:** " + ", ".join(f"{v} {k.lower()}" for k, v in conteo.items()), "",
            "Siguiente paso: completar lo parcial/pendiente (en `sistemas/polizas/app` está el resultado terminado de este ejemplo) "
            "y validar con pruebas de paridad contra el sistema legado.", ""]
+    if contraste is not None:
+        md += ["## Contraste con vb6graph (dos parsers independientes)", "",
+               f"vb6graph (tree-sitter) y vb62net coinciden en **{contraste['coinciden']}** procedimientos.", ""]
+        md += [f"- Solo en vb6graph (vb62net no lo vio): `{x}`" for x in contraste["solo_grafo"]]
+        md += [f"- Solo en vb62net (vb6graph no lo vio): `{x}`" for x in contraste["solo_vb62net"]]
+        md += [f"- Distinta cantidad de SQL en `{x}`" for x in contraste["sql_distinto"]]
+        md += [f"- Llamada sin resolver (enlace tardío/COM) en `{x}`: {y}" for x, y in contraste["sin_resolver"]]
+        md.append("")
     (a.salida / "MAPEO_VB6_NET.md").write_text("\n".join(md), encoding="utf-8")
     print(f"{ns}: {len(endpoints)} endpoints, {len(funciones)} funciones · " + ", ".join(f"{v} {k.lower()}" for k, v in conteo.items()))
     return 0

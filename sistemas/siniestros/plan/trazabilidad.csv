@@ -1,0 +1,6 @@
+legacy_node,tipo,tamano,decision,tarea,componente_nuevo,tests,estado,evidencia
+ssis_pkg:carga_siniestros,ssis_pkg,,rediseño ADF,ETL-01,adf/pipeline/PL_Carga_Siniestros.json,validar_adf;emulador ADF (scripts/demo),parcial: 1 marcador(es) por migrar,ssis/Carga_Siniestros.dtsx
+ssis_pkg:maestro_siniestros,ssis_pkg,,rediseño ADF,ETL-02,adf/pipeline/PL_Maestro_Siniestros.json,validar_adf;emulador ADF (scripts/demo),parcial: 1 marcador(es) por migrar,ssis/Maestro_Siniestros.dtsx
+table:siniestro_mov,table,,solo lectura,,,,,escribe: — · lee: ssis:movimientos vigentes
+table:siniestros,table,,coexistencia (misma BD),,,,,"escribe: ssis:limpiar staging, ssis:staging siniestros · lee: —"
+table:usp_calcularreservas,table,,solo lectura,,,,,escribe: — · lee: —

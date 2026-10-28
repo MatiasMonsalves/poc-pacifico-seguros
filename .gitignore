@@ -6,6 +6,10 @@ sistemas/*/fuentes/
 sistemas/*/reingenieria/rea/*/decompilado/
 !sistemas/polizas/reingenieria/rea/*/decompilado/
 !sistemas/siniestros/reingenieria/rea/*/decompilado/
+# El grafo y el reporte de vb6graph incluyen el texto de los fuentes
+sistemas/*/reingenieria/vb6graph/
+!sistemas/polizas/reingenieria/vb6graph/
+!sistemas/siniestros/reingenieria/vb6graph/
 __pycache__/
 bin/
 !sistemas/*/fuentes/**/bin/

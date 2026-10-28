@@ -1,6 +1,6 @@
 # Verificación de la fábrica de migración
 
-Ejecutada el 17-10-2026 11:07 con `scripts/verificar.sh `.
+Ejecutada el 28-10-2026 23:20 con `scripts/verificar.sh `.
 
 | Paso | Resultado | Log |
 |---|---|---|
@@ -11,12 +11,15 @@ Ejecutada el 17-10-2026 11:07 con `scripts/verificar.sh `.
 | 5. Entorno local (docker compose) | OK | `portafolio/logs/compose.log` |
 | 6. Pruebas de punta a punta (scripts/demo.sh) | OK | `portafolio/logs/demo.log` |
 | 7. Cobertura VB6 → app terminada | OK | `portafolio/logs/cobertura.log` |
+| 8. Plan y trazabilidad (grafo vb6graph) | OK | `portafolio/logs/plan.log` |
 
 ## Resultados
 
 - Portafolio: [PORTAFOLIO.md](PORTAFOLIO.md)
 - Transformación VB6 → .NET: [sistemas/polizas/transformacion/MAPEO_VB6_NET.md](../sistemas/polizas/transformacion/MAPEO_VB6_NET.md)
 - Cobertura: [sistemas/polizas/transformacion/COBERTURA.md](../sistemas/polizas/transformacion/COBERTURA.md)
+- Plan y avance: [sistemas/polizas/plan/AVANCE.md](../sistemas/polizas/plan/AVANCE.md)
+- Plan y avance: [sistemas/siniestros/plan/AVANCE.md](../sistemas/siniestros/plan/AVANCE.md)
 - SSIS → ADF: [sistemas/polizas/adf/REPORTE_CONVERSION.md](../sistemas/polizas/adf/REPORTE_CONVERSION.md)
 - SSIS → ADF: [sistemas/siniestros/adf/REPORTE_CONVERSION.md](../sistemas/siniestros/adf/REPORTE_CONVERSION.md)
 

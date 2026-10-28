@@ -1,0 +1,10 @@
+﻿categoria,id,destino,file,line,detalle
+ocx,ocx:polizas/msflxgrd.ocx,,,,
+refs,ref:polizas/progid:pacificotarificador.tarificador,,,,PacificoTarificador.Tarificador
+refs,ref:polizas/{00020430-0000-0000-c000-000000000046},,vb6/Polizas.vbp,2,OLE Automation
+refs,ref:polizas/{2a75196c-d9eb-4129-b803-931327f72d5c},,vb6/Polizas.vbp,3,Microsoft ActiveX Data Objects 2.8 Library
+late_binding,proc:polizas/frmpolizas.cmdcotizar_click,unresolved:tarificador.calcularprima,vb6/frmPolizas.frm,58,"prima = tarificador.CalcularPrima(cboTipo.Text, edad, CCur(txtSuma.Text), CInt(txtSiniestros.Text))"
+createobject,proc:polizas/frmpolizas.cmdcotizar_click,ref:polizas/progid:pacificotarificador.tarificador,vb6/frmPolizas.frm,57,"Set tarificador = CreateObject(""PacificoTarificador.Tarificador"")"
+dynamic_sql,sql:polizas/frmpolizas.cmdbuscar_click#l42,,vb6/frmPolizas.frm,42,"SELECT NumPoliza, TipoSeguro, Prima, Estado FROM dbo.Polizas WHERE IdCliente = {?}"
+dynamic_sql,sql:polizas/frmpolizas.cmdcotizar_click#l54,,vb6/frmPolizas.frm,54,SELECT FechaNacimiento FROM dbo.Clientes WHERE IdCliente = {?}
+unresolved,proc:polizas/frmpolizas.cmdcotizar_click,unresolved:tarificador.calcularprima,vb6/frmPolizas.frm,58,"prima = tarificador.CalcularPrima(cboTipo.Text, edad, CCur(txtSuma.Text), CInt(txtSiniestros.Text))"

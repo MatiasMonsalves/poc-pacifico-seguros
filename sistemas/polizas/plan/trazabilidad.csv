@@ -1,0 +1,18 @@
+legacy_node,tipo,tamano,decision,tarea,componente_nuevo,tests,estado,evidencia
+form:polizas/frmpolizas,form,S,migrar,,app terminada (sistemas/polizas/app),,hecho,vb6/frmPolizas.frm:1
+module:polizas/modconexion,module,S,migrar,,dominio / infraestructura .NET 10,,hecho,vb6/modConexion.bas:1
+proc:polizas/frmpolizas.form_load,proc,,migrar,POL-01,app: GET /api/catalogos,scripts/demo (punta a punta);cobertura,hecho,vb6/frmPolizas.frm:32-37
+proc:polizas/frmpolizas.cmdbuscar_click,proc,,migrar,POL-02,app: GET /api/clientes/{idCliente}/polizas,scripts/demo (punta a punta);cobertura,hecho,vb6/frmPolizas.frm:40-45
+proc:polizas/frmpolizas.cmdcotizar_click,proc,,migrar,POL-03,app: POST /api/cotizaciones,ParidadLegadoTests;TarificadorTests;EdadTests,hecho,vb6/frmPolizas.frm:48-60
+proc:polizas/frmpolizas.cmdrecalcular_click,proc,,migrar,POL-04,app: POST /api/primas/recalcular,scripts/demo (punta a punta);cobertura,hecho,vb6/frmPolizas.frm:62-69
+proc:polizas/frmpolizas.exportarexcelviejo,proc,,no migrar (código muerto),,,,validar R3,vb6/frmPolizas.frm:72-75
+proc:polizas/frmpolizas.cmdcargar_click,proc,,migrar,POL-05,app: POST /api/cargas,ClienteDataFactoryTests,hecho,vb6/frmPolizas.frm:78-83
+proc:polizas/modconexion.abrirconexion,proc,,reemplazar,,Db (inyección de SqlConnection),,reemplazado,vb6/modConexion.bas:8-12
+proc:polizas/modconexion.calcularedad,proc,,migrar,,generado: modConexion.CalcularEdad,EdadTests;Vb6Tests,generado,vb6/modConexion.bas:14-16
+proc:polizas/modconexion.formatearrutviejo,proc,,no migrar (código muerto),,,,validar R3,vb6/modConexion.bas:19-21
+ssis_pkg:cargapolizas,ssis_pkg,,rediseño ADF,ETL-01,adf/pipeline/PL_CargaPolizas.json,validar_adf;emulador ADF (scripts/demo),convertido,ssis/CargaPolizas.dtsx
+table:clientes,table,,solo lectura,,,,,"escribe: — · lee: ssis:buscar cliente, vb6:frmpolizas.cmdcotizar_click"
+table:erroresetl,table,,coexistencia (misma BD),,,,,escribe: ssis:registrar error · lee: —
+table:polizas,table,,coexistencia (misma BD),,,,,"escribe: ssis:destino staging, ssis:truncar staging · lee: vb6:frmpolizas.cmdbuscar_click, vb6:frmpolizas.exportarexcelviejo"
+table:usp_consolidarpolizas,table,,solo lectura,,,,,escribe: — · lee: —
+table:usp_recalcularprimas,table,,solo lectura,,,,,escribe: — · lee: —

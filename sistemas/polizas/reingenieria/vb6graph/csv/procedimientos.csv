@@ -1,0 +1,10 @@
+﻿id,container,file,line,loc,cyclomatic,fan_in,fan_out,sql,resume_next,visibility,proc_kind,event_handler,tables
+proc:polizas/frmpolizas.cmdbuscar_click,form:polizas/frmpolizas,vb6/frmPolizas.frm,40,6,1,0,1,1,0,private,sub,True,table:polizas
+proc:polizas/frmpolizas.cmdcargar_click,form:polizas/frmpolizas,vb6/frmPolizas.frm,78,6,1,0,0,0,0,private,sub,True,
+proc:polizas/frmpolizas.cmdcotizar_click,form:polizas/frmpolizas,vb6/frmPolizas.frm,48,13,1,0,2,1,0,private,sub,True,table:clientes
+proc:polizas/frmpolizas.cmdrecalcular_click,form:polizas/frmpolizas,vb6/frmPolizas.frm,62,8,1,0,1,1,0,private,sub,True,table:usp_recalcularprimas
+proc:polizas/frmpolizas.exportarexcelviejo,form:polizas/frmpolizas,vb6/frmPolizas.frm,72,4,1,0,1,1,0,private,sub,False,table:polizas
+proc:polizas/frmpolizas.form_load,form:polizas/frmpolizas,vb6/frmPolizas.frm,32,6,1,0,2,0,0,private,sub,True,
+proc:polizas/modconexion.abrirconexion,module:polizas/modconexion,vb6/modConexion.bas,8,5,1,1,1,0,0,public,function,False,
+proc:polizas/modconexion.calcularedad,module:polizas/modconexion,vb6/modConexion.bas,14,3,1,1,0,0,0,public,function,False,
+proc:polizas/modconexion.formatearrutviejo,module:polizas/modconexion,vb6/modConexion.bas,19,3,1,0,0,0,0,public,function,False,

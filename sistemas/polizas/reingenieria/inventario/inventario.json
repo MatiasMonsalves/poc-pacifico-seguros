@@ -223,7 +223,8 @@
       "conexiones": [],
       "sql_embebido": [
         "SELECT NumPoliza, TipoSeguro, Prima, Estado FROM dbo.Polizas WHERE IdCliente =",
-        "SELECT FechaNacimiento FROM dbo.Clientes WHERE IdCliente ="
+        "SELECT FechaNacimiento FROM dbo.Clientes WHERE IdCliente =",
+        "SELECT * FROM dbo.Polizas WHERE Estado ="
       ],
       "procedimientos_llamados": [
         "dbo.usp_RecalcularPrimas"
@@ -272,6 +273,7 @@
       "SQL:dbo.usp_RecalcularPrimas",
       "SQL:dbo.usp_ConsolidarPolizas",
       "SQL:db/04_datos.sql",
+      "APP:vb6/frmPolizas.frm",
       "APP:vb6/frmPolizas.frm"
     ],
     "dbo.usp_RecalcularPrimas": [

@@ -1,0 +1,10 @@
+﻿table,object_type,origen,actor,modo,file,line,compartida
+table:clientes,table,vb6,proc:polizas/frmpolizas.cmdcotizar_click,READS,vb6/frmPolizas.frm,54,True
+table:clientes,table,ssis,ssis_component:cargapolizas/cargar csv a staging/buscar cliente,READS,ssis/CargaPolizas.dtsx,47,True
+table:erroresetl,table,ssis,ssis_task:cargapolizas/registrar error,WRITES,ssis/CargaPolizas.dtsx,68,False
+table:polizas,table,vb6,proc:polizas/frmpolizas.cmdbuscar_click,READS,vb6/frmPolizas.frm,42,True
+table:polizas,table,vb6,proc:polizas/frmpolizas.exportarexcelviejo,READS,vb6/frmPolizas.frm,74,True
+table:polizas,table,ssis,ssis_task:cargapolizas/truncar staging,WRITES,ssis/CargaPolizas.dtsx,34,True
+table:polizas,table,ssis,ssis_component:cargapolizas/cargar csv a staging/destino staging,WRITES,ssis/CargaPolizas.dtsx,52,True
+table:usp_consolidarpolizas,procedure,ssis,ssis_task:cargapolizas/consolidar,EXEC,ssis/CargaPolizas.dtsx,61,False
+table:usp_recalcularprimas,procedure,vb6,proc:polizas/frmpolizas.cmdrecalcular_click,EXEC,vb6/frmPolizas.frm,66,False

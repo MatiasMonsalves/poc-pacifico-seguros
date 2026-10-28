@@ -1,0 +1,3 @@
+﻿categoria,id,file,line,proyecto,tambien_compilado_en,seguro_para_borrar,grupo_borrado,miembros_grupo,bloqueado_por,referencia_condicional
+candidates,proc:polizas/frmpolizas.exportarexcelviejo,vb6/frmPolizas.frm,72,Polizas,,si,G1,vb6/frmPolizas.frm:72,,
+candidates,proc:polizas/modconexion.formatearrutviejo,vb6/modConexion.bas,19,Polizas,,si,G2,vb6/modConexion.bas:19,,

@@ -68,6 +68,12 @@ Private Sub cmdRecalcular_Click()
     cmd.Execute
 End Sub
 
+' Exportaba las pólizas a Excel; el botón se quitó del formulario en 2019
+Private Sub ExportarExcelViejo()
+    Dim rs As New ADODB.Recordset
+    rs.Open "SELECT * FROM dbo.Polizas WHERE Estado = 'VIGENTE'", cn
+End Sub
+
 ' Ejecuta el paquete SSIS en el servidor y espera a que termine
 Private Sub cmdCargar_Click()
     Dim comando As String

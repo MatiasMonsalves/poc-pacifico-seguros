@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reporte vb6graph</title><style>
+:root{--bg:#f7f7f5;--panel:#fff;--fg:#1d1f23;--muted:#6b7078;--line:#e2e3e0;--accent:#2457c5;--accent2:#0f8a6a;
+--warn:#b4561b;--bad:#b42335;--bar:#2457c5;--hl:#fff3b0;--shadow:0 1px 2px rgba(0,0,0,.06)}
+@media (prefers-color-scheme:dark){:root{--bg:#15171a;--panel:#1d2024;--fg:#e6e7e9;--muted:#9aa0a8;--line:#2d3137;
+--accent:#7aa2ff;--accent2:#4cc7a1;--warn:#f0a35e;--bad:#ff7b8a;--bar:#7aa2ff;--hl:#4a4320;--shadow:none}}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+header{position:sticky;top:0;z-index:5;background:var(--panel);border-bottom:1px solid var(--line);padding:10px 20px}
+h1{font-size:18px;margin:0 0 6px}nav{display:flex;flex-wrap:wrap;gap:4px 14px}
+nav a{color:var(--accent);text-decoration:none;font-weight:500}main{max-width:1400px;margin:0 auto;padding:12px 20px 60px}
+section{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px 18px;margin:16px 0;
+box-shadow:var(--shadow);scroll-margin-top:80px}
+h2{font-size:17px;margin:0 0 10px}h3{font-size:14px;margin:18px 0 8px}h4{font-size:13px;margin:12px 0 6px}
+.intro,.muted{color:var(--muted)}code{font:12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+code.sql{display:block;white-space:pre-wrap;word-break:break-word}
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:8px 0}
+.kpi{border:1px solid var(--line);border-radius:6px;padding:10px}.kval{font-size:20px;font-weight:650}
+.klab{color:var(--muted);font-size:12px}.ksub{color:var(--muted);font-size:11px}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}
+.bars{display:flex;flex-direction:column;gap:4px}.bar{display:grid;grid-template-columns:120px 1fr 60px;gap:8px;
+align-items:center;font-size:12px}.bt{background:var(--line);border-radius:3px;height:10px;overflow:hidden}
+.bf{display:block;height:100%;background:var(--bar)}.bv{text-align:right;font-variant-numeric:tabular-nums}
+.tw{overflow-x:auto;max-height:560px;overflow-y:auto;border:1px solid var(--line);border-radius:6px}
+table.grid{border-collapse:collapse;width:100%;font-size:12.5px}
+.grid th,.grid td{padding:5px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.grid th{position:sticky;top:0;background:var(--panel);cursor:pointer;user-select:none;white-space:nowrap}
+.grid th.asc::after{content:" ▲"}.grid th.desc::after{content:" ▼"}
+table.mini{width:auto;margin:8px 0}.mini th{position:static;cursor:default}
+.filter{margin:4px 0 6px;padding:5px 8px;width:260px;max-width:100%;border:1px solid var(--line);border-radius:5px;
+background:var(--bg);color:var(--fg)}
+a.loc{color:var(--accent);text-decoration:none;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px}
+a.loc:hover{text-decoration:underline}
+.tag{display:inline-block;padding:0 6px;border-radius:9px;border:1px solid var(--line);font-size:11px}
+.tag.shared{border-color:var(--accent2);color:var(--accent2);font-weight:600}.tag.warn,.sev-warning{color:var(--warn)}
+.sev-error{color:var(--bad)}.m{font-size:11px;font-weight:600;padding:0 4px;border-radius:3px}
+.m-READS{color:var(--accent)}.m-WRITES{color:var(--bad)}.m-EXEC{color:var(--warn)}
+.sz{display:inline-block;min-width:26px;text-align:center;border-radius:4px;font-weight:700;color:#fff}
+.sz-S{background:#3b8a5a}.sz-M{background:#2f6fbf}.sz-L{background:#c27a1a}.sz-XL{background:#b42335}
+.note{border-left:3px solid var(--accent);background:var(--bg);padding:10px 12px;border-radius:4px;margin:8px 0 12px}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--muted);margin:6px 0}
+.lg{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+.lg.start{background:var(--accent2)}.lg.form{background:var(--accent)}.lg.mod{background:var(--muted)}
+.lg.dead{border:2px dashed var(--bad)}
+#navwrap{border:1px solid var(--line);border-radius:6px;height:560px}#nav{width:100%;height:100%;display:block}
+#nav text{font-size:11px;fill:var(--fg);pointer-events:none}#nav line{stroke:var(--muted);stroke-opacity:.55}
+#nav .modal{stroke-width:2.6}#nav circle{cursor:grab;stroke:var(--panel);stroke-width:2}
+#nav .start circle{fill:var(--accent2)}#nav .form circle{fill:var(--accent)}#nav .other circle{fill:var(--muted)}
+#nav .dead circle{fill:var(--panel);stroke:var(--bad);stroke-dasharray:3 2}#nav marker path{fill:var(--muted)}
+.pkg{border-top:1px solid var(--line);padding-top:6px}
+dialog{width:min(1100px,95vw);height:min(80vh,900px);padding:0;border:1px solid var(--line);border-radius:8px;
+background:var(--panel);color:var(--fg)}dialog::backdrop{background:rgba(0,0,0,.45)}
+.dh{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line)}
+.dh a{color:var(--accent);margin-right:12px}.dh button{background:var(--bg);color:var(--fg);border:1px solid var(--line);
+border-radius:5px;padding:3px 10px;cursor:pointer}
+#srcpre{margin:0;height:calc(100% - 44px);overflow:auto;font:12px/1.5 ui-monospace,Menlo,Consolas,monospace;padding:6px 0}
+#srcpre div{white-space:pre;padding:0 12px}#srcpre div.hl{background:var(--hl)}
+#srcpre span.n{display:inline-block;width:52px;color:var(--muted);text-align:right;margin-right:12px;user-select:none}
+</style></head>
+<body><header><h1>Reporte vb6graph</h1><nav><a href="#resumen">Resumen</a><a href="#inventario">Inventario</a><a href="#navegacion">Navegación</a><a href="#tablas">Tablas</a><a href="#ssis">SSIS</a><a href="#riesgos">Riesgos</a><a href="#muerto">Código muerto</a><a href="#diagnosticos">Diagnósticos</a></nav></header>
+<main><section id="resumen"><h2>Resumen</h2>
+<div class="kpis"><div class="kpi"><div class="kval">0</div><div class="klab">Proyectos</div></div><div class="kpi"><div class="kval">2</div><div class="klab">Archivos</div></div><div class="kpi"><div class="kval">0</div><div class="klab">Líneas de código</div><div class="ksub">de 0 totales</div></div><div class="kpi"><div class="kval">0</div><div class="klab">Procedimientos</div></div><div class="kpi"><div class="kval">n/d</div><div class="klab">Resolución de llamadas</div><div class="ksub">0/0 resueltas</div></div><div class="kpi"><div class="kval">2</div><div class="klab">Paquetes SSIS</div></div></div>
+<div class="cols"><div><h3>Líneas (archivos de código VB6)</h3><div class="bars"><div class="bar loc"><span class="bl">Código</span><span class="bt"><span class="bf" style="width:0.0%"></span></span><span class="bv">0</span></div><div class="bar loc"><span class="bl">Comentarios</span><span class="bt"><span class="bf" style="width:0.0%"></span></span><span class="bv">0</span></div><div class="bar loc"><span class="bl">Blancos</span><span class="bt"><span class="bf" style="width:0.0%"></span></span><span class="bv">0</span></div><div class="bar loc"><span class="bl">Diseñador</span><span class="bt"><span class="bf" style="width:0.0%"></span></span><span class="bv">0</span></div></div></div>
+<div><h3>Nodos por tipo</h3><div class="bars"><div class="bar "><span class="bl">ssis_task</span><span class="bt"><span class="bf" style="width:100.0%"></span></span><span class="bv">6</span></div><div class="bar "><span class="bl">ssis_component</span><span class="bt"><span class="bf" style="width:50.0%"></span></span><span class="bv">3</span></div><div class="bar "><span class="bl">ssis_conn</span><span class="bt"><span class="bf" style="width:50.0%"></span></span><span class="bv">3</span></div><div class="bar "><span class="bl">table</span><span class="bt"><span class="bf" style="width:50.0%"></span></span><span class="bv">3</span></div><div class="bar "><span class="bl">ssis_pkg</span><span class="bt"><span class="bf" style="width:33.3%"></span></span><span class="bv">2</span></div></div></div></div>
+<h3>Proyectos</h3><p class="muted">Sin elementos.</p>
+<div class="cols"><div><h3>Resolución</h3><div class="tw"><table id="t-res" class="grid sortable"><thead><tr><th>Métrica</th><th>Valor</th></tr></thead><tbody><tr><td>CALLS resueltas</td><td>0</td></tr><tr><td>CALLS heurísticas</td><td>0</td></tr><tr><td>CALLS sin resolver</td><td>0</td></tr><tr><td>Llamadas a funciones intrínsecas VB</td><td>0</td></tr></tbody></table></div></div>
+<div><h3>Aristas por tipo</h3><div class="tw"><table id="t-edges" class="grid sortable"><thead><tr><th>Tipo</th><th>Total</th><th>Por resolución</th></tr></thead><tbody><tr><td>CONTAINS</td><td>12</td><td>resolved=12</td></tr><tr><td>READS</td><td>1</td><td>resolved=1</td></tr><tr><td>SSIS_EXECUTES_PKG</td><td>1</td><td>resolved=1</td></tr><tr><td>SSIS_EXECUTES_PROC</td><td>1</td><td>resolved=1</td></tr><tr><td>SSIS_PRECEDES</td><td>4</td><td>resolved=4</td></tr><tr><td>SSIS_USES_CONN</td><td>4</td><td>resolved=4</td></tr><tr><td>WRITES</td><td>2</td><td>resolved=2</td></tr></tbody></table></div></div></div>
+<h3>Archivos y backend de parseo</h3>
+<p class="muted">Backends: </p>
+<div class="tw"><table id="t-files" class="grid sortable"><thead><tr><th>Archivo</th><th>Tipo</th><th>Codificación</th><th>Líneas</th><th>Proyecto</th><th>Parser</th></tr></thead><tbody><tr><td><a class="loc" href="#" data-f="ssis/Carga_Siniestros.dtsx" data-l="1">ssis/Carga_Siniestros.dtsx</a></td><td>dtsx</td><td>utf-8</td><td>43</td><td></td><td><span class="tag">lxml</span></td></tr><tr><td><a class="loc" href="#" data-f="ssis/Maestro_Siniestros.dtsx" data-l="1">ssis/Maestro_Siniestros.dtsx</a></td><td>dtsx</td><td>utf-8</td><td>33</td><td></td><td><span class="tag">lxml</span></td></tr></tbody></table></div>
+</section><section id="inventario"><h2>Inventario por formulario / módulo / clase</h2><div class="note"><b>Tamaño (alimenta la estimación).</b> Se calcula el tramo por líneas de código
+(sin diseñador, comentarios ni blancos) y por complejidad ciclomática total; el componente toma el
+<b>mayor</b> de ambos tramos.<table class="grid mini"><thead><tr><th>Tramo</th><th>LOC código</th>
+<th>Ciclomática Σ</th></tr></thead><tbody><tr><td><b>S</b></td><td>≤ 150</td><td>≤ 20</td></tr><tr><td><b>M</b></td><td>≤ 400</td><td>≤ 60</td></tr><tr><td><b>L</b></td><td>≤ 1,000</td><td>≤ 150</td></tr><tr><td><b>XL</b></td><td>&gt; 1,000</td><td>&gt; 150</td></tr></tbody></table>
+<b>Ciclomática aproximada</b> por procedimiento = 1 + número de <code>If</code>, <code>ElseIf</code>,
+<code>Case</code> (sin <code>Select Case</code>/<code>Case Else</code>), <code>For</code>, <code>Do</code>,
+<code>While</code>, <code>And</code>, <code>Or</code> y <code>On Error</code>, ignorando cadenas y comentarios.
+<b>Fan-in/fan-out</b> = componentes distintos que llaman a / son llamados por este componente (aristas CALLS).
+<br>Distribución: S=0, M=0, L=0, XL=0</div><p class="muted">Sin elementos.</p><h3>Procedimientos (ordenados por complejidad)</h3><p class="muted">Sin elementos.</p></section><section id="navegacion"><h2>Navegación entre formularios</h2><p class="intro">Aristas <code>OPENS_FORM</code> e <code>INSTANTIATES</code> agregadas por componente de origen.</p>
+<p>Inicio: —. Formularios nunca abiertos (inalcanzables desde el inicio): ninguno.</p>
+<div class="legend"><span><i class="lg start"></i>inicio</span><span><i class="lg form"></i>formulario</span>
+<span><i class="lg mod"></i>módulo/clase</span><span><i class="lg dead"></i>nunca abierto</span>
+<span>línea gruesa = modal · arrastre los nodos · clic = ir al código</span></div>
+<div id="navwrap"><svg id="nav" role="img" aria-label="Grafo de navegación entre formularios"></svg></div>
+<h3>Aperturas (Show / Load / New)</h3>
+<p class="muted">Sin elementos.</p></section><section id="tablas"><h2>Tablas</h2><p class="intro">Compartidas entre VB6 y SSIS: <b>ninguna</b>. Los procedimientos VB6 llegan a la tabla a través de su sentencia SQL (<code>EXECUTES_SQL → READS/WRITES</code>).</p><div class="tw"><table id="t-tables" class="grid sortable"><thead><tr><th>Objeto</th><th>Tipo</th><th>VB6 (procedimientos)</th><th>SSIS (tareas / componentes)</th></tr></thead><tbody><tr><td><b>SINIESTRO_MOV</b> </td><td>tabla</td><td><span class="muted">—</span></td><td><span class="m m-READS">lee</span> <a class="loc" href="#" data-f="ssis/Carga_Siniestros.dtsx" data-l="22" title="ssis_component:carga_siniestros/extraer siniestros del core/movimientos vigentes — ssis/Carga_Siniestros.dtsx:22">Extraer siniestros del core/Movimientos vigentes</a> <a class="loc" href="#" data-f="ssis/Carga_Siniestros.dtsx" data-l="23">ssis/Carga_Siniestros.dtsx:23</a></td></tr><tr><td><b>Siniestros</b> </td><td>tabla</td><td><span class="muted">—</span></td><td><span class="m m-WRITES">escribe</span> <a class="loc" href="#" data-f="ssis/Carga_Siniestros.dtsx" data-l="13" title="ssis_task:carga_siniestros/limpiar staging — ssis/Carga_Siniestros.dtsx:13">Limpiar staging</a> <a class="loc" href="#" data-f="ssis/Carga_Siniestros.dtsx" data-l="15">ssis/Carga_Siniestros.dtsx:15</a><br><span class="m m-WRITES">escribe</span> <a class="loc" href="#" data-f="ssis/Carga_Siniestros.dtsx" data-l="27" title="ssis_component:carga_siniestros/extraer siniestros del core/staging siniestros — ssis/Carga_Siniestros.dtsx:27">Extraer siniestros del core/Staging siniestros</a> <a class="loc" href="#" data-f="ssis/Carga_Siniestros.dtsx" data-l="28">ssis/Carga_Siniestros.dtsx:28</a></td></tr><tr><td><b>usp_CalcularReservas</b> </td><td>procedimiento</td><td><span class="muted">—</span></td><td><span class="m m-EXEC">ejecuta</span> <a class="loc" href="#" data-f="ssis/Maestro_Siniestros.dtsx" data-l="18" title="ssis_task:maestro_siniestros/calcular reservas — ssis/Maestro_Siniestros.dtsx:18">Calcular reservas</a> <a class="loc" href="#" data-f="ssis/Maestro_Siniestros.dtsx" data-l="20">ssis/Maestro_Siniestros.dtsx:20</a></td></tr></tbody></table></div></section><section id="ssis"><h2>SSIS</h2><p class="intro">Las contraseñas ya vienen redactadas desde el indexador.</p><article class="pkg"><h3><a class="loc" href="#" data-f="ssis/Carga_Siniestros.dtsx" data-l="2" title="ssis_pkg:carga_siniestros — ssis/Carga_Siniestros.dtsx:2">Carga_Siniestros</a></h3>
+<p class="muted">Formato 8 · creador  ·
+<a class="loc" href="#" data-f="ssis/Carga_Siniestros.dtsx" data-l="2">ssis/Carga_Siniestros.dtsx:2</a></p>
+<h4>Tareas</h4><div class="tw"><table id="t-ssis-t-Carga_Siniestros" class="grid sortable"><thead><tr><th>Tarea</th><th>Tipo</th><th>Deshab.</th><th>Detalle</th></tr></thead><tbody><tr><td><a class="loc" href="#" data-f="ssis/Carga_Siniestros.dtsx" data-l="13" title="ssis_task:carga_siniestros/limpiar staging — ssis/Carga_Siniestros.dtsx:13">Limpiar staging</a></td><td>Execute SQL</td><td></td><td><code class="sql">TRUNCATE TABLE stg.Siniestros</code></td></tr><tr><td><a class="loc" href="#" data-f="ssis/Carga_Siniestros.dtsx" data-l="18" title="ssis_task:carga_siniestros/extraer siniestros del core — ssis/Carga_Siniestros.dtsx:18">Extraer siniestros del core</a></td><td>Data Flow</td><td></td><td><a class="loc" href="#" data-f="ssis/Carga_Siniestros.dtsx" data-l="22" title="ssis_component:carga_siniestros/extraer siniestros del core/movimientos vigentes — ssis/Carga_Siniestros.dtsx:22">Movimientos vigentes</a> <span class="muted">OLE DB Source</span><br><a class="loc" href="#" data-f="ssis/Carga_Siniestros.dtsx" data-l="26" title="ssis_component:carga_siniestros/extraer siniestros del core/convertir montos — ssis/Carga_Siniestros.dtsx:26">Convertir montos</a> <span class="muted">Data Conversion</span><br><a class="loc" href="#" data-f="ssis/Carga_Siniestros.dtsx" data-l="27" title="ssis_component:carga_siniestros/extraer siniestros del core/staging siniestros — ssis/Carga_Siniestros.dtsx:27">Staging siniestros</a> <span class="muted">OLE DB Destination</span></td></tr><tr><td><a class="loc" href="#" data-f="ssis/Carga_Siniestros.dtsx" data-l="35" title="ssis_task:carga_siniestros/validar totales — ssis/Carga_Siniestros.dtsx:35">Validar totales</a></td><td>Script</td><td></td><td></td></tr></tbody></table></div>
+<h4>Precedencias y flujo de datos</h4><div class="tw"><table id="t-ssis-p-Carga_Siniestros" class="grid sortable"><thead><tr><th>Desde</th><th>Hacia</th><th>Flujo</th><th>Condición</th><th>Ubicación</th></tr></thead><tbody><tr><td><a class="loc" href="#" data-f="ssis/Carga_Siniestros.dtsx" data-l="13" title="ssis_task:carga_siniestros/limpiar staging — ssis/Carga_Siniestros.dtsx:13">Limpiar staging</a></td><td><a class="loc" href="#" data-f="ssis/Carga_Siniestros.dtsx" data-l="18" title="ssis_task:carga_siniestros/extraer siniestros del core — ssis/Carga_Siniestros.dtsx:18">Extraer siniestros del core</a></td><td>control</td><td>Success</td><td><a class="loc" href="#" data-f="ssis/Carga_Siniestros.dtsx" data-l="40">ssis/Carga_Siniestros.dtsx:40</a></td></tr><tr><td><a class="loc" href="#" data-f="ssis/Carga_Siniestros.dtsx" data-l="18" title="ssis_task:carga_siniestros/extraer siniestros del core — ssis/Carga_Siniestros.dtsx:18">Extraer siniestros del core</a></td><td><a class="loc" href="#" data-f="ssis/Carga_Siniestros.dtsx" data-l="35" title="ssis_task:carga_siniestros/validar totales — ssis/Carga_Siniestros.dtsx:35">Validar totales</a></td><td>control</td><td>Success</td><td><a class="loc" href="#" data-f="ssis/Carga_Siniestros.dtsx" data-l="41">ssis/Carga_Siniestros.dtsx:41</a></td></tr></tbody></table></div>
+<h4>Conexiones</h4><div class="tw"><table id="t-ssis-c-Carga_Siniestros" class="grid sortable"><thead><tr><th>Conexión</th><th>Tipo</th><th>Cadena</th><th>Contraseña</th></tr></thead><tbody><tr><td><a class="loc" href="#" data-f="ssis/Carga_Siniestros.dtsx" data-l="5" title="ssis_conn:carga_siniestros/core — ssis/Carga_Siniestros.dtsx:5">CORE</a></td><td>OLEDB</td><td><code>Data Source=SRVCORE;Initial Catalog=CoreLegado;Provider=SQLNCLI11.1;Integrated Security=SSPI;</code></td><td></td></tr><tr><td><a class="loc" href="#" data-f="ssis/Carga_Siniestros.dtsx" data-l="8" title="ssis_conn:carga_siniestros/dw — ssis/Carga_Siniestros.dtsx:8">DW</a></td><td>OLEDB</td><td><code>Data Source=SRVSQL02;Initial Catalog=Siniestros;Provider=SQLNCLI11.1;User ID=etl;Password=***;</code></td><td>redactada</td></tr></tbody></table></div></article><article class="pkg"><h3><a class="loc" href="#" data-f="ssis/Maestro_Siniestros.dtsx" data-l="2" title="ssis_pkg:maestro_siniestros — ssis/Maestro_Siniestros.dtsx:2">Maestro_Siniestros</a></h3>
+<p class="muted">Formato 8 · creador  ·
+<a class="loc" href="#" data-f="ssis/Maestro_Siniestros.dtsx" data-l="2">ssis/Maestro_Siniestros.dtsx:2</a></p>
+<h4>Tareas</h4><div class="tw"><table id="t-ssis-t-Maestro_Siniestros" class="grid sortable"><thead><tr><th>Tarea</th><th>Tipo</th><th>Deshab.</th><th>Detalle</th></tr></thead><tbody><tr><td><a class="loc" href="#" data-f="ssis/Maestro_Siniestros.dtsx" data-l="13" title="ssis_task:maestro_siniestros/ejecutar carga — ssis/Maestro_Siniestros.dtsx:13">Ejecutar carga</a></td><td>Execute Package</td><td></td><td><a class="loc" href="#" data-f="ssis/Carga_Siniestros.dtsx" data-l="2" title="ssis_pkg:carga_siniestros — ssis/Carga_Siniestros.dtsx:2">Carga_Siniestros</a></td></tr><tr><td><a class="loc" href="#" data-f="ssis/Maestro_Siniestros.dtsx" data-l="18" title="ssis_task:maestro_siniestros/calcular reservas — ssis/Maestro_Siniestros.dtsx:18">Calcular reservas</a></td><td>Execute SQL</td><td></td><td><code class="sql">EXEC dbo.usp_CalcularReservas ?</code></td></tr><tr><td><a class="loc" href="#" data-f="ssis/Maestro_Siniestros.dtsx" data-l="25" title="ssis_task:maestro_siniestros/avisar falla — ssis/Maestro_Siniestros.dtsx:25">Avisar falla</a></td><td>Send Mail</td><td></td><td></td></tr></tbody></table></div>
+<h4>Precedencias y flujo de datos</h4><div class="tw"><table id="t-ssis-p-Maestro_Siniestros" class="grid sortable"><thead><tr><th>Desde</th><th>Hacia</th><th>Flujo</th><th>Condición</th><th>Ubicación</th></tr></thead><tbody><tr><td><a class="loc" href="#" data-f="ssis/Maestro_Siniestros.dtsx" data-l="13" title="ssis_task:maestro_siniestros/ejecutar carga — ssis/Maestro_Siniestros.dtsx:13">Ejecutar carga</a></td><td><a class="loc" href="#" data-f="ssis/Maestro_Siniestros.dtsx" data-l="18" title="ssis_task:maestro_siniestros/calcular reservas — ssis/Maestro_Siniestros.dtsx:18">Calcular reservas</a></td><td>control</td><td>Success</td><td><a class="loc" href="#" data-f="ssis/Maestro_Siniestros.dtsx" data-l="30">ssis/Maestro_Siniestros.dtsx:30</a></td></tr><tr><td><a class="loc" href="#" data-f="ssis/Maestro_Siniestros.dtsx" data-l="18" title="ssis_task:maestro_siniestros/calcular reservas — ssis/Maestro_Siniestros.dtsx:18">Calcular reservas</a></td><td><a class="loc" href="#" data-f="ssis/Maestro_Siniestros.dtsx" data-l="25" title="ssis_task:maestro_siniestros/avisar falla — ssis/Maestro_Siniestros.dtsx:25">Avisar falla</a></td><td>control</td><td>Failure</td><td><a class="loc" href="#" data-f="ssis/Maestro_Siniestros.dtsx" data-l="31">ssis/Maestro_Siniestros.dtsx:31</a></td></tr></tbody></table></div>
+<h4>Conexiones</h4><div class="tw"><table id="t-ssis-c-Maestro_Siniestros" class="grid sortable"><thead><tr><th>Conexión</th><th>Tipo</th><th>Cadena</th><th>Contraseña</th></tr></thead><tbody><tr><td><a class="loc" href="#" data-f="ssis/Maestro_Siniestros.dtsx" data-l="5" title="ssis_conn:maestro_siniestros/dw — ssis/Maestro_Siniestros.dtsx:5">DW</a></td><td>OLEDB</td><td><code>Data Source=SRVSQL02;Initial Catalog=Siniestros;Provider=SQLNCLI11.1;User ID=etl;Password=***;</code></td><td>redactada</td></tr></tbody></table></div></article></section><section id="riesgos"><h2>Riesgos</h2><div class="kpis"><div class="kpi"><div class="kval">0</div><div class="klab">OCX</div></div><div class="kpi"><div class="kval">0</div><div class="klab">Referencias COM</div></div><div class="kpi"><div class="kval">0</div><div class="klab">Declare (Win32)</div></div><div class="kpi"><div class="kval">0</div><div class="klab">Enlace tardío</div></div><div class="kpi"><div class="kval">0</div><div class="klab">SQL dinámico</div></div><div class="kpi"><div class="kval">0</div><div class="klab">On Error Resume Next</div></div><div class="kpi"><div class="kval">0</div><div class="klab">Sin resolver</div></div></div>
+<h3>Controles OCX</h3><p class="muted">Sin elementos.</p>
+<h3>Referencias COM y ProgIDs</h3><p class="muted">Sin elementos.</p>
+<h3>API Win32 (Declare)</h3><p class="muted">Sin elementos.</p>
+<h3>CreateObject / GetObject</h3><p class="muted">Sin elementos.</p>
+<h3>Enlace tardío y CallByName</h3><p class="muted">Sin elementos.</p>
+<h3>SQL dinámico (marcadores <code>{?}</code>)</h3><p class="muted">Sin elementos.</p>
+<h3>On Error Resume Next por procedimiento</h3><p class="muted">Sin elementos.</p>
+<h3>Referencias sin resolver</h3><p class="muted">Sin elementos.</p></section><section id="muerto"><h2>Código muerto candidato</h2><div class="note"><b>Regla (candidato, no veredicto): alcanzabilidad.</b> Se parte de los
+<b>puntos de entrada</b>: formulario o <code>Sub Main</code> de inicio de cada proyecto EXE; clases expuestas
+(<code>VB_Exposed=True</code>) y UserControls de proyectos ActiveX DLL/EXE/OCX, con sus miembros
+<code>Public</code> y los de cualquier UserControl (API expuesta); y los procedimientos citados en
+<code>AddressOf</code>. Si no se puede determinar el punto de entrada de un proyecto (sin .vbp o con un inicio
+que no está en el grafo), todo el proyecto se considera vivo. Desde un procedimiento alcanzable se siguen las
+aristas <code>CALLS</code>, <code>USES_VAR</code> (Get, Let y Set son unidades separadas: leer una propiedad
+alcanza su Get; asignarla, su Let/Set),
+<code>OPENS_FORM</code>, <code>INSTANTIATES</code> y <code>CALLS_API</code> resueltas o heurísticas. Usar un
+miembro de un formulario (<code>frmX.Refrescar</code>, <code>frmX.txt</code>) lo carga, igual que
+<code>Show</code>/<code>Load</code>/<code>New</code>. Un formulario, clase o UserControl alcanzable hace
+alcanzables sus manejadores de eventos (<code>HANDLES_EVENT</code>: <code>Form_Load</code>, controles, menús,
+<code>WithEvents</code>, <code>Class_Initialize</code>), sus métodos <code>Implements</code> y los UserControls que
+contiene. Las aperturas del propio formulario (<code>Me.Show</code>, <code>Load Me</code>,
+<code>Me.Visible = True</code>) no lo hacen alcanzable. <b>Conservador:</b> una llamada tardía o sin tipo
+<code>x.Nombre</code> (<code>x As Object</code>/<code>Form</code>, <code>CallByName(obj, "Nombre")</code>) desde
+código alcanzable mantiene <i>vivo por enlace tardío (posible)</i> a todo procedimiento no <code>Private</code>
+llamado <code>Nombre</code> de las clases, formularios y UserControls del proyecto, y a lo que estos alcanzan; lo
+mismo los candidatos de una variable asignada con varios objetos. Un procedimiento es <i>candidato</i> solo si
+ningún camino, resuelto o posible, lo alcanza; un formulario está <i>nunca abierto</i> si no es alcanzable, y los
+procedimientos suyos que algo referencia (o que manejan sus eventos) se listan aparte. Lo declarado dentro de un
+<code>#If</code> inactivo (según <code>CondComp</code>/<code>#Const</code>) no se compila y se lista aparte.
+Un acceso tardío a una propiedad sin paréntesis (<code>x = o.Nombre</code>, <code>o.Nombre = v</code>) cuenta
+igual que una llamada; el uso implícito del miembro por defecto (<code>Attribute X.VB_UserMemId = 0</code>:
+<code>obj("k")</code>, <code>obj!k</code>, <code>obj = v</code>; <code>-4</code> para <code>For Each</code>) llega a
+ese miembro, y sobre un objeto tardío mantiene posibles todos los miembros por defecto del proyecto.
+<code>CallByName</code> con un nombre calculado mantiene posibles todos los miembros públicos del tipo del objeto
+(o de todas las clases y formularios si el tipo es desconocido) y deja un aviso <code>callbyname_dynamic</code>.
+Lo referenciado solo desde código <code>#If</code> inactivo se lista aparte: borrarlo rompe el build si cambia la
+constante. <b>Archivos compartidos:</b> cada proyecto que compila un archivo tiene sus propios nodos; un
+candidato es <i>seguro para borrar del archivo fuente</i> solo si está muerto en <b>todos</b> los proyectos que
+compilan ese archivo, no es posible por enlace tardío en ninguno y todo procedimiento que lo referencia (en
+cualquier proyecto) también es borrable: VB6 compila todos los procedimientos del archivo. Los que se referencian
+entre sí forman un <i>grupo de borrado</i> que se borra junto. Una referencia desde código vivo en otro proyecto o
+desde un <code>#If</code> inactivo lo bloquea. <code>Eval</code> o los clientes externos no se
+ven: revise antes de borrar.</div><h3>Candidatos (0)</h3><p class="muted">Muertos en su proyecto. La columna <i>Seguro para borrar</i> indica si lo están en todos los proyectos que compilan el archivo.</p><p class="muted">Sin elementos.</p><h3>Accesores de propiedad sin uso (0)</h3><p class="muted">Property Get, Let o Set que nadie usa mientras otro accesor de la misma propiedad sí se usa (por ejemplo, un Get que nunca se lee). Borrarlo deja la propiedad de solo escritura o de solo lectura.</p><p class="muted">Sin elementos.</p><h3>Solo en formularios nunca abiertos (0)</h3><p class="muted">Sin elementos.</p><h3>Seguro para borrar del archivo fuente (0)</h3><p class="muted">Una fila por procedimiento del archivo: muerto en cada proyecto que lo compila.</p><p class="muted">Sin elementos.</p><h3>Grupos de borrado (0 con varios procedimientos)</h3><p class="muted">Procedimientos que se referencian entre sí: bórrelos juntos (si borra solo uno, el que lo llama deja de compilar).</p><p class="muted">Sin elementos.</p><h3>Muerto pero no borrable (0)</h3><p class="muted">Lo referencia código que no se puede borrar: vivo en otro proyecto que compila ese archivo, o un <code>#If</code> inactivo.</p><p class="muted">Sin elementos.</p><h3>Muerto solo en este proyecto (0)</h3><p class="muted">No borrar del archivo: otro proyecto que compila el mismo archivo lo usa (o podría usarlo).</p><p class="muted">Sin elementos.</p><h3>Referenciados solo desde código #If inactivo (0)</h3><p class="muted">Sin referencias en el código que se compila con las constantes actuales (<code>CondComp</code>/<code>#Const</code>), pero sí dentro de un <code>#If</code> inactivo: borrarlos rompe el build si cambia la constante.</p><p class="muted">Sin elementos.</p><h3>API pública expuesta sin llamadas internas (0)</h3><p class="muted">No son candidatos: un cliente externo (DLL) o el contenedor (UserControl) podría usarlos.</p><p class="muted">Sin elementos.</p><h3>Vivos por enlace tardío, posible (0)</h3><p class="muted">No son candidatos: una llamada tardía alcanzable podría invocarlos.</p><p class="muted">Sin elementos.</p><h3>Excluidos por compilación condicional (0)</h3><p class="muted">Sin elementos.</p></section><section id="diagnosticos"><h2>Diagnósticos</h2>
+<p>Último índice: 2026-10-28T23:16:25+00:00 → 2026-10-28T23:16:25+00:00 · raíz <code>/home/user/poc-pacifico-seguros/sistemas/siniestros/fuentes</code>
+· versión 0.1.0</p>
+<p class="muted">Informativos: ninguno</p>
+<p class="muted">Sin advertencias ni errores.</p></section></main>
+<dialog id="srcdlg"><div class="dh"><b id="srctitle"></b><span><a id="srcvscode" href="#">abrir en VS Code</a>
+<button id="srcclose" type="button">Cerrar</button></span></div><pre id="srcpre"></pre></dialog>
+<script type="application/json" id="vb6-src">{"ssis/Carga_Siniestros.dtsx":"<?xml version=\"1.0\"?>\n<DTS:Executable xmlns:DTS=\"www.microsoft.com/SqlServer/Dts\" DTS:refId=\"Package\" DTS:ObjectName=\"Carga_Siniestros\" DTS:ExecutableType=\"Microsoft.Package\">\n  <DTS:Property DTS:Name=\"PackageFormatVersion\">8<\/DTS:Property>\n  <DTS:ConnectionManagers>\n    <DTS:ConnectionManager DTS:refId=\"Package.ConnectionManagers[CORE]\" DTS:ObjectName=\"CORE\" DTS:CreationName=\"OLEDB\">\n      <DTS:ObjectData><DTS:ConnectionManager DTS:ConnectionString=\"Data Source=SRVCORE;Initial Catalog=CoreLegado;Provider=SQLNCLI11.1;Integrated Security=SSPI;\" /><\/DTS:ObjectData>\n    <\/DTS:ConnectionManager>\n    <DTS:ConnectionManager DTS:refId=\"Package.ConnectionManagers[DW]\" DTS:ObjectName=\"DW\" DTS:CreationName=\"OLEDB\">\n      <DTS:ObjectData><DTS:ConnectionManager DTS:ConnectionString=\"Data Source=SRVSQL02;Initial Catalog=Siniestros;Provider=SQLNCLI11.1;User ID=etl;Password=***;\" /><\/DTS:ObjectData>\n    <\/DTS:ConnectionManager>\n  <\/DTS:ConnectionManagers>\n  <DTS:Executables>\n    <DTS:Executable DTS:refId=\"Package\\Limpiar staging\" DTS:ObjectName=\"Limpiar staging\" DTS:ExecutableType=\"Microsoft.ExecuteSQLTask\">\n      <DTS:ObjectData>\n        <SQLTask:SqlTaskData xmlns:SQLTask=\"www.microsoft.com/sqlserver/dts/tasks/sqltask\" SQLTask:Connection=\"Package.ConnectionManagers[DW]\" SQLTask:SqlStatementSource=\"TRUNCATE TABLE stg.Siniestros\" />\n      <\/DTS:ObjectData>\n    <\/DTS:Executable>\n    <DTS:Executable DTS:refId=\"Package\\Extraer siniestros del core\" DTS:ObjectName=\"Extraer siniestros del core\" DTS:ExecutableType=\"Microsoft.Pipeline\">\n      <DTS:ObjectData>\n        <pipeline>\n          <components>\n            <component name=\"Movimientos vigentes\" componentClassID=\"Microsoft.OLEDBSource\">\n              <properties><property name=\"SqlCommand\">SELECT NRO_SINIESTRO AS NumSiniestro, NRO_POLIZA AS NumPoliza, TIPO AS Tipo, FEC_DENUNCIA AS FechaDenuncia, MONTO_UF AS MontoUF FROM dbo.SINIESTRO_MOV WHERE VIGENTE = 1<\/property><\/properties>\n              <connections><connection connectionManagerRefId=\"Package.ConnectionManagers[CORE]\" /><\/connections>\n            <\/component>\n            <component name=\"Convertir montos\" componentClassID=\"Microsoft.DataConvert\" />\n            <component name=\"Staging siniestros\" componentClassID=\"Microsoft.OLEDBDestination\">\n              <properties><property name=\"OpenRowset\">[stg].[Siniestros]<\/property><\/properties>\n              <connections><connection connectionManagerRefId=\"Package.ConnectionManagers[DW]\" /><\/connections>\n            <\/component>\n          <\/components>\n        <\/pipeline>\n      <\/DTS:ObjectData>\n    <\/DTS:Executable>\n    <DTS:Executable DTS:refId=\"Package\\Validar totales\" DTS:ObjectName=\"Validar totales\" DTS:ExecutableType=\"Microsoft.ScriptTask\">\n      <DTS:ObjectData><ScriptProject Name=\"ST_ValidarTotales\" Language=\"CSharp\" /><\/DTS:ObjectData>\n    <\/DTS:Executable>\n  <\/DTS:Executables>\n  <DTS:PrecedenceConstraints>\n    <DTS:PrecedenceConstraint DTS:From=\"Package\\Limpiar staging\" DTS:To=\"Package\\Extraer siniestros del core\" />\n    <DTS:PrecedenceConstraint DTS:From=\"Package\\Extraer siniestros del core\" DTS:To=\"Package\\Validar totales\" />\n  <\/DTS:PrecedenceConstraints>\n<\/DTS:Executable>\n","ssis/Maestro_Siniestros.dtsx":"<?xml version=\"1.0\"?>\n<DTS:Executable xmlns:DTS=\"www.microsoft.com/SqlServer/Dts\" DTS:refId=\"Package\" DTS:ObjectName=\"Maestro_Siniestros\" DTS:ExecutableType=\"Microsoft.Package\">\n  <DTS:Property DTS:Name=\"PackageFormatVersion\">8<\/DTS:Property>\n  <DTS:ConnectionManagers>\n    <DTS:ConnectionManager DTS:refId=\"Package.ConnectionManagers[DW]\" DTS:ObjectName=\"DW\" DTS:CreationName=\"OLEDB\">\n      <DTS:ObjectData><DTS:ConnectionManager DTS:ConnectionString=\"Data Source=SRVSQL02;Initial Catalog=Siniestros;Provider=SQLNCLI11.1;User ID=etl;Password=***;\" /><\/DTS:ObjectData>\n    <\/DTS:ConnectionManager>\n  <\/DTS:ConnectionManagers>\n  <DTS:Variables>\n    <DTS:Variable DTS:Namespace=\"User\" DTS:ObjectName=\"FechaCorte\" DTS:Expression=\"(DT_DBDATE)GETDATE()\"><DTS:VariableValue>2026-10-17<\/DTS:VariableValue><\/DTS:Variable>\n  <\/DTS:Variables>\n  <DTS:Executables>\n    <DTS:Executable DTS:refId=\"Package\\Ejecutar carga\" DTS:ObjectName=\"Ejecutar carga\" DTS:ExecutableType=\"Microsoft.ExecutePackageTask\">\n      <DTS:ObjectData>\n        <ExecutePackageTask><UseProjectReference>True<\/UseProjectReference><PackageName>Carga_Siniestros.dtsx<\/PackageName><\/ExecutePackageTask>\n      <\/DTS:ObjectData>\n    <\/DTS:Executable>\n    <DTS:Executable DTS:refId=\"Package\\Calcular reservas\" DTS:ObjectName=\"Calcular reservas\" DTS:ExecutableType=\"Microsoft.ExecuteSQLTask\">\n      <DTS:ObjectData>\n        <SQLTask:SqlTaskData xmlns:SQLTask=\"www.microsoft.com/sqlserver/dts/tasks/sqltask\" SQLTask:Connection=\"Package.ConnectionManagers[DW]\" SQLTask:SqlStatementSource=\"EXEC dbo.usp_CalcularReservas ?\">\n          <SQLTask:ParameterBinding SQLTask:ParameterName=\"0\" SQLTask:DtsVariableName=\"User::FechaCorte\" SQLTask:ParameterDirection=\"Input\" SQLTask:DataType=\"133\" />\n        <\/SQLTask:SqlTaskData>\n      <\/DTS:ObjectData>\n    <\/DTS:Executable>\n    <DTS:Executable DTS:refId=\"Package\\Avisar falla\" DTS:ObjectName=\"Avisar falla\" DTS:ExecutableType=\"Microsoft.SendMailTask\">\n      <DTS:ObjectData><SendMailTask ToLine=\"operaciones@ejemplo.cl\" Subject=\"Falla carga siniestros\" /><\/DTS:ObjectData>\n    <\/DTS:Executable>\n  <\/DTS:Executables>\n  <DTS:PrecedenceConstraints>\n    <DTS:PrecedenceConstraint DTS:From=\"Package\\Ejecutar carga\" DTS:To=\"Package\\Calcular reservas\" />\n    <DTS:PrecedenceConstraint DTS:From=\"Package\\Calcular reservas\" DTS:To=\"Package\\Avisar falla\" DTS:Value=\"1\" />\n  <\/DTS:PrecedenceConstraints>\n<\/DTS:Executable>\n"}</script><script type="application/json" id="vb6-nav">{"nodes":[],"links":[]}</script>
+<script>const VB6_ROOT="/home/user/poc-pacifico-seguros/sistemas/siniestros/fuentes";
+(function(){
+const SRC=JSON.parse(document.getElementById('vb6-src').textContent||'{}');
+const NAV=JSON.parse(document.getElementById('vb6-nav').textContent||'{"nodes":[],"links":[]}');
+const dlg=document.getElementById('srcdlg'),pre=document.getElementById('srcpre');
+function openSrc(f,l){
+  document.getElementById('srctitle').textContent=f+':'+l;
+  const root=VB6_ROOT.replace(/\\/g,'/').replace(/\/$/,'');
+  document.getElementById('srcvscode').href='vscode://file/'+encodeURI(root+'/'+f)+':'+l;
+  pre.textContent='';
+  const text=SRC[f];
+  if(text===undefined){pre.textContent='Código fuente no incrustado en el reporte.';}
+  else{const frag=document.createDocumentFragment();text.split('\n').forEach(function(t,i){
+    const d=document.createElement('div');const n=document.createElement('span');n.className='n';n.textContent=i+1;
+    d.appendChild(n);d.appendChild(document.createTextNode(t.replace(/\r$/,'')));if(i+1===l)d.className='hl';
+    frag.appendChild(d);});pre.appendChild(frag);}
+  if(dlg.showModal)dlg.showModal();else dlg.setAttribute('open','');
+  const hl=pre.querySelector('.hl');if(hl)hl.scrollIntoView({block:'center'});
+}
+document.addEventListener('click',function(ev){const a=ev.target.closest('a.loc');if(!a)return;ev.preventDefault();
+  openSrc(a.dataset.f,parseInt(a.dataset.l||'1',10));});
+document.getElementById('srcclose').onclick=function(){dlg.close();};
+document.querySelectorAll('table.sortable').forEach(function(t){
+  t.querySelectorAll('th').forEach(function(th,i){th.addEventListener('click',function(){
+    const asc=!th.classList.contains('asc');t.querySelectorAll('th').forEach(function(x){x.classList.remove('asc','desc');});
+    th.classList.add(asc?'asc':'desc');const tb=t.tBodies[0];const rows=Array.from(tb.rows);
+    rows.sort(function(a,b){const x=a.cells[i].textContent.trim(),y=b.cells[i].textContent.trim();
+      const nx=parseFloat(x.replace(/,/g,'')),ny=parseFloat(y.replace(/,/g,''));
+      const r=(!isNaN(nx)&&!isNaN(ny)&&/^[\d.,%-]+$/.test(x)&&/^[\d.,%-]+$/.test(y))?nx-ny:x.localeCompare(y,'es');
+      return asc?r:-r;});rows.forEach(function(r){tb.appendChild(r);});});});});
+document.querySelectorAll('input.filter').forEach(function(inp){inp.addEventListener('input',function(){
+  const q=inp.value.toLowerCase();const t=document.getElementById(inp.dataset.table);
+  Array.from(t.tBodies[0].rows).forEach(function(r){r.style.display=r.textContent.toLowerCase().includes(q)?'':'none';});});});
+// force-directed navigation graph (no libraries)
+const svg=document.getElementById('nav');if(!svg||!NAV.nodes.length)return;
+const NS='http://www.w3.org/2000/svg',W=svg.clientWidth||900,H=svg.clientHeight||560;
+svg.setAttribute('viewBox','0 0 '+W+' '+H);
+function el(n,a,p){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);(p||svg).appendChild(e);return e;}
+const defs=el('defs',{});const mk=el('marker',{id:'arr',viewBox:'0 0 10 10',refX:'20',refY:'5',markerWidth:'7',
+  markerHeight:'7',orient:'auto-start-reverse'},defs);el('path',{d:'M0,0L10,5L0,10z'},mk);
+const idx={};const N=NAV.nodes.map(function(n,i){idx[n.id]=i;const ang=2*Math.PI*i/NAV.nodes.length;
+  return Object.assign({},n,{x:W/2+Math.cos(ang)*W/3,y:H/2+Math.sin(ang)*H/3,vx:0,vy:0});});
+const L=NAV.links.filter(function(l){return l.src in idx&&l.dst in idx;}).map(function(l){
+  return Object.assign({},l,{s:N[idx[l.src]],t:N[idx[l.dst]]});});
+const k=Math.sqrt(W*H/Math.max(N.length,1))*0.55;
+function step(alpha){
+  for(let i=0;i<N.length;i++)for(let j=i+1;j<N.length;j++){const a=N[i],b=N[j];let dx=a.x-b.x,dy=a.y-b.y;
+    let d2=dx*dx+dy*dy||0.01;const f=k*k/d2*alpha;a.vx+=dx*f;a.vy+=dy*f;b.vx-=dx*f;b.vy-=dy*f;}
+  L.forEach(function(l){const dx=l.t.x-l.s.x,dy=l.t.y-l.s.y,d=Math.sqrt(dx*dx+dy*dy)||1;const f=(d-k)/d*0.08*alpha;
+    l.s.vx+=dx*f;l.s.vy+=dy*f;l.t.vx-=dx*f;l.t.vy-=dy*f;});
+  N.forEach(function(n){n.vx+=(W/2-n.x)*0.005*alpha;n.vy+=(H/2-n.y)*0.005*alpha;
+    if(!n.fixed){n.x+=Math.max(-30,Math.min(30,n.vx));n.y+=Math.max(-30,Math.min(30,n.vy));}
+    n.vx*=0.5;n.vy*=0.5;n.x=Math.max(30,Math.min(W-30,n.x));n.y=Math.max(20,Math.min(H-20,n.y));});
+}
+for(let i=0;i<300;i++)step(1-i/300);
+const lines=L.map(function(l){const e=el('line',{'marker-end':'url(#arr)'});if(l.modal)e.setAttribute('class','modal');
+  const t=el('title',{},e);t.textContent=l.src+' → '+l.dst+' ('+l.count+')';return e;});
+const gs=N.map(function(n){const cls=n.never_opened?'dead':n.startup?'start':n.kind==='form'?'form':'other';
+  const g=el('g',{class:cls});el('circle',{r:n.startup?10:8},g);const t=el('text',{dx:12,dy:4},g);t.textContent=n.name;
+  const tt=el('title',{},g);tt.textContent=n.id+(n.file?' — '+n.file+':'+n.line:'');
+  let drag=null,moved=false;
+  g.addEventListener('pointerdown',function(ev){drag={x:ev.clientX,y:ev.clientY};moved=false;g.setPointerCapture(ev.pointerId);});
+  g.addEventListener('pointermove',function(ev){if(!drag)return;const r=svg.getBoundingClientRect();
+    const sx=W/r.width,sy=H/r.height;n.x+=(ev.clientX-drag.x)*sx;n.y+=(ev.clientY-drag.y)*sy;drag={x:ev.clientX,y:ev.clientY};
+    moved=true;n.fixed=true;draw();});
+  g.addEventListener('pointerup',function(){drag=null;if(!moved&&n.file)openSrc(n.file,n.line||1);});
+  return g;});
+function draw(){L.forEach(function(l,i){const e=lines[i];e.setAttribute('x1',l.s.x);e.setAttribute('y1',l.s.y);
+  e.setAttribute('x2',l.t.x);e.setAttribute('y2',l.t.y);});
+  N.forEach(function(n,i){gs[i].setAttribute('transform','translate('+n.x+','+n.y+')');});}
+draw();
+})();
+</script></body></html>

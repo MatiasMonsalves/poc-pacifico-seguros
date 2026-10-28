@@ -26,7 +26,7 @@ from datetime import date
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parents[2]
-for herramienta in ("re_inventario", "ssis2adf", "rea"):
+for herramienta in ("re_inventario", "ssis2adf", "rea", "vb6graph_puente"):
     sys.path.insert(0, str(RAIZ / "tools" / herramienta))
 
 from inventario import generar_markdown, inventariar  # noqa: E402
@@ -58,6 +58,16 @@ def analizar_sistema(carpeta: Path, decompilar: bool, con_rea: bool) -> dict:
     (reing / "inventario" / "inventario.json").write_text(json.dumps(inv, indent=2, ensure_ascii=False), encoding="utf-8")
     (reing / "inventario" / "inventario.md").write_text(generar_markdown(inv), encoding="utf-8")
     print(f"   inventario: {inv['resumen']}")
+
+    # 1b. Grafo de conocimiento con vb6graph (assessment: linaje VB6↔SSIS, riesgos, código muerto)
+    from grafo import cargar as cargar_grafo, indexar as indexar_grafo
+    if indexar_grafo(fuentes, reing / "vb6graph"):
+        print("   vb6graph: grafo y reporte actualizados")
+    g = cargar_grafo(reing / "vb6graph")
+    if g:
+        print(f"   vb6graph: {len(g.procs)} procedimientos, {len(g.muertos())} código muerto, {len(g.paquetes_ssis)} paquetes SSIS")
+    else:
+        print("   vb6graph: no instalado y sin grafo guardado (opcional; ver docs/VB6GRAPH.md)")
 
     # 2. REA sobre binarios
     binarios = []
