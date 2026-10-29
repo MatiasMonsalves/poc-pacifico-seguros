@@ -10,6 +10,7 @@ sistemas/*/reingenieria/rea/*/decompilado/
 sistemas/*/reingenieria/vb6graph/
 !sistemas/polizas/reingenieria/vb6graph/
 !sistemas/siniestros/reingenieria/vb6graph/
+portafolio/vb6graph/
 __pycache__/
 bin/
 !sistemas/*/fuentes/**/bin/

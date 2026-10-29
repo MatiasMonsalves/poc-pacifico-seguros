@@ -6,12 +6,21 @@
 #   powershell -ExecutionPolicy Bypass -File scripts\windows\presentacion.ps1             # la demo, con pausas (Enter)
 #   powershell -ExecutionPolicy Bypass -File scripts\windows\presentacion.ps1 -SinPausa -AbrirNavegador
 #   powershell -ExecutionPolicy Bypass -File scripts\windows\presentacion.ps1 -Apagar     # al terminar
-param([switch]$Preparar, [switch]$SinPausa, [switch]$SinDocker, [switch]$AbrirNavegador, [switch]$Apagar)
+#   powershell -ExecutionPolicy Bypass -File scripts\windows\presentacion.ps1 -Fuentes 'C:\ruta\fuentes'  # grafo de otros fuentes
+param([string]$Fuentes, [switch]$Preparar, [switch]$SinPausa, [switch]$SinDocker, [switch]$AbrirNavegador, [switch]$Apagar)
 . (Join-Path $PSScriptRoot 'comun.ps1')
 Set-Location $Raiz
 $compose = Comando-Compose
 
 if ($Apagar) { & docker @compose down; exit $LASTEXITCODE }
+
+if ($Fuentes) {
+    # Solo el assessment: vb6graph arma el grafo de esos fuentes y se abre su reporte
+    Invocar-Python @('tools/demo/presentacion.py', '--fuentes', $Fuentes)
+    $nombre = (Split-Path -Leaf (Resolve-Path $Fuentes)) -replace '[^\w.-]+', '_'
+    Start-Process (Join-Path $Raiz "portafolio/vb6graph/$nombre/reporte.html")
+    exit 0
+}
 
 if (-not (Obtener-Python)) { Write-Host 'Falta Python 3.9 o superior: winget install Python.Python.3.12' -ForegroundColor Red; exit 1 }
 if (-not $SinDocker) {

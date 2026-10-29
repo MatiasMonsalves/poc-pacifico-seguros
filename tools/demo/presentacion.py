@@ -13,6 +13,7 @@ Uso (desde la carpeta del repositorio, en Windows, macOS o Linux):
     python tools/demo/presentacion.py              # con pausas (Enter para avanzar)
     python tools/demo/presentacion.py --sin-pausa  # de corrido
     python tools/demo/presentacion.py --sin-docker # pasos 1-3 y 5 (sin compilar ni ejecutar)
+    python tools/demo/presentacion.py --fuentes C:\ruta\fuentes  # grafo y assessment de otros fuentes (requiere vb6graph)
 
 Requisitos: Python 3.9+ y, para los pasos 2 (compilar) y 4, Docker. vb6graph es opcional:
 si no está instalado se usa el grafo guardado en el repositorio.
@@ -135,15 +136,22 @@ class Demo:
             input(c("\n  [Enter para continuar] ", "2"))
 
     # -- 1 -------------------------------------------------------------------
-    def assessment(self) -> None:
+    def assessment(self, fuentes: Path = SISTEMA / "fuentes", carpeta: Path = SISTEMA / "reingenieria" / "vb6graph",
+                   propios: bool = False) -> None:
         import grafo as vb6graph
         titulo(1, "Assessment con vb6graph", "Grafo de conocimiento determinista del VB6 y del SSIS, con evidencia archivo:línea")
-        carpeta = SISTEMA / "reingenieria" / "vb6graph"
-        if vb6graph.indexar(SISTEMA / "fuentes", carpeta):
+        if propios:
+            ok(f"Fuentes: {fuentes}")
+        if vb6graph.indexar(fuentes, carpeta):
             ok("vb6graph indexó los fuentes (parser tree-sitter) y generó el reporte")
+        elif propios:
+            raise SystemExit("Para armar el grafo de otros fuentes hace falta vb6graph instalado "
+                             "(ver docs/DEMO_WINDOWS.md, sección F).")
         else:
             aviso("vb6graph no está instalado en este equipo: se usa el grafo guardado en el repositorio")
         g = vb6graph.cargar(carpeta)
+        if not g:
+            raise SystemExit(f"No hay grafo en {carpeta}")
         eventos = [p for p in g.procs.values() if p.evento]
         sql = sum(len(p.sql) for p in g.procs.values())
         ok(f"{len(g.formularios)} formularios/módulos · {len(g.procs)} procedimientos ({len(eventos)} eventos de UI) · "
@@ -163,7 +171,7 @@ class Demo:
                 t["origen"], t["modo"], t["actor"].split("/")[-1], f"{t['file']}:{t['line']}"]
                for t in g.tablas], ["objeto", "tipo", "sistema", "modo", "quién", "evidencia"])
         compartidas = sorted({t["table"].split(":", 1)[1] for t in g.tablas if t["compartida"] == "True"})
-        info(c(f"    Compartidas VB6 ↔ SSIS: {', '.join(compartidas) or 'ninguna'} (stg.Polizas y dbo.Polizas se distinguen por esquema)", "2"))
+        info(c(f"    Compartidas VB6 ↔ SSIS: {', '.join(compartidas) or 'ninguna'} (tablas identificadas por esquema.tabla)", "2"))
         info(f"\n    Reporte completo: {carpeta / 'reporte.html'}")
         self.seguir()
 
@@ -294,7 +302,17 @@ def main(argv: list[str]) -> int:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--sin-pausa", action="store_true")
     p.add_argument("--sin-docker", action="store_true")
+    p.add_argument("--fuentes", type=Path, help="carpeta con otros fuentes VB6/SSIS: arma su grafo y muestra solo el assessment")
     a = p.parse_args(argv[1:])
+    if a.fuentes:
+        fuentes = a.fuentes.resolve()
+        if not fuentes.is_dir():
+            raise SystemExit(f"No existe la carpeta {fuentes}")
+        # Fuera de sistemas/: el grafo incluye el texto de los fuentes y no se versiona (portafolio/vb6graph/ está en .gitignore)
+        carpeta = RAIZ / "portafolio" / "vb6graph" / re.sub(r"[^\w.-]+", "_", fuentes.name)
+        print(c("\n Fábrica de migración · Assessment de fuentes propios", "1"))
+        Demo(pausa=False, con_docker=False).assessment(fuentes, carpeta, propios=True)
+        return 0
     con_docker = not a.sin_docker and shutil.which("docker") is not None
     if con_docker and ejecutar(["docker", "info", "--format", "{{.ServerVersion}}"]).returncode != 0:
         raise SystemExit("Docker está instalado pero no responde: abra Docker Desktop, espere a que diga "

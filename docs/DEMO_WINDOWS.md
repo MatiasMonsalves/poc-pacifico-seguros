@@ -75,4 +75,43 @@ powershell -ExecutionPolicy Bypass -File scripts\windows\presentacion.ps1 -Apaga
 
 Apaga los contenedores. Las imágenes quedan en caché para la próxima vez.
 
-vb6graph no hace falta en este equipo: la demo usa el grafo guardado en el repositorio. Si lo instala (ver [VB6GRAPH.md](VB6GRAPH.md)), aplique antes el parche de esquemas y procedimientos con `python tools\vb6graph_puente\aplicar_parche.py`.
+## F. Armar el grafo con otros fuentes (instalar vb6graph)
+
+Sin vb6graph, la demo muestra el grafo guardado en el repositorio ("vb6graph no está instalado en este equipo"). Para que el grafo se arme en vivo desde los fuentes que usted le pase, instálelo una vez:
+
+1. **Instale uv** (instala vb6graph y descarga Python 3.12 si hace falta). Luego cierre y vuelva a abrir PowerShell:
+   ```powershell
+   winget install astral-sh.uv
+   ```
+2. **Descomprima el paquete de Fabián** (`vb6graph-portable-0.1.0.zip`), por ejemplo en Descargas:
+   ```powershell
+   Expand-Archive "$HOME\Downloads\vb6graph-portable-0.1.0.zip" "$HOME\Downloads\vb6graph"
+   cd "$HOME\Downloads\vb6graph\vb6graph-portable-0.1.0"
+   ```
+3. **Instálelo** y deje el comando `vb6graph` en el PATH. Luego cierre y vuelva a abrir PowerShell:
+   ```powershell
+   uv tool install --python 3.12 --with openpyxl .\vb6graph-0.1.0-py3-none-any.whl
+   uv tool update-shell
+   ```
+4. **Configúrelo y revíselo.** Sin compilador C usa el parser de respaldo y funciona igual. `doctor` debe terminar en *estado: OK*:
+   ```powershell
+   vb6graph setup
+   vb6graph doctor
+   ```
+5. **Aplique el parche de esquemas y procedimientos**, desde la carpeta de la demo:
+   ```powershell
+   cd "C:\Users\MatiasMonsalve\Desktop\inAdvance\Pacifico Seguros\poc-demo"
+   python tools\vb6graph_puente\aplicar_parche.py
+   ```
+
+Desde ahí:
+
+- **La demo normal** arma en vivo el grafo de pólizas: el paso 1 dice *vb6graph indexó los fuentes*.
+- **Otros fuentes** (una carpeta con `.vbp`, `.frm`, `.bas`, `.cls` y, si hay, `.dtsx`): se arma su grafo, se muestra el assessment (inventario, riesgos, código muerto, quién lee y escribe cada tabla) y se abre el reporte HTML:
+  ```powershell
+  powershell -ExecutionPolicy Bypass -File scripts\windows\presentacion.ps1 -Fuentes "C:\ruta\a\los\fuentes"
+  ```
+  El grafo y el reporte quedan en `portafolio\vb6graph\<carpeta>\`, que no se sube a GitHub porque incluye el texto de los fuentes.
+- **El proceso completo** con esos fuentes (conversión a .NET 10, ADF, plan): cópielos en `sistemas\<id>\fuentes\` (`vb6\`, `ssis\`, `db\`) y siga [GUIA_MULTISISTEMA.md](GUIA_MULTISISTEMA.md).
+
+Según la documentación de vb6graph, su instalación en Windows no se ha probado: si algún paso falla, mándele la captura a Fabián.
