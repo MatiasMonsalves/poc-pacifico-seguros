@@ -3,6 +3,7 @@
 *.py    text eol=lf
 Dockerfile text eol=lf
 *.yml   text eol=lf
+*.patch text eol=lf
 # Binarios legados y fuentes de los sistemas emulados: no se tocan
 *.dll   binary
 *.exe   binary

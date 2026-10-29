@@ -42,13 +42,15 @@ def main() -> int:
         print("Falta git para aplicar el parche.")
         return 1
     for parche in sorted(PARCHES.glob("*.patch")):
-        ya = subprocess.run(["git", "apply", "--reverse", "--check", str(parche)], cwd=destino, capture_output=True)
+        # Git en Windows puede haber dejado el parche con CRLF; los fuentes instalados de vb6graph usan LF
+        contenido = parche.read_bytes().replace(b"\r\n", b"\n")
+        ya = subprocess.run(["git", "apply", "--reverse", "--check", "-"], cwd=destino, input=contenido, capture_output=True)
         if ya.returncode == 0:
             print(f"✔ {parche.name}: ya aplicado")
             continue
-        r = subprocess.run(["git", "apply", str(parche)], cwd=destino, capture_output=True, text=True)
+        r = subprocess.run(["git", "apply", "-"], cwd=destino, input=contenido, capture_output=True)
         if r.returncode != 0:
-            print(f"✘ {parche.name}: no se pudo aplicar (¿otra versión de vb6graph?)\n{r.stderr}")
+            print(f"✘ {parche.name}: no se pudo aplicar (¿otra versión de vb6graph?)\n{r.stderr.decode('utf-8', 'replace')}")
             return 1
         print(f"✔ {parche.name}: aplicado en {destino / 'vb6graph'}")
     return 0
