@@ -1,0 +1,25 @@
+diff --git a/vb6graph/ingest.py b/vb6graph/ingest.py
+index c44e848..251be8f 100644
+--- a/vb6graph/ingest.py
++++ b/vb6graph/ingest.py
+@@ -3,8 +3,9 @@ from __future__ import annotations
+ 
+ import codecs
+ import os
++import posixpath
+ from dataclasses import dataclass, field
+-from pathlib import Path, PurePosixPath, PureWindowsPath
++from pathlib import Path, PureWindowsPath
+ 
+ from .model import Diagnostic, FileRec, sha256
+ from .vbp import VbpProject, parse_vbg, parse_vbp
+@@ -115,7 +116,8 @@ class _CaseIndex:
+             return None
+         cand = base_dir.joinpath(*parts)
+         try:
+-            key = PurePosixPath(os.path.normpath(cand.relative_to(self.root).as_posix())).as_posix().lower()
++            # posixpath, not os.path: on Windows os.path.normpath returns '\\' and the key would never match by_lower
++            key = posixpath.normpath(cand.relative_to(self.root).as_posix()).lower()
+         except ValueError:
+             return None
+         return self.by_lower.get(key)

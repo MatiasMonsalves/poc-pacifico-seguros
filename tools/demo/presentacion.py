@@ -143,7 +143,7 @@ class Demo:
         if propios:
             ok(f"Fuentes: {fuentes}")
         if vb6graph.indexar(fuentes, carpeta):
-            ok("vb6graph indexó los fuentes (parser tree-sitter) y generó el reporte")
+            ok(f"vb6graph indexó los fuentes (parser {vb6graph.parser_usado(carpeta)}) y generó el reporte")
         elif propios:
             raise SystemExit("Para armar el grafo de otros fuentes hace falta vb6graph instalado "
                              "(ver docs/DEMO_WINDOWS.md, sección F).")

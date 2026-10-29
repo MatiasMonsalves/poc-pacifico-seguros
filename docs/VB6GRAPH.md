@@ -46,11 +46,12 @@ Un paquete SSIS con marcadores (Script Task, Send Mail…) cuenta como **parcial
 
 ## Mejoras al grafo (parche para el autor)
 
-`tools/vb6graph_puente/parches/0001-esquema-y-procedimientos.patch` corrige dos problemas encontrados al integrarlo. Se aplica a la instalación local con `python tools/vb6graph_puente/aplicar_parche.py` (Windows o Linux, necesita git; es idempotente). Los grafos guardados de `polizas` y `siniestros` ya están generados con el parche.
+`tools/vb6graph_puente/parches/` trae dos parches que corrigen tres problemas encontrados al integrarlo. Se aplica a la instalación local con `python tools/vb6graph_puente/aplicar_parche.py` (Windows o Linux, necesita git; es idempotente). Los grafos guardados de `polizas` y `siniestros` ya están generados con el parche.
 
 | | Antes | Con el parche |
 |---|---|---|
 | Esquema | `TRUNCATE TABLE stg.Polizas` y `SELECT … FROM dbo.Polizas` caían en el mismo nodo `table:polizas`: falso acoplamiento VB6↔SSIS en el linaje y en la propiedad de escritura | Nodos `table:stg.polizas` y `table:dbo.polizas`. Sin esquema se asume `dbo`, como hace SQL Server (configurable con `VB6GRAPH_DEFAULT_SCHEMA`); se descartan servidor y base; las temporales (`#x`) no llevan esquema |
+| Rutas en Windows (`0002-rutas-windows.patch`) | `os.path.normpath` devuelve `\\` en Windows: los `.frm`/`.bas` de una subcarpeta no se asociaban a su `.vbp` y quedaban en `_orphans`, lo que además ocultaba código muerto | `posixpath.normpath`: los archivos quedan en su proyecto, igual que en Linux |
 | Procedimientos almacenados | Nodo `table` con `object_type=procedure` y arista `READS` heurística | Nodo propio `db_proc:esquema.nombre`; desde VB6 la arista `EXECUTES_PROC`, desde SSIS `SSIS_EXECUTES_PROC` |
 
 Archivos que toca: `model.py` (`qualify_db_object`, `table_id`, `db_proc_id`, nuevos `db_proc` y `EXECUTES_PROC`), `resolve.py` y `ssis.py` (creación de nodos), `report.py` (sección Tablas y `tablas.csv`), `mcp_server.py` (`who_touches_table` acepta tablas y procedimientos), `enrich/facts.py` y `cli.py` (`trace`). El formato de `tablas.csv` no cambia: la columna `table` trae `table:esquema.tabla` o `db_proc:esquema.nombre`.

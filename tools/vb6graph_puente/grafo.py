@@ -91,6 +91,14 @@ def indexar(fuentes: Path, salida: Path) -> bool:
     return True
 
 
+def parser_usado(carpeta: Path) -> str:
+    """Parser con que vb6graph leyó el VB6: tree-sitter o el de respaldo (sin compilador C)."""
+    con = sqlite3.connect(carpeta / "grafo.db")
+    usados = {r[0] for r in con.execute("SELECT parser FROM files WHERE kind IN ('frm', 'bas', 'cls', 'ctl')") if r[0]}
+    con.close()
+    return " + ".join(sorted("de respaldo" if u == "fallback" else u for u in usados)) or "—"
+
+
 def _csv(ruta: Path) -> list[dict]:
     if not ruta.exists():
         return []
